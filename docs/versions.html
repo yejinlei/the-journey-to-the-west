@@ -74,7 +74,7 @@
 </footer>
 
 <script type="module">
-import { initDB, query } from './js/db.js';
+import { loadPageData } from './js/page.js';
 
 const elLoading = document.getElementById('loading');
 const elContent = document.getElementById('content');
@@ -109,11 +109,10 @@ const TYPE_BAR = [
 
 async function main() {
   try {
-    await initDB(msg => { elLoading.textContent = msg; });
-    const [editions, annosByCh] = await Promise.all([
-      query(`SELECT edition_id, display_name, year, publisher, desc FROM editions ORDER BY CASE WHEN year > 0 THEN 0 ELSE 1 END, year, display_name`),
-      query(`SELECT chapter_ref, count(*) as n FROM annotations WHERE edition='xinke_pingbi' GROUP BY 1 ORDER BY 1`),
-    ]);
+    elLoading.textContent = '正在加载页面数据…';
+    const d = await loadPageData('versions');
+    const editions = { rows: d.editions || [] };
+    const annosByCh = { rows: d.annosByCh || [] };
 
     elLoading.style.display = 'none';
     elContent.style.display = 'block';
