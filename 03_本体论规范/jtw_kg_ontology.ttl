@@ -1,0 +1,641 @@
+@prefix jtw:   <http://localhost/jtw-kg#> .
+@prefix kg:    <http://localhost/jtw-kg/kg#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix bibo:  <http://purl.org/vocab/bibo/> .
+@prefix dc:    <http://purl.org/dc/elements/1.1/> .
+@prefix prov:  <http://www.w3.org/ns/prov#> .
+@prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+@prefix foaf:  <http://xmlns.com/foaf/0.1/> .
+
+<http://localhost/jtw-kg#>
+  a owl:Ontology ;
+  rdfs:label "Journey-to-the-West Knowledge Graph Ontology"@zh,
+             "The Journey to the West Knowledge Graph Ontology"@en ;
+  rdfs:comment "西游记多版本古籍知识图谱本体 — 名录层 + 剧情子图双轨结构，参考 nobel-kg 范式"@zh ;
+  dc:creator "yejinlei" ;
+  dc:date "2026-10-12" .
+
+# ──────────────────────────────────────────────
+# 根类：jtw:Thing
+# ──────────────────────────────────────────────
+jtw:Thing  rdfs:label "事物"@zh ;
+  rdfs:comment "西游记知识图谱顶层类，所有实体继承自此类"@zh .
+
+# ──────────────────────────────────────────────
+# A. 版本层（Textual Editions）
+# ──────────────────────────────────────────────
+jtw:Edition
+  rdfs:label "版本"@zh ;
+  rdfs:subClassOf bibo:Document, jtw:Thing ;
+  rdfs:comment "西游记的一个具体刊刻/影印版本（世德堂本、李评本、大奇书本...）"@zh .
+
+jtw:edition_id
+  rdfs:domain jtw:Edition ;
+  rdfs:range  xsd:string ;
+  rdfs:label  "版本ID"@zh ;
+  rdfs:comment "形如 shidetang / li_ping / daqishi / xinke_pingbi 等"@zh .
+
+jtw:edition_title
+  rdfs:domain jtw:Edition ;
+  rdfs:range  xsd:string ;
+  rdfs:label  "版本名称"@zh .
+
+jtw:print_year
+  rdfs:domain jtw:Edition ;
+  rdfs:range  xsd:gYear ;
+  rdfs:label  "刊刻年份"@zh .
+
+jtw:publisher
+  rdfs:domain jtw:Edition ;
+  rdfs:range  xsd:string ;
+  rdfs:label  "刊刻/出版机构"@zh .
+
+jtw:has_source
+  rdfs:domain jtw:Edition ;
+  rdfs:range  jtw:Edition ;
+  rdfs:label  "源流自"@zh ;
+  rdfs:comment "版本源流：世德堂→大奇书→..."@zh .
+
+# ──────────────────────────────────────────────
+# B. 章回层（Chapters）
+# ──────────────────────────────────────────────
+jtw:Chapter
+  rdfs:label "章回"@zh ;
+  rdfs:subClassOf bibo:Chapter, jtw:Thing .
+
+jtw:chapter_no    rdfs:label "回号"@zh ; rdfs:range xsd:integer .
+jtw:chapter_title rdfs:label "回目"@zh ; rdfs:range xsd:string .
+
+jtw:belongs_to_edition
+  rdfs:domain jtw:Chapter ;
+  rdfs:range  jtw:Edition ;
+  rdfs:label  "所属版本"@zh .
+
+# ──────────────────────────────────────────────
+# C. 页面/文本层（Pages & Lines）
+# ──────────────────────────────────────────────
+jtw:Page
+  rdfs:label "页面"@zh ;
+  rdfs:subClassOf bibo:Page, jtw:Thing .
+
+jtw:page_no      rdfs:label "页码"@zh ; rdfs:range xsd:integer .
+jtw:image_path   rdfs:label "图像路径"@zh .
+
+jtw:belongsToChapter
+  rdfs:domain jtw:Page ;
+  rdfs:range  jtw:Chapter .
+
+jtw:belongsToEdition
+  rdfs:domain jtw:Page ;
+  rdfs:range  jtw:Edition .
+
+jtw:TextLine
+  rdfs:label "文本段（形态层）"@zh ;
+  rdfs:subClassOf bibo:Chapter, jtw:Thing ;
+  rdfs:comment "OCR/VLM 抽取的一段文本；含形态类型（title/main/poem/pre/post/inline/top/side/bottom/caption/colophon/preface）"@zh .
+
+jtw:line_type   rdfs:label "形态类型"@zh ;
+  skos:broader  <http://www.w3.org/2004/02/skos/core#Concept> ;
+  rdfs:range    xsd:string ;
+  rdfs:comment  "取值：title/main/poem/pre/post/inline/top/side/bottom/caption/colophon/preface"@zh .
+
+jtw:line_text   rdfs:label "转录文本"@zh ; rdfs:range xsd:string .
+jtw:line_conf   rdfs:label "置信度"@zh ; rdfs:range xsd:float .
+
+jtw:onPage
+  rdfs:domain jtw:TextLine ;
+  rdfs:range  jtw:Page .
+
+# ──────────────────────────────────────────────
+# D. 主题层：人物（Persons）
+# ──────────────────────────────────────────────
+jtw:Person
+  rdfs:label "人物"@zh ;
+  rdfs:subClassOf foaf:Person, jtw:Thing .
+
+jtw:person_name      rdfs:label "人物名"@zh .
+jtw:person_alias     rdfs:label "别名"@zh .
+jtw:person_category  rdfs:label "人物类别"@zh ;
+  rdfs:comment "取值：主角/唐僧徒/神仙/佛/帝王/妖魔/世俗/龙神/道士/女仙"@zh .
+
+jtw:role             rdfs:label "在文本中的角色"@zh ;
+  rdfs:comment "取值：祖师/弟子/使者/客卿/主角/配角/观察者"@zh .
+
+# ──────────────────────────────────────────────
+# E. 门派/机构（Sects）
+# ──────────────────────────────────────────────
+jtw:Sect
+  rdfs:label "门派/机构"@zh ;
+  rdfs:subClassOf jtw:Thing ;
+  rdfs:comment "如：花果山/灵山/天庭/地府/车迟国/狮驼国"@zh .
+
+jtw:sect_name    rdfs:label "门派名"@zh .
+jtw:sect_type    rdfs:label "门派类型"@zh ;
+  rdfs:comment "佛/道/天庭/地府/世俗/妖魔/山水"@zh .
+
+# ──────────────────────────────────────────────
+# F. 法宝（Artifacts）
+# ──────────────────────────────────────────────
+jtw:Artifact
+  rdfs:label "法宝"@zh ;
+  rdfs:subClassOf jtw:Thing ;
+  rdfs:comment "如意金箍棒/紫金葫芦/定海神针/芭蕉扇/幌金绳..."@zh .
+
+jtw:artifact_name rdfs:label "法宝名"@zh .
+
+# ──────────────────────────────────────────────
+# G. 法术（Spells）
+# ──────────────────────────────────────────────
+jtw:Spell
+  rdfs:label "法术"@zh ;
+  rdfs:subClassOf jtw:Thing .
+
+jtw:spell_name  rdfs:label "法术名"@zh .
+
+# ──────────────────────────────────────────────
+# H. 地点（Places）
+# ──────────────────────────────────────────────
+jtw:Place
+  rdfs:label "地点"@zh ;
+  rdfs:subClassOf jtw:Thing .
+
+jtw:place_name rdfs:label "地点名"@zh .
+
+# ──────────────────────────────────────────────
+# I. 事件（Events）
+# ──────────────────────────────────────────────
+jtw:Event
+  rdfs:label "事件"@zh ;
+  rdfs:subClassOf jtw:Thing ;
+  rdfs:comment "降妖/斗法/拜师/结拜/出行/朝见/战斗/变化/受封"@zh .
+
+jtw:event_name    rdfs:label "事件名"@zh .
+jtw:event_category rdfs:label "事件类别"@zh ;
+  rdfs:comment "取值：降妖/斗法/拜师/结拜/出行/朝见/战斗/变化/受封/授宝/受戒"@zh .
+
+# ──────────────────────────────────────────────
+# J. 主题（Themes）
+# ──────────────────────────────────────────────
+jtw:Theme
+  rdfs:label "主题"@zh ;
+  rdfs:subClassOf skos:Concept, jtw:Thing ;
+  rdfs:comment "佛道之争/因果报应/忠君报国/修行悟道/善恶有报..."@zh .
+
+# ──────────────────────────────────────────────
+# K. 关系一等实体（Relationships as First-class）
+#    仿 nobel-kg mentorship 设计
+# ──────────────────────────────────────────────
+jtw:Discipleship
+  rdfs:label "师徒关系"@zh ;
+  rdfs:subClassOf jtw:Thing .
+
+jtw:Kinship
+  rdfs:label "亲属关系"@zh ;
+  rdfs:subClassOf jtw:Thing .
+
+jtw:Antagonism
+  rdfs:label "敌对关系"@zh ;
+  rdfs:subClassOf jtw:Thing .
+
+jtw:Membership
+  rdfs:label "归属关系"@zh ;
+  rdfs:subClassOf jtw:Thing .
+
+jtw:Possession
+  rdfs:label "法宝持有关系"@zh ;
+  rdfs:subClassOf jtw:Thing .
+
+jtw:Involvement
+  rdfs:label "事件参与关系"@zh ;
+  rdfs:subClassOf jtw:Thing .
+
+jtw:PlotOrder
+  rdfs:label "情节序列关系"@zh ;
+  rdfs:subClassOf jtw:Thing .
+
+jtw:AnnotationOf
+  rdfs:label "评点归属"@zh ;
+  rdfs:subClassOf jtw:Thing .
+
+jtw:EditionLineage
+  rdfs:label "版本源流"@zh ;
+  rdfs:subClassOf jtw:Thing .
+
+jtw:ChapterOf
+  rdfs:label "章节归属"@zh ;
+  rdfs:subClassOf jtw:Thing .
+
+# ── 关系通用属性（都套在关系实例上）──
+jtw:relation_type
+  rdfs:domain jtw:Thing ;
+  rdfs:label  "关系类型"@zh ;
+  rdfs:comment "师徒：拜师/拜佛/拜道祖/收徒/化生；亲属：兄妹/父子/师徒同源..."@zh .
+
+jtw:verification_status
+  rdfs:domain jtw:Thing ;
+  rdfs:range  xsd:string ;
+  rdfs:label  "核验状态"@zh ;
+  rdfs:comment "取值：已核实/存疑/待核实/版本间冲突"@zh .
+
+jtw:source_page
+  rdfs:domain jtw:Thing ;
+  rdfs:range  jtw:Page ;
+  rdfs:label  "证据页面"@zh .
+
+jtw:source_text
+  rdfs:domain jtw:Thing ;
+  rdfs:range  xsd:string ;
+  rdfs:label  "原文片段"@zh .
+
+jtw:is_official
+  rdfs:domain jtw:Thing ;
+  rdfs:range  xsd:boolean ;
+  rdfs:label  "是否正传记载"@zh .
+
+# ── 关系主体/客体 ──
+jtw:subjectOf   rdfs:range xsd:string ; rdfs:label "关系主体"@zh .
+jtw:objectOf    rdfs:range xsd:string ; rdfs:label "关系客体"@zh .
+
+# ──────────────────────────────────────────────
+# L. 语体层（Register）— 隐性约束之一
+#    《西游》语体波动巨大：市井白话 / 佛道偈颂 / 打怪套话 / 诙谐段子
+#    与 nobel-kg 不同：不是靠"名录 + 师承"约束，是靠语体指纹约束
+# ──────────────────────────────────────────────
+jtw:Register
+  rdfs:label "语体"@zh ;
+  rdfs:subClassOf skos:Concept, jtw:Thing ;
+  rdfs:comment "《西游》语体分类：市井白话/佛道偈颂/诗词歌赋/打怪套话/诙谐段子/帝王语/叙述语/佛语/道语/妖语"@zh .
+
+jtw:register_id    rdfs:label "语体ID"@zh .
+jtw:register_name  rdfs:label "语体名"@zh .
+jtw:register_desc  rdfs:label "语体描述"@zh .
+jtw:token_freq     rdfs:label "特征字频"@zh ; rdfs:range xsd:string .
+jtw:avg_sentence_len rdfs:label "平均句长"@zh ; rdfs:range xsd:float .
+jtw:punctuation_density rdfs:label "标点密度"@zh ; rdfs:range xsd:float .
+jtw:formal_score   rdfs:label "文白比"@zh ; rdfs:range xsd:float .
+
+jtw:hasRegister
+  rdfs:domain jtw:TextLine ;
+  rdfs:range  jtw:Register ;
+  rdfs:label  "所属语体"@zh ;
+  rdfs:comment "每条 line 可被打上 1..N 个语体标签（可混合）"@zh .
+
+# ──────────────────────────────────────────────
+# M. 口吻层（Voice）— 人物在不同情境下的说话模式
+#    悟空：文人语 / 泼猴语 / 戏谑语；唐僧：经卷语 / 感伤语
+# ──────────────────────────────────────────────
+jtw:Voice
+  rdfs:label "口吻"@zh ;
+  rdfs:subClassOf skos:Concept, jtw:Thing ;
+  rdfs:comment "同一个人物在不同情境下的语言模式，如：悟空文人语/泼猴语/戏谑语；唐僧经卷语/感伤语"@zh .
+
+jtw:voice_id       rdfs:label "口吻ID"@zh .
+jtw:voice_name     rdfs:label "口吻名"@zh .
+jtw:owner_person   rdfs:label "所属人物"@zh ; rdfs:range jtw:Person .
+jtw:trigger_context rdfs:label "触发情境"@zh ;
+  rdfs:comment "如：斗智时/受挫时/谈经时/戏谑时/严肃时"@zh .
+jtw:fingerprint    rdfs:label "指纹"@zh ;
+  rdfs:comment "字符 n-gram / 高频词 / 困惑度 / 情绪字密度（对应《红楼未完》字镜）"@zh ;
+  rdfs:range xsd:string .
+
+jtw:usesVoice
+  rdfs:domain jtw:TextLine ;
+  rdfs:range  jtw:Voice ;
+  rdfs:label  "使用口吻"@zh .
+
+# ──────────────────────────────────────────────
+# N. 套路层（Motif / Formula）— 打怪/拜师/受封模板
+#    西游套路化明显：套路母题 + 实例 + 偏离度
+# ──────────────────────────────────────────────
+jtw:Motif
+  rdfs:label "母题/套路"@zh ;
+  rdfs:subClassOf skos:Concept, jtw:Thing ;
+  rdfs:comment "西游反复出现的叙事模板：打怪模板/拜师模板/受封模板/变化模板/结拜模板/受戒模板"@zh .
+
+jtw:motif_id        rdfs:label "母题ID"@zh .
+jtw:motif_name      rdfs:label "母题名"@zh .
+jtw:motif_template  rdfs:label "模板骨架"@zh ;
+  rdfs:comment "如：【妖精现】→【悟空辨】→【法宝斗】→【祖师救】→【受降】"@zh .
+jtw:motif_frequency rdfs:label "出现频次"@zh ; rdfs:range xsd:integer .
+
+jtw:MotifInstance
+  rdfs:label "母题实例"@zh ;
+  rdfs:subClassOf jtw:Thing .
+
+jtw:instanceOfMotif
+  rdfs:domain jtw:MotifInstance ;
+  rdfs:range  jtw:Motif .
+
+jtw:instance_deviation
+  rdfs:domain jtw:MotifInstance ;
+  rdfs:range  xsd:float ;
+  rdfs:label  "偏离度"@zh ;
+  rdfs:comment "与模板的偏离程度，低=套路化，高=创新/胡闹感强"@zh .
+
+# ──────────────────────────────────────────────
+# O. 诙谐/机锋层（Wit）— 胡闹感、戏谑、反讽
+#    这是"猴子气"的核心，也是最难量化的一层
+# ──────────────────────────────────────────────
+jtw:Wit
+  rdfs:label "诙谐/机锋"@zh ;
+  rdfs:subClassOf jtw:Thing .
+
+jtw:wit_type       rdfs:label "诙谐类型"@zh ;
+  rdfs:comment "取值：戏谑/反讽/双关/谐音/胡闹/挑衅/自嘲/冷幽默"@zh .
+
+jtw:humor_level    rdfs:label "诙谐强度"@zh ; rdfs:range xsd:float ;
+  rdfs:comment "0.0 严肃 — 1.0 极致胡闹"@zh .
+
+jtw:hasWit
+  rdfs:domain jtw:TextLine ;
+  rdfs:range  jtw:Wit ;
+  rdfs:label  "诙谐标记"@zh .
+
+# ──────────────────────────────────────────────
+# P. 版本+语体 双维比较（不同于单纯字符层 diff）
+# ──────────────────────────────────────────────
+jtw:register_drift
+  rdfs:label "语体漂移"@zh ;
+  rdfs:comment "同一回目在不同版本间的语体分布差异（比字符层更能反映编辑意图）"@zh .
+
+jtw:voice_consistency
+  rdfs:label "口吻一致性"@zh ;
+  rdfs:comment "检查某人物的口吻在长文本中是否漂移，用于生成式推演的质量控制"@zh .
+
+# ──────────────────────────────────────────────
+# Q. 法宝状态机（借鉴红楼器物流转，但法宝有"生效/失效/传递/收回"）
+# ──────────────────────────────────────────────
+jtw:ArtifactState
+  rdfs:label "法宝状态"@zh ;
+  rdfs:subClassOf skos:Concept ;
+  rdfs:comment "法宝状态机：沉睡/激活/持有/传递中/被收/被夺/失效/回归本主"@zh .
+
+jtw:artifact_state
+  rdfs:domain jtw:Artifact ;
+  rdfs:range  jtw:ArtifactState ;
+  rdfs:label  "当前状态"@zh .
+
+jtw:ArtifactEvent
+  rdfs:label "法宝事件"@zh ;
+  rdfs:subClassOf jtw:Event ;
+  rdfs:comment "法宝流转的每一次变动都是一等事件，仿 nobel-kg 关系一等实体"@zh .
+
+jtw:from_holder   rdfs:label "从持有者"@zh ; rdfs:range jtw:Person .
+jtw:to_holder     rdfs:label "至持有者"@zh ; rdfs:range jtw:Person .
+jtw:state_change  rdfs:label "状态变更"@zh .
+
+# ──────────────────────────────────────────────
+# R. 地理路径网络（西游是开放旅程图，路径本身即叙事骨架）
+#    不同于红楼"大观园图"的封闭空间，西游是 Path Network
+# ──────────────────────────────────────────────
+jtw:JourneySegment
+  rdfs:label "旅程段"@zh ;
+  rdfs:subClassOf jtw:Thing ;
+  rdfs:comment "取经路上的一段旅程，从 A 地到 B 地，绑定章回范围"@zh .
+
+jtw:from_place    rdfs:label "起点"@zh ; rdfs:range jtw:Place .
+jtw:to_place      rdfs:label "终点"@zh ; rdfs:range jtw:Place .
+jtw:cover_chapters rdfs:label "覆盖章回"@zh ; rdfs:range xsd:string .
+jtw:travel_days   rdfs:label "行程天数"@zh ; rdfs:range xsd:integer .
+jtw:difficulty    rdfs:label "难度"@zh ; rdfs:range xsd:float .
+jtw:encounters_monsters rdfs:label "途经妖怪数"@zh ; rdfs:range xsd:integer .
+
+jtw:next_segment
+  rdfs:domain jtw:JourneySegment ;
+  rdfs:range  jtw:JourneySegment ;
+  rdfs:label  "下一段"@zh ;
+  rdfs:comment "路径的有向串联，重建取经路线"@zh .
+
+# ──────────────────────────────────────────────
+# S. 母题延续链（Motif Chain）— 替代红楼"伏线三栏对账"
+#    红楼伏线：埋线→点破→应验（有明确证据链）
+#    西游母题：模板复用→偏离度曲线（无伏线账本，用偏离度反推）
+# ──────────────────────────────────────────────
+jtw:MotifChain
+  rdfs:label "母题延续链"@zh ;
+  rdfs:subClassOf jtw:Thing ;
+  rdfs:comment "同一母题在多个章回/回目/版本中的实例序列，附偏离度时间曲线"@zh .
+
+jtw:chain_motif
+  rdfs:domain jtw:MotifChain ;
+  rdfs:range  jtw:Motif .
+
+jtw:chain_includes
+  rdfs:domain jtw:MotifChain ;
+  rdfs:range  jtw:MotifInstance ;
+  rdfs:label  "包含实例"@zh .
+
+jtw:deviation_trend
+  rdfs:label "偏离度趋势"@zh ;
+  rdfs:comment "递增（越写越胡闹）/递减/震荡/平稳 — 用于分析作者创作节奏"@zh ;
+  rdfs:range xsd:string .
+
+# ──────────────────────────────────────────────
+# T. 意象/符号星座（红楼意象星座的西游版）
+#    金箍/白骨/紧箍咒/芭蕉扇 → 主题聚类，跨回目追踪
+# ──────────────────────────────────────────────
+jtw:Symbol
+  rdfs:label "意象/符号"@zh ;
+  rdfs:subClassOf skos:Concept, jtw:Thing ;
+  rdfs:comment "关键意象：金箍/白骨/紧箍/芭蕉/人参果/定风... 用于意象星座聚类"@zh .
+
+jtw:symbol_name   rdfs:label "意象名"@zh .
+jtw:symbol_theme  rdfs:label "关联主题"@zh ; rdfs:range jtw:Theme .
+jtw:symbol_frequency rdfs:label "频次"@zh ; rdfs:range xsd:integer .
+
+jtw:features_symbol
+  rdfs:domain jtw:TextLine ;
+  rdfs:range  jtw:Symbol ;
+  rdfs:label  "出现意象"@zh .
+
+# ──────────────────────────────────────────────
+# U. 诙谐谱（WitMap）— 红楼"冷暖谱"的西游版
+#    不追踪情感冷暖，追踪诙谐分布（胡闹/戏谑/反讽/双关）
+# ──────────────────────────────────────────────
+jtw:WitMap
+  rdfs:label "诙谐谱"@zh ;
+  rdfs:subClassOf jtw:Thing ;
+  rdfs:comment "全书诙谐强度的章节级分布，用于跨版本比较（世德堂 vs 李评）"@zh .
+
+jtw:chapter_wit_density
+  rdfs:label "章回诙谐密度"@zh ;
+  rdfs:comment "每章回的诙谐标记数 / 章回总行数"@zh ;
+  rdfs:range xsd:float .
+
+# ──────────────────────────────────────────────
+# V. 版本谱系（Edition Lineage）— 独立成体系
+#    16 版源流，含编辑意图标注
+# ──────────────────────────────────────────────
+jtw:EditionLineageNode
+  rdfs:label "版本节点"@zh ;
+  rdfs:subClassOf jtw:Thing .
+
+jtw:derives_from_edition
+  rdfs:domain jtw:Edition ;
+  rdfs:range  jtw:Edition ;
+  rdfs:label  "衍生自版本"@zh .
+
+jtw:editor_intent
+  rdfs:label "编辑意图"@zh ;
+  rdfs:comment "如：加大图像、删减诗词、增补评点、删减市井语... 反映版本差异的编辑意图"@zh .
+
+jtw:editor_change_type
+  rdfs:label "改动类型"@zh ;
+  rdfs:comment "取值：增补评点/删减诗词/改写人物口吻/图像增补/删减段落/加标题"@zh .
+
+# ──────────────────────────────────────────────
+# W. 三教论理层（Doctrine）— 儒释道三教作为一等实体
+#    依据：
+#    - 张书绅《新说西游记》三教合一论
+#    - 尤侗《西游真诠》"殆《华严》之外篇"
+#    - 刘廷玑"证道之书"
+#    - 杨义"三教归一，是作者的基本思路"
+#    - 明末三教合一思潮是文本的文化背景
+# ──────────────────────────────────────────────
+jtw:Doctrine
+  rdfs:label "教派/论理"@zh ;
+  rdfs:subClassOf skos:Concept, jtw:Thing ;
+  rdfs:comment "儒/释/道三教及其子派，包括内丹/符箓/禅宗/天台/华严/程朱理学等"@zh .
+
+jtw:doctrine_id      rdfs:label "教派ID"@zh .
+jtw:doctrine_name    rdfs:label "教派名"@zh .
+jtw:doctrine_school  rdfs:label "所属宗教"@zh ;
+  rdfs:comment "儒/释/道 三选一"@zh .
+jtw:doctrine_sub     rdfs:label "子派"@zh ;
+  rdfs:comment "如：道→内丹/符箓/清微/灵宝；释→禅/天台/华严/净土；儒→理学/心学/经世"@zh .
+
+jtw:DoctrinalStance
+  rdfs:label "论理立场"@zh ;
+  rdfs:subClassOf jtw:Thing ;
+  rdfs:comment "三教在文本中的立场：褒扬/贬抑/中立/融合/对比 — 与 verification_status 配合"@zh .
+
+jtw:stance_toward
+  rdfs:label "立场针对"@zh ;
+  rdfs:comment "如：贬道符箓/褒佛禅宗/褒儒忠孝/贬佛空谈/褒道内丹"@zh .
+
+jtw:stance_attitude
+  rdfs:label "立场态度"@zh ;
+  rdfs:comment "取值：褒扬/贬抑/中立/融合/对比/批判"@zh .
+
+jtw:hasDoctrine
+  rdfs:domain jtw:TextLine ;
+  rdfs:range  jtw:Doctrine ;
+  rdfs:label  "涉及教派"@zh .
+
+jtw:refersToDoctrinalStance
+  rdfs:domain jtw:TextLine ;
+  rdfs:range  jtw:DoctrinalStance ;
+  rdfs:label  "承载论理立场"@zh .
+
+jtw:person_holds_doctrine
+  rdfs:domain jtw:Person ;
+  rdfs:range  jtw:Doctrine ;
+  rdfs:label  "人物所属教派"@zh .
+
+jtw:doctrine_conflict
+  rdfs:label "教派冲突"@zh ;
+  rdfs:comment "三教在特定回目中的冲突/融合/辩论，一等事件。例：车迟国斗法（贬道符箓）；比丘国（褒道内丹）；五行山（悟空=佛性回归）"@zh .
+
+jtw:conflict_chapter    rdfs:label "冲突所在章回"@zh .
+jtw:conflict_parties   rdfs:label "冲突各方"@zh .
+jtw:conflict_resolution rdfs:label "冲突解决方式"@zh ;
+  rdfs:comment "取值：以佛胜道/以道胜佛/融合/未解/超越"@zh .
+
+# ──────────────────────────────────────────────
+# X. 心性与修炼系统（Inner Cultivation）
+#    尤侗"《华严》之外篇"、"心猿归正"= 佛性论
+#    道门内丹修炼 → 与佛禅的融合
+# ──────────────────────────────────────────────
+jtw:CultivationPath
+  rdfs:label "修行路径"@zh ;
+  rdfs:subClassOf jtw:Thing ;
+  rdfs:comment "取经/炼心/内丹/符箓/斋戒/讲经/坐禅 等具体修行方式"@zh .
+
+jtw:cultivation_type rdfs:label "修行类型"@zh .
+jtw:cultivation_goal rdfs:label "修行目标"@zh ;
+  rdfs:comment "取值：成道/成佛/证仙/证圣/超脱/受封/受戒"@zh .
+
+jtw:practices_cultivation
+  rdfs:domain jtw:Person ;
+  rdfs:range  jtw:CultivationPath ;
+  rdfs:label  "修习路径"@zh .
+
+jtw:inner_cultivation_stage
+  rdfs:label "心性阶段"@zh ;
+  rdfs:comment "如悟空的心猿归正进程：石猴→齐天→取经→斗战胜佛；唐僧：俗人→取经→旃檀功德佛"@zh .
+
+# ──────────────────────────────────────────────
+# Y. 学术评点传统（Scholarly Tradition）
+#    明清诸家评本互校 → 本体的一等资源
+# ──────────────────────────────────────────────
+jtw:Scholar
+  rdfs:label "学者/评点家"@zh ;
+  rdfs:subClassOf foaf:Person, jtw:Thing ;
+  rdfs:comment "张书绅/尤侗/刘廷玑/汪琯/陈士奇/李廷机/杨慎... "@zh .
+
+jtw:work_title   rdfs:label "评点著作名"@zh .
+jtw:school_of    rdfs:label "所属学派"@zh ;
+  rdfs:comment "佛学/理学/丹道/文学/考证 五派"@zh .
+
+jtw:ScholarlyArgument
+  rdfs:label "学术论点"@zh ;
+  rdfs:subClassOf jtw:Thing ;
+  rdfs:comment "学者对某问题的具体论点，可被多版本引用/反驳"@zh .
+
+jtw:argued_by     rdfs:label "论者"@zh ; rdfs:range jtw:Scholar .
+jtw:argues_about  rdfs:label "论点对象"@zh ;
+  rdfs:comment "指向 Person/Event/Theme/Doctrine/TextLine"@zh .
+jtw:argument_stance rdfs:label "论点立场"@zh .
+jtw:argument_evidence rdfs:label "论点证据"@zh ;
+  rdfs:range jtw:TextLine .
+
+# ──────────────────────────────────────────────
+# Z. 版本源流 × 三教倾向（每个版本的三教倾向是学术比较维度）
+# ──────────────────────────────────────────────
+jtw:edition_doctrine_tendency
+  rdfs:label "版本教派倾向"@zh ;
+  rdfs:comment "每个版本对儒/释/道三教的相对倾向（数值向量：儒/释/道 三维评分 0.0-1.0）"@zh ;
+  rdfs:range xsd:string .
+
+# ──────────────────────────────────────────────
+# 形态层 ↔ 主题层映射（TextLine → Person/Event...）
+# ──────────────────────────────────────────────
+jtw:mentions
+  rdfs:domain jtw:TextLine ;
+  rdfs:range  jtw:Person ;
+  rdfs:label  "提及人物"@zh .
+
+jtw:refersToEvent
+  rdfs:domain jtw:TextLine ;
+  rdfs:range  jtw:Event .
+
+jtw:refersToArtifact
+  rdfs:domain jtw:TextLine ;
+  rdfs:range  jtw:Artifact .
+
+jtw:refersToPlace
+  rdfs:domain jtw:TextLine ;
+  rdfs:range  jtw:Place .
+
+# ──────────────────────────────────────────────
+# OWL Functional Property（一值约束）
+# ──────────────────────────────────────────────
+jtw:edition_id    a owl:FunctionalProperty .
+jtw:chapter_no    a owl:FunctionalProperty .
+jtw:page_no       a owl:FunctionalProperty .
+jtw:person_name   a owl:FunctionalProperty .
+jtw:artifact_name a owl:FunctionalProperty .
+jtw:spell_name    a owl:FunctionalProperty .
+jtw:place_name    a owl:FunctionalProperty .
+jtw:event_name    a owl:FunctionalProperty .
+
+# ──────────────────────────────────────────────
+# 关键对象属性（对称/反称/传递）
+# ──────────────────────────────────────────────
+jtw:has_source        a owl:FunctionalProperty ;
+                      owl:inverseOf jtw:derived_from .
+
+jtw:derived_from
+  rdfs:label "衍生自"@zh .

@@ -1,0 +1,313 @@
+# ============================================================
+# 西游记知识图谱受控词表
+# 用途：抽取/入库/查询全链路统一词汇，避免同义异写
+# ============================================================
+
+verification_status:
+  已核实:
+    en: verified
+    desc: 至少两版原文印证或有明确史料
+  存疑:
+    en: doubtful
+    desc: 单一版本出现，或与主流版本冲突
+  待核实:
+    en: pending
+    desc: VLM 抽取初稿，未交叉验证
+  版本间冲突:
+    en: cross_edition_conflict
+    desc: 不同版本对同一事实表述不一致
+
+person_category:
+  主角:
+    en: protagonist
+    desc: 唐僧师徒 + 关键配角
+  唐僧徒:
+    en: pilgrim
+    desc: 唐僧/孙悟空/猪八戒/沙僧/白龙马
+  神仙:
+    en: deity
+    desc: 道教神仙、天尊、元帅
+  佛:
+    en: buddha
+    desc: 如来、观音、弥勒、文殊、普贤
+  帝王:
+    en: monarch
+    desc: 各国王/玉帝/阎王
+  妖魔:
+    en: demon
+    desc: 妖王/妖怪/精怪/魔头
+  世俗:
+    en: mortal
+    desc: 百姓、官宦、僧道普通角色
+  龙神:
+    en: dragon_deity
+    desc: 龙王、龙子龙孙
+  道士:
+    en: daoist
+    desc: 各派道士/真人
+  女仙:
+    en: female_deity
+    desc: 观音/铁扇公主/女儿国王
+
+relation_type:
+  # 师徒 discipleship
+  拜师:
+    en: formal_disciple
+    desc: 正式拜师收徒
+  拜佛:
+    en: buddha_devotee
+    desc: 皈依佛门
+  拜道祖:
+    en: daoist_devotee
+    desc: 皈依道门
+  收徒:
+    en: accepted_disciple
+    desc: 从师父视角
+  化生:
+    en: spiritual_child
+    desc: 灵性化生，如唐僧
+
+  # 亲属 kinship
+  兄妹: en: sibling
+  父子: en: parent_child
+  师徒同源:
+    en: same_lineage
+    desc: 同源不同门，如菩提祖师与如来
+
+  # 敌对 antagonism
+  仇敌: en: arch_enemy
+  宿敌: en: longterm_enemy
+  临时敌对: en: temporary_enemy
+  主从: en: master_servant
+
+  # 归属 membership
+  祖师: en: patriarch
+  弟子: en: disciple
+  使者: en: envoy
+  客卿: en: advisor
+  成员: en: member
+
+  # 法宝持有 possession
+  持有者: en: holder
+  制造者: en: maker
+  传递者: en: transmitter
+
+  # 事件参与 involvement
+  主角: en: protagonist
+  配角: en: supporting
+  观察者: en: observer
+  参与者: en: participant
+
+sect_type:
+  佛: en: buddhist
+  道: en: daoist
+  天庭: en: celestial
+  地府: en: underworld
+  世俗: en: mortal_kingdom
+  妖魔: en: demon
+  山水: en: mountain
+  龙宫: en: dragon_palace
+
+event_category:
+  降妖: en: demon_subdue
+  斗法: en: magic_duel
+  拜师: en: disciple_bow
+  结拜: en: sworn_brothers
+  出行: en: journey
+  朝见: en: audience
+  战斗: en: combat
+  变化: en: transformation
+  受封: en: enfeoffment
+  授宝: en: artifact_grant
+  受戒: en: precept_taking
+  论道: en: dao_discourse
+  讲经: en: dharma_talk
+
+annotation_form:
+  眉批: en: top_margin
+  夹批: en: inline
+  旁批: en: side_margin
+  回前总评: en: chapter_pre
+  回后总评: en: chapter_post
+  图注: en: caption
+  题署: en: colophon
+  序跋: en: preface_postscript
+
+register_id:
+  # 语体（Register）— 隐性约束核心，对应 TextLine.form 之外的第二个维度
+  market_colloquial:
+    display: 市井白话
+    en: market_colloquial
+    tokens: "咱 你 我 咋 干 那 这 得 啥"
+    formal_score: 0.1
+  buddhist_chant:
+    display: 佛道偈颂
+    en: buddhist_chant
+    tokens: "阿弥陀佛 如来 诸法 空性 三藏 佛 菩萨 观音"
+    formal_score: 0.9
+  daoist_chant:
+    display: 道门玄谈
+    en: daoist_chant
+    tokens: "太上 天尊 大道 三清 灵宝 金丹 丹道 玄门"
+    formal_score: 0.9
+  poetry_song:
+    display: 诗词歌赋
+    en: poetry_song
+    tokens: "诗云 有诗为证 赋曰 词曰 诗曰"
+    formal_score: 0.85
+  monster_battle:
+    display: 打怪套话
+    en: monster_battle
+    tokens: "妖精 孽畜 泼怪 老孙 一棒 定住 现原形 化形"
+    formal_score: 0.3
+  monkey_mischief:
+    display: 猴子胡闹
+    en: monkey_mischief
+    tokens: "嘻嘻哈哈 耍弄 捉弄 闹 顽 皮 撒 泼"
+    formal_score: 0.2
+  monarch_speech:
+    display: 帝王语
+    en: monarch_speech
+    tokens: "朕 寡人 王 天朝 朝廷 敕"
+    formal_score: 0.8
+  narrator_voice:
+    display: 叙述语
+    en: narrator_voice
+    tokens: "话说 却说 且说 只见 却说那"
+    formal_score: 0.5
+  buddha_speech:
+    display: 佛语
+    en: buddha_speech
+    tokens: "善哉 施主 众生 因果 缘法 佛门"
+    formal_score: 0.9
+  demon_speech:
+    display: 妖语
+    en: demon_speech
+    tokens: "小猢狲 和尚 唐僧 师父 老孙 吃 嚼"
+    formal_score: 0.3
+
+voice_id:
+  # 口吻（Voice）— 人物在不同情境下的说话模式
+  wukong_scholar:
+    display: 悟空文人语
+    owner: sun-wukong
+    trigger: 谈经/论道/自谦时
+    example: "小圣乃天地生成之灵长"
+  wukong_monkey:
+    display: 悟空泼猴语
+    owner: sun-wukong
+    trigger: 挑衅/胡闹时
+    example: "俺老孙去！"
+  wukong_mischievous:
+    display: 悟空戏谑语
+    owner: sun-wukong
+    trigger: 戏弄八戒/调侃时
+    example: "你这呆子"
+  tang_sutra:
+    display: 唐僧经卷语
+    owner: tang-sanzang
+    trigger: 讲经/念经时
+    example: "阿弥陀佛，贫僧..."
+  tang_melancholy:
+    display: 唐僧感伤语
+    owner: tang-sanzang
+    trigger: 遇险/思乡时
+  zhujie_glutton:
+    display: 八戒贪嘴语
+    owner: zhu-bajie
+    trigger: 想吃/偷懒/抱怨时
+    example: "师兄，我饿了"
+  shajiej_steady:
+    display: 沙僧稳重语
+    owner: sha-wujing
+    trigger: 劝和/挑担时
+    example: "大师兄，二师兄，莫吵了"
+  yaojing_provoke:
+    display: 妖怪挑衅语
+    owner: demon
+    trigger: 现原形/斗法时
+
+motif_id:
+  monster_subdue:
+    display: 打怪模板
+    template: 【妖现】→【辨妖】→【法宝斗】→【祖师救】→【受降】
+    typical_pages: 5-8
+  disciple_bow:
+    display: 拜师模板
+    template: 【遇恩人】→【自报家门】→【叩拜】→【受名】
+  enfeoffment:
+    display: 受封模板
+    template: 【功成】→【上天庭/回灵山】→【册封】→【职司】
+  transformation:
+    display: 变化模板
+    template: 【起念】→【捻诀】→【变形】→【显威】
+  sworn_brothers:
+    display: 结拜模板
+    template: 【相遇】→【共事】→【称兄道弟】
+  precept_taking:
+    display: 受戒模板
+    template: 【入佛门/道门】→【赐法名】→【拜经】
+
+# 三教：儒释道统合定义
+three_teachings:
+  儒:
+    en: confucianism
+    desc: 孔孟之道，礼乐教化，入世治世
+    key_concepts: "仁 义 礼 智 信 忠 孝 君臣 父子"
+    representative: "孔子 孟子 荀子"
+  释:
+    en: buddhism
+    desc: 佛门教法，因果轮回，出世超脱
+    key_concepts: "空 无常 涅槃 轮回 因果 菩提 般若"
+    representative: "如来 观音 文殊 普贤"
+  道:
+    en: daoism
+    desc: 老庄之学，自然无为，长生久视
+    key_concepts: "道 德 无为 自然 阴阳 气 金丹"
+    representative: "太上老君 元始天尊 灵宝天尊"
+
+wit_type:
+  戏谑: en: teasing
+  反讽: en: irony
+  双关: en: pun
+  谐音: en: homophone_pun
+  胡闹: en: mischief
+  挑衅: en: provocation
+  自嘲: en: self_deprecation
+  冷幽默: en: deadpan
+
+edition_id:
+  shidetang:
+    display: 世德堂本
+    year: 1592
+    publisher: 金陵世德堂
+    desc: 现存最早刻本，1592
+  li_ping:
+    display: 李评本
+    year: null
+    publisher: 明李廷机评点本
+  daqishi:
+    display: 大奇书本
+    year: null
+    publisher: 大奇书堂
+    desc: Gallica 分册 4031-4035
+  xinke_pingbi:
+    display: 新刻全像批评西游记
+    year: null
+    publisher: 清
+  zhenquan:
+    display: 真诠本
+    year: null
+    publisher: 清陈士奇真诠本
+  yangminzhai:
+    display: 杨闽斋本
+    year: null
+    publisher: 杨闽斋堂
+  minzhaitang:
+    display: 闽斋堂本
+    year: null
+    publisher: 闽斋堂
+  zhengdao:
+    display: 证道本
+    year: null
+    publisher: 清证道本
