@@ -78,7 +78,7 @@
 </footer>
 
 <script type="module">
-import { initDB, query } from './js/db.js';
+import { loadPageData } from './js/page.js';
 
 const TYPE_LABEL = {
   person: '人物', place: '地点', artifact: '器物', monster: '妖神',
@@ -162,9 +162,9 @@ function render() {
 
 async function main() {
   try {
-    await initDB(msg => { elLoading.textContent = msg; });
-    const r = await query(`SELECT entity_id, entity_id_raw, type, label, canonical_name, aliases, mention_count FROM entities ORDER BY type, mention_count DESC`);
-    ENTITIES = r.rows;
+    elLoading.textContent = '正在加载页面数据…';
+    const d = await loadPageData('entities');
+    ENTITIES = d.entities || [];
     elLoading.style.display = 'none';
     elContent.style.display = 'block';
     buildTabs();
