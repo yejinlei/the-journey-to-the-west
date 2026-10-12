@@ -35,6 +35,8 @@ scripts/smoke_*.png
 *.key
 
 # === DuckDB WASM 原始文件（体积 70+MB，仓库只保留 .br 压缩版本） ===
+# 例外：docs/ 目录为 GitHub Pages 静态产物，保留完整 wasm 与 .br
 06_Web前端/lib/duckdb/*.wasm
 !06_Web前端/lib/duckdb/*.wasm.br
+!docs/**
 
