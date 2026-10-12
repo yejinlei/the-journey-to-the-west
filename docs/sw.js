@@ -6,7 +6,7 @@
  *   - 其它请求回退到网络
  */
 
-const CACHE = 'jtw-kg-v1';
+const CACHE = 'jtw-kg-v2';
 const KEEP = 60; // 缓存条目上限，DuckDB-WASM + 19 张表约 40MB
 
 const ALWAYS_CACHE = [/^\/lib\//, /^\/data\//, /^\/css\//, /^\/js\//];
