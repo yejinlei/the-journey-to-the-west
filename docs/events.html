@@ -78,7 +78,7 @@
 </footer>
 
 <script type="module">
-import { initDB, query } from './js/db.js';
+import { loadPageData } from './js/page.js';
 
 const elLoading = document.getElementById('loading');
 const elContent = document.getElementById('content');
@@ -107,10 +107,9 @@ function chapterOf(pageNo) {
 
 async function main() {
   try {
-    await initDB(msg => { elLoading.textContent = msg; });
-    const r = await query(`SELECT event_id, page_no, name, actor_count, place_label, summary, line_span, category
-                           FROM events WHERE edition='xinke_pingbi' ORDER BY page_no, line_span`);
-    EVENTS = r.rows;
+    elLoading.textContent = '正在加载页面数据…';
+    const d = await loadPageData('events');
+    EVENTS = d.events || [];
     elLoading.style.display = 'none';
     elContent.style.display = 'block';
     render();
