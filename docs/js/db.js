@@ -11,11 +11,14 @@ let READY = false;
 let INITED = false;
 
 function assetUrl(relPath) {
-  // 站点基址：document.baseURI 截到 index.html 之前，再拼相对路径。
-  // 例如 baseURI = https://host/the-journey-to-the-west/index.html
-  //       base     = https://host/the-journey-to-the-west/
-  //       rel='data/manifest.json' → https://host/the-journey-to-the-west/data/manifest.json
-  const base = document.baseURI.replace(/[^/]*$/, '');
+  // 站点基址：把 baseURI 截到最后一个 '/' 之后（含 '/'），得到目录前缀。
+  // - baseURI = https://host/the-journey-to-the-west/index.html
+  //   → base  = https://host/the-journey-to-the-west/
+  // - baseURI = https://host/the-journey-to-the-west/
+  //   → base  = https://host/the-journey-to-the-west/
+  const baseURI = document.baseURI;
+  const lastSlash = baseURI.lastIndexOf('/');
+  const base = lastSlash === -1 ? '/' : baseURI.substring(0, lastSlash + 1);
   return new URL(relPath, base).href;
 }
 
