@@ -1,7 +1,7 @@
 {
   "project": "Journey-to-the-West Knowledge Graph",
   "version": "0.1.0",
-  "built_at": "2026-10-12T02:34:48",
+  "built_at": "2026-10-12T03:06:03Z",
   "ontology": "../03_本体论规范/jtw_kg_ontology.ttl",
   "vocabularies": "../03_本体论规范/vocabularies.yaml",
   "source_extract_dir": "book\\extract",
@@ -26,8 +26,8 @@
     {
       "name": "antagonism",
       "path": "antagonism.parquet",
-      "rows": 0,
-      "size_bytes": 4223
+      "rows": 43,
+      "size_bytes": 7283
     },
     {
       "name": "artifacts",
@@ -44,14 +44,14 @@
     {
       "name": "discipleship",
       "path": "discipleship.parquet",
-      "rows": 0,
-      "size_bytes": 4669
+      "rows": 91,
+      "size_bytes": 9152
     },
     {
       "name": "doctrine_mentions",
       "path": "doctrine_mentions.parquet",
-      "rows": 0,
-      "size_bytes": 3155
+      "rows": 343,
+      "size_bytes": 5611
     },
     {
       "name": "editions",
@@ -74,8 +74,8 @@
     {
       "name": "involvement",
       "path": "involvement.parquet",
-      "rows": 0,
-      "size_bytes": 3255
+      "rows": 343,
+      "size_bytes": 7683
     },
     {
       "name": "kinship",
@@ -92,8 +92,8 @@
     {
       "name": "membership",
       "path": "membership.parquet",
-      "rows": 0,
-      "size_bytes": 3243
+      "rows": 173,
+      "size_bytes": 5620
     },
     {
       "name": "mentions",
@@ -110,8 +110,8 @@
     {
       "name": "possession",
       "path": "possession.parquet",
-      "rows": 0,
-      "size_bytes": 3279
+      "rows": 38,
+      "size_bytes": 3951
     },
     {
       "name": "relationships",
@@ -132,5 +132,5 @@
       "size_bytes": 9151
     }
   ],
-  "status": "skeleton_v0.1"
+  "status": "v0.2_classified"
 }
