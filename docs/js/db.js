@@ -11,8 +11,15 @@ let READY = false;
 let INITED = false;
 
 function assetUrl(relPath) {
-  return new URL('../' + relPath, import.meta.url).href;
+  // 站点基址：document.baseURI 截到 index.html 之前，再拼相对路径。
+  // 例如 baseURI = https://host/the-journey-to-the-west/index.html
+  //       base     = https://host/the-journey-to-the-west/
+  //       rel='data/manifest.json' → https://host/the-journey-to-the-west/data/manifest.json
+  const base = document.baseURI.replace(/[^/]*$/, '');
+  return new URL(relPath, base).href;
 }
+
+function bust(url) { return url + (url.includes('?') ? '&' : '?') + 'v=' + Date.now(); }
 
 function normalizeValue(v) {
   if (v === null || v === undefined) return null;
@@ -57,8 +64,9 @@ export async function initDB(onProgress) {
   const log = (m) => { try { onProgress && onProgress(m); } catch (_) {} };
 
   log('正在读取数据清单…');
-  const resp = await fetch(assetUrl('data/manifest.json'), { cache: 'no-cache' });
-  if (!resp.ok) throw new Error(`数据清单加载失败（HTTP ${resp.status}）`);
+  const manUrl = bust(assetUrl('data/manifest.json'));
+  const resp = await fetch(manUrl, { cache: 'no-store' });
+  if (!resp.ok) throw new Error(`数据清单加载失败（HTTP ${resp.status} @ ${manUrl}）`);
   const manifest = await resp.json();
   const names = (manifest.tables || []).map(t => t.name);
   if (!names.length) throw new Error('数据清单为空');
