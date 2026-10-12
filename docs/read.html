@@ -85,7 +85,7 @@
 </footer>
 
 <script type="module">
-import { initDB, query } from './js/db.js';
+import { loadPageData } from './js/page.js';
 
 const TYPE_META = {
   colophon: { label: '底端', color: '朱批', desc: '每回末页收语或批评总纲' },
@@ -239,15 +239,11 @@ function esc(s) {
 
 async function main() {
   try {
-    await initDB(msg => { elLoading.textContent = msg; });
-    const [chs, lines, annos] = await Promise.all([
-      query(`SELECT chapter_id, edition, chapter_label, chapter_title, first_page, first_line_id FROM chapters ORDER BY first_page`),
-      query(`SELECT page_id, page_no, line_idx, form_type, text, char_count, is_commentary FROM lines WHERE edition='xinke_pingbi'`),
-      query(`SELECT page_id, page_no, line_idx, form_type, text, confidence, chapter_ref FROM annotations WHERE edition='xinke_pingbi'`),
-    ]);
-    state.chapters = chs.rows;
-    state.lines = lines.rows;
-    state.annotations = annos.rows;
+    elLoading.textContent = '正在加载页面数据…';
+    const d = await loadPageData('read');
+    state.chapters = d.chapters || [];
+    state.lines = d.lines || [];
+    state.annotations = d.annotations || [];
     elLoading.style.display = 'none';
     elContent.style.display = 'block';
     render();
