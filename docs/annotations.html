@@ -68,7 +68,7 @@
 </footer>
 
 <script type="module">
-import { initDB, query } from './js/db.js';
+import { loadPageData } from './js/page.js';
 
 const elLoading = document.getElementById('loading');
 const elContent = document.getElementById('content');
@@ -92,11 +92,9 @@ let active = new Set(Object.keys(TYPE_META));
 
 async function main() {
   try {
-    await initDB(msg => { elLoading.textContent = msg; });
-    const r = await query(`SELECT annotation_id, page_no, line_idx, form_type, text, confidence, chapter_ref
-                           FROM annotations WHERE edition='xinke_pingbi'
-                           ORDER BY page_no, line_idx`);
-    ALL = r.rows;
+    elLoading.textContent = '正在加载页面数据…';
+    const d = await loadPageData('annotations');
+    ALL = d.annotations || [];
     elLoading.style.display = 'none';
     elContent.style.display = 'block';
     render();
