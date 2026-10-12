@@ -26,12 +26,8 @@ body{margin:0;color:var(--ink);
   background-attachment:fixed;
   font-family:var(--serif);font-size:15.5px;line-height:1.95;letter-spacing:.02em;
 }
-/* 背景画：赭红底纹（docs/背景.jpg，构建时复制到 assets/bg.jpg），
-   铺满视口、随页不动；704px 见方放大后略糊，正好当纸纹看 */
-body::before{content:'';position:fixed;inset:0;z-index:-2;
-  background:url('bg.jpg') center 20%/cover no-repeat;
-  /* 原画偏暗（均亮 77），提亮压浓，才透得出赭红底纹 */
-  filter:saturate(.85) brightness(1.5) contrast(1.02)}
+/* 背景画：红楼未完专有的 bg.jpg，西游页面不套用；仅保留宣纸薄纱 body::after */
+body::before{display:none}
 /* 宣纸薄纱：压住底纹，墨字乃可辨；纸纹噪点照旧 */
 body::after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;
   background:var(--veil),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.055'/%3E%3C/svg%3E")}
