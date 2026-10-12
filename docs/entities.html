@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>本体实体 · 西游未完</title>
+<link rel="stylesheet" href="assets/app.css">
+<style>
+  .tabs{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0 10px;padding:6px;
+    background:linear-gradient(180deg,rgba(255,253,248,.85),rgba(253,248,238,.7));
+    border:1px solid var(--line);border-radius:3px;box-shadow:var(--shadow)}
+  .tabs button{letter-spacing:.1em;padding:5px 12px;font-size:13.5px;color:var(--ink2);
+    border:1px solid transparent;background:none;border-radius:2px;cursor:pointer;font-family:inherit}
+  .tabs button:hover{color:var(--cinnabar);border-color:rgba(158,43,37,.3);background:rgba(255,255,255,.55)}
+  .tabs button.on{color:var(--cinnabar);border-color:rgba(158,43,37,.35);
+    background:linear-gradient(180deg,#fffdf8,#f6ecd9);font-weight:600}
+  .tabs button .cnt{font-family:var(--kai);color:var(--ink3);margin-left:4px}
+  .tabs button.on .cnt{color:var(--cinnabar)}
+  .search{margin:6px 0 10px;padding:8px 12px;
+    background:linear-gradient(180deg,rgba(255,253,248,.85),rgba(253,248,238,.7));
+    border:1px solid var(--line);border-radius:3px;box-shadow:var(--shadow);
+    display:flex;gap:10px;align-items:center}
+  .search input{flex:1;padding:6px 10px;font-size:14px;font-family:inherit;
+    background:rgba(255,253,248,.9);border:1px solid var(--line);border-radius:2px}
+  .loadbox{padding:80px 20px;text-align:center;color:var(--ink3);font-family:var(--kai);font-size:16px}
+  .entcard{padding:12px 14px;margin:10px 0}
+  .entcard .label{font-family:var(--kai);font-size:20px;color:#332c25;letter-spacing:.06em}
+  .entcard .canonical{color:var(--cinnabar);font-family:var(--kai);font-size:14px;margin-left:6px}
+  .entcard .cnt{float:right;font-family:var(--kai);color:var(--cinnabar);font-size:16px}
+  .entcard .aliases{margin-top:4px}
+  .entcard .mid{font-size:12px;color:var(--ink3);margin-top:2px}
+</style>
+</head>
+<body>
+<header>
+  <span class="seal">西游</span>
+  <h1>西游未完</h1>
+  <div class="sub">一心向道 · 三教合一 · 群魔尽伏</div>
+  <nav>
+    <a href="index.html">总览</a>
+    <a href="read.html">正文·评点</a>
+    <a href="entities.html" class="on">本体实体</a>
+    <a href="versions.html">版本谱</a>
+    <a href="relics.html">法宝谱</a>
+    <a href="annotations.html">诙谐谱</a>
+    <a href="events.html">事件检索</a>
+    <a href="graph.html">图谱</a>
+    <a href="agent.html">Agent</a>
+  </nav>
+</header>
+
+<main>
+  <div class="hero" style="margin-top:2px">
+    <span class="seal solid">本體</span>
+    <div class="verse">人名之地名之器名<br>三教合一　群魔盡伏</div>
+    <div class="rule"></div>
+    <p class="lead">《西游未完》本体实体总表。人物 <b>179</b> 条，地点 <b>115</b> 条，
+      器物 <b>64</b> 条，妖神 <b>52</b> 条，官职 <b>17</b> 条，引诗 <b>16</b> 条，
+      经文 <b>11</b> 条，共 <b>455</b> 条。附别名链（"行者"「孫行者」归「孫悟空」）与提及频数。
+      底本：新刻全像批評西遊記（清）第七十六葉至八十七葉，四回正文。</p>
+  </div>
+
+  <div class="tabs" id="tabs"></div>
+
+  <div class="search">
+    <span class="small muted">检索（名字、别名、canonical_name）</span>
+    <input id="search" placeholder="如：孫悟空 / 金箍棒 / 天竺國 ……" />
+  </div>
+
+  <div id="loading" class="loadbox">正在装载数据库与数据表……</div>
+  <div id="content" style="display:none"></div>
+</main>
+
+<footer>
+  <span class="seal">评本</span>
+  <div>本体论规范：<a href="../03_本体论规范/jtw_kg_ontology.ttl" target="_blank" rel="noopener">jtw_kg_ontology.ttl</a> · 受控词表：<a href="../03_本体论规范/vocabularies.yaml" target="_blank" rel="noopener">vocabularies.yaml</a></div>
+  <div>由多 Agent 生成，仅供研究玩索，非定本。</div>
+</footer>
+
+<script type="module">
+import { initDB, query } from './js/db.js';
+
+const TYPE_LABEL = {
+  person: '人物', place: '地点', artifact: '器物', monster: '妖神',
+  official_title: '官职', quote: '引诗', religion: '经文', event: '事件'
+};
+const TYPE_ORDER = ['person','place','artifact','monster','official_title','quote','religion'];
+
+const elTabs = document.getElementById('tabs');
+const elLoading = document.getElementById('loading');
+const elContent = document.getElementById('content');
+const elSearch = document.getElementById('search');
+
+let ENTITIES = [];
+let CURRENT_TYPE = 'person';
+
+function esc(s) {
+  if (s === null || s === undefined) return '';
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function buildTabs() {
+  elTabs.innerHTML = '';
+  for (const t of TYPE_ORDER) {
+    const n = ENTITIES.filter(x => x.type === t).length;
+    const btn = document.createElement('button');
+    btn.className = CURRENT_TYPE === t ? 'on' : '';
+    btn.innerHTML = `${TYPE_LABEL[t] || t} <span class="cnt">${n}</span>`;
+    btn.addEventListener('click', () => {
+      CURRENT_TYPE = t;
+      buildTabs();
+      render();
+    });
+    elTabs.appendChild(btn);
+  }
+}
+
+function render() {
+  const q = (elSearch.value || '').trim().toLowerCase();
+  const list = ENTITIES.filter(e => {
+    if (e.type !== CURRENT_TYPE) return false;
+    if (!q) return true;
+    const hay = [e.label, e.canonical_name, e.aliases, e.entity_id].join('|').toLowerCase();
+    return hay.includes(q);
+  }).sort((a, b) => (b.mention_count || 0) - (a.mention_count || 0));
+
+  elContent.innerHTML = '';
+  if (!list.length) {
+    elContent.innerHTML = '<div class="card"><span class="muted">此类型下暂无匹配条目。</span></div>';
+    return;
+  }
+
+  const grid = document.createElement('div');
+  grid.className = 'grid';
+  for (const e of list) {
+    const aliases = (e.aliases || '').split('|').filter(Boolean);
+    const card = document.createElement('div');
+    card.className = 'card entcard';
+    let html = '';
+    html += `<span class="cnt">${e.mention_count || 0} 次</span>`;
+    html += `<div><span class="label">${esc(e.label)}</span>`;
+    if (e.canonical_name && e.canonical_name !== e.label) {
+      html += `<span class="canonical">→ ${esc(e.canonical_name)}</span>`;
+    }
+    html += `</div>`;
+    if (aliases.length) {
+      html += `<div class="aliases">`;
+      for (const a of aliases) html += `<span class="tag">${esc(a)}</span>`;
+      html += `</div>`;
+    }
+    html += `<div class="mid">id：<code>${esc(e.entity_id_raw || e.entity_id)}</code></div>`;
+    card.innerHTML = html;
+    grid.appendChild(card);
+  }
+  elContent.appendChild(grid);
+
+  const info = document.createElement('div');
+  info.className = 'card';
+  info.innerHTML = `<span class="muted">共 <b>${list.length}</b> 条 · 按提及频数降序 · 底本：新刻全像批評西遊記</span>`;
+  elContent.appendChild(info);
+}
+
+async function main() {
+  try {
+    await initDB(msg => { elLoading.textContent = msg; });
+    const r = await query(`SELECT entity_id, entity_id_raw, type, label, canonical_name, aliases, mention_count FROM entities ORDER BY type, mention_count DESC`);
+    ENTITIES = r.rows;
+    elLoading.style.display = 'none';
+    elContent.style.display = 'block';
+    buildTabs();
+    render();
+  } catch (e) {
+    elLoading.textContent = '加载失败：' + (e && e.message ? e.message : String(e));
+    console.error(e);
+  }
+}
+
+elSearch.addEventListener('input', () => render());
+buildTabs();
+main();
+</script>
+</body>
+</html>

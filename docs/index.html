@@ -1,121 +1,119 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-Hans">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>西游记知识图谱 · JTW Agent</title>
-<meta name="description" content="西游记古籍数字化：本体论驱动的三教合一张书绅·尤侗·刘廷玑·杨义研究整合，DuckDB-WASM 本地 SQL，LangGraph.js 编排，支持版本比较、隐性约束分析、诙谐谱追踪、法宝图谱。">
-<meta name="keywords" content="西游记,本体论,知识图谱,OWL,DuckDB,LangGraph,三教合一,张书绅,杨义,诙谐谱,法宝">
-<link rel="stylesheet" href="css/style.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>总览 · 西游未完</title>
+<link rel="stylesheet" href="assets/app.css">
 </head>
 <body>
+<header>
+  <span class="seal">西游</span>
+  <h1>西游未完</h1>
+  <div class="sub">一心向道 · 三教合一 · 群魔尽伏</div>
+  <nav>
+    <a href="index.html" class="on">总览</a>
+    <a href="read.html">正文·评点</a>
+    <a href="entities.html">本体实体</a>
+    <a href="versions.html">版本谱</a>
+    <a href="relics.html">法宝谱</a>
+    <a href="annotations.html">诙谐谱</a>
+    <a href="events.html">事件检索</a>
+    <a href="graph.html">图谱</a>
+    <a href="agent.html">Agent</a>
+  </nav>
+</header>
 
-<div class="app-shell">
+<main>
+  <div class="hero">
+    <span class="seal solid">三教</span>
+    <div class="verse">一心向道　三教合一<br>群魔尽伏《西游》未完</div>
+    <div class="rule"></div>
+    <p class="lead">本工程以吴承恩《西游记》为底本，取明万历金陵世德堂本、
+      李廷机批评本、朱鼎臣评林本、清初杨本等八本之异同。先立本体论，
+      再令多个 Agent（读者、评点家、道释诸家，以及数据科学家、文体计量学家、
+      知识图谱工程师）互相质证。<b>评点本所据者为正文，正文所本者为原书</b>；
+      两相对勘，方可见书中隐义。</p>
+  </div>
 
-  <!-- ================ 左侧边栏 ================ -->
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-brand">
-      <span class="brand-logo">🐒</span>
-      <div class="brand-text">
-        <span class="brand-name">西游记 Agent</span>
-        <span class="brand-sub">Journey to the West KG</span>
-      </div>
+  <h2>规模</h2>
+  <div class="grid">
+    <div class="card">正文 <big>958</big> 块 · 评点 <big>113</big> 条</div>
+    <div class="card">章节 <big>4</big> 回 · 版本 <big>8</big> 本</div>
+    <div class="card">人物 <big>179</big> · 地点 <big>115</big> · 器物 <big>64</big></div>
+    <div class="card">妖神 <big>52</big> · 官职 <big>17</big> · 引诗 <big>16</big></div>
+    <div class="card">关系 <big>349</big> 条 · 事件 <big>138</big> 桩</div>
+  </div>
+
+  <h2>评点版本分布</h2>
+  <div class="card">
+    李评本 · 朱评本 · 清初杨本 · 世德堂本 · 大奇书本 · 新刻批评本 —— 六源对勘，
+    世德堂本为主干（1592），批评本为血肉，余作参校。共收 <b>新刻批评西游记</b>
+    第七十六至八十九回（现存七十二叶），涉及回目四回半。
+  </div>
+
+  <h2>评点最密的回</h2>
+  <div class="card">
+    第八十六回（水母助威） · 第八十七回（凤仙郡） · 第八十八回（玉华施法会） · 第八十九回（黄狮精）
+  </div>
+
+  <h2>关系谱前八</h2>
+  <div class="card">
+    <b>师徒</b> 50 · <b>拜师</b> 41 · <b>役使</b> 42 · <b>行旅</b> 44 · <b>兵器</b> 38 ·
+    <b>居所</b> 27 · <b>降伏</b> 24 · <b>斗战</b> 19
+  </div>
+
+  <h2>入口</h2>
+  <div class="grid">
+    <div class="card">
+      <h3>正文 · 评点</h3>
+      <p class="small">按回阅读，可按评点类型（眉批/侧批/夹批/眉端/底端/题款）与版本过滤，评点条按颜色分门。</p>
+      <a href="read.html">进入 →</a>
     </div>
-
-    <button id="newChatBtn" class="btn-new-chat">＋ 新对话</button>
-
-    <nav class="sidebar-nav">
-      <div class="nav-title">知识入口</div>
-      <a class="nav-link" data-q="知识图谱总览">📊 图谱总览</a>
-      <a class="nav-link" data-q="版本比较">📚 版本比较</a>
-      <a class="nav-link" data-q="章节检索">📖 章节检索</a>
-      <a class="nav-link" data-q="孙悟空人物画像">👤 人物画像</a>
-      <a class="nav-link" data-q="法宝查询">🪄 法宝图谱</a>
-      <a class="nav-link" data-q="事件检索">🌟 事件检索</a>
-
-      <div class="nav-title">西游特色</div>
-      <a class="nav-link" data-q="三教论理分析">☯ 三教论理</a>
-      <a class="nav-link" data-q="诙谐点查找">😄 诙谐谱</a>
-      <a class="nav-link" data-q="语体分析">✒️ 语体分析</a>
-      <a class="nav-link" data-q="母题追踪 拜師">🔗 母题追踪</a>
-
-      <div class="nav-title">本体规范</div>
-      <a class="nav-link" href="../03_本体论规范/jtw_kg_ontology.ttl" target="_blank" rel="noopener">📜 OWL 本体（.ttl）</a>
-      <a class="nav-link" href="../03_本体论规范/vocabularies.yaml" target="_blank" rel="noopener">📋 受控词表（.yaml）</a>
-    </nav>
-
-    <div class="sidebar-footer">
-      <div class="status-indicator" id="dbStatus" title="知识图谱状态">
-        <span class="status-dot loading"></span>
-        <span class="status-text">初始化中…</span>
-      </div>
-
-      <details class="settings-details" id="settingsDetails">
-        <summary>⚙️ 模型与 Key 设置</summary>
-        <div class="settings-body">
-          <div class="form-group">
-            <label>服务商预设</label>
-            <select id="providerPreset" class="select-input"></select>
-          </div>
-          <div class="form-group">
-            <label>接口地址（Base URL）</label>
-            <input type="text" id="baseUrl" placeholder="https://openrouter.ai/api/v1">
-          </div>
-          <div class="form-group">
-            <label>API Key</label>
-            <input type="password" id="apiKey" placeholder="sk-...">
-          </div>
-          <div class="form-group">
-            <label>模型名称</label>
-            <input type="text" id="modelName" placeholder="openai/gpt-4o-mini">
-          </div>
-          <div class="form-group">
-            <button class="btn btn-secondary btn-small" id="testConnection">测试连接</button>
-            <div id="testResult" style="font-size:12px;margin-top:6px;line-height:1.5;"></div>
-          </div>
-          <div class="settings-actions">
-            <button id="clearSettings" class="btn btn-danger btn-small">清除</button>
-            <button id="saveSettings" class="btn btn-primary btn-small">保存设置</button>
-          </div>
-          <p class="settings-note">Key 仅保存在浏览器 localStorage，不上传任何服务器。未配置时使用本地规则引擎（仅支持关键词路由）。</p>
-        </div>
-      </details>
+    <div class="card">
+      <h3>本体实体</h3>
+      <p class="small">人物、地点、器物、妖神、官职、经文，共 <b>455</b> 条，附提及频数与别名链。</p>
+      <a href="entities.html">进入 →</a>
     </div>
-  </aside>
-
-  <!-- ================ 主聊天区 ================ -->
-  <main class="chat-main">
-    <div class="chat-scroll" id="chatScroll">
-      <div class="chat-hero" id="chatHero">
-        <div class="hero-icon">🐒</div>
-        <h2>我已准备好，你随时问我～</h2>
-        <p class="hero-desc">西游记知识图谱 Agent · 本体论驱动的三教合一研究 · DuckDB-WASM 本地 SQL · LangGraph.js 编排</p>
-        <p class="hero-sub">参考：张书绅《西游證道書》· 尤侗《東坡戲學》· 杨义三教归一论 · 蔡振前文本细读</p>
-        <div id="welcomeStats" class="stats-row hidden"></div>
-        <p class="hero-hint">💡 提示：未配置大模型时进入「规则引擎」模式，仅支持关键词路由；配置后启用多步推理与自然语言回答。</p>
-      </div>
-      <div class="chat-messages" id="chatMessages"></div>
+    <div class="card">
+      <h3>版本谱</h3>
+      <p class="small">八本对勘：世德堂本、李评本、朱评本、清初杨本、大奇书本、新刻批评本、张书绅证道本、刘廷玑本。收评点条数与异文处。</p>
+      <a href="versions.html">进入 →</a>
     </div>
-
-    <div class="chat-input-area">
-      <div class="input-toolbar">
-        <span class="mode-badge" id="modeBadge">…</span>
-      </div>
-      <div class="input-wrapper">
-        <textarea id="userInput" rows="1" placeholder="用自然语言提问，例如：孙悟空的师父是谁？三教在本书里如何分布？"></textarea>
-        <button id="sendBtn" class="btn btn-primary send-btn" title="发送">➤</button>
-      </div>
-      <div class="quick-actions" id="quickActions"></div>
+    <div class="card">
+      <h3>法宝谱</h3>
+      <p class="small">器物 <b>64</b> 件，附所属人物、出现回次与情节证据。金箍棒、如意棒、九齿钉耙、芭蕉扇、紫金红葫芦，逐一可查。</p>
+      <a href="relics.html">进入 →</a>
     </div>
-  </main>
-</div>
+    <div class="card">
+      <h3>诙谐谱</h3>
+      <p class="small">评点 <b>113</b> 条：眉批 <b>33</b> · 底端 <b>48</b> · 夹批 <b>13</b> · 眉端 <b>11</b> · 引诗 <b>7</b>。评点家对诙谐处必加朱批，此处按类型归之。</p>
+      <a href="annotations.html">进入 →</a>
+    </div>
+    <div class="card">
+      <h3>事件检索</h3>
+      <p class="small">事件 <b>138</b> 桩：水母降妖、凤仙劝善、玉华献宝、黄狮斗战，逐桩列名、参与人、场所、原文行号。</p>
+      <a href="events.html">进入 →</a>
+    </div>
+    <div class="card">
+      <h3>图谱</h3>
+      <p class="small">多重视图：师徒关系、法宝谱、事件时序、诙谐密度、版本异文——点选即见本体记录与逐回分布。</p>
+      <a href="graph.html">进入 →</a>
+    </div>
+    <div class="card">
+      <h3>Agent</h3>
+      <p class="small">本地 DuckDB-WASM + LangGraph.js：自然语言提问，多步推理，跨版本对勘，评点家视角切入。</p>
+      <a href="agent.html">进入 →</a>
+    </div>
+  </div>
+</main>
 
-<!-- ================ 加载遮罩 ================ -->
-<div id="loadingOverlay" class="loading-overlay">
-  <div class="loading-spinner"></div>
-  <p id="loadingText">正在初始化…</p>
-</div>
-
-<script type="module" src="js/main.js"></script>
+<footer>
+  <span class="seal">评本</span>
+  <div>底本：吴承恩《西游记》（世德堂本 1592 为源流，评点本为血肉）。</div>
+  <div>本体论规范：<a href="../03_本体论规范/jtw_kg_ontology.ttl" target="_blank" rel="noopener">jtw_kg_ontology.ttl</a> · 受控词表：<a href="../03_本体论规范/vocabularies.yaml" target="_blank" rel="noopener">vocabularies.yaml</a></div>
+  <div>由多 Agent 生成，仅供研究玩索，非定本。</div>
+</footer>
+<script></script>
 </body>
 </html>

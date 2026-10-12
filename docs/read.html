@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>正文·评点 · 西游未完</title>
+<link rel="stylesheet" href="assets/app.css">
+<style>
+  .ch-controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:6px 0 4px;padding:10px 14px;
+    background:linear-gradient(180deg,rgba(255,253,248,.85),rgba(253,248,238,.7));
+    border:1px solid var(--line);border-radius:3px;box-shadow:var(--shadow)}
+  .ch-controls label{font-size:13.5px;color:var(--ink2);letter-spacing:.06em}
+  .ch-controls select,.ch-controls input{font-family:inherit;font-size:13.5px;padding:3px 6px}
+  .ch-controls .chips{display:flex;flex-wrap:wrap;gap:4px}
+  .ch-controls .chip{display:inline-block;padding:2px 9px;font-size:12.5px;letter-spacing:.06em;
+    border:1px solid var(--line);border-radius:11px;background:rgba(255,253,248,.7);color:var(--ink2);cursor:pointer;
+    user-select:none;transition:all .2s}
+  .ch-controls .chip.on{color:var(--cinnabar);border-color:rgba(158,43,37,.4);
+    background:linear-gradient(180deg,#fdf1ee,#f8e6e2)}
+  .ch-controls .chip input{margin-right:4px}
+  .chap{margin:26px 0 8px;padding-bottom:8px;border-bottom:1px solid rgba(158,43,37,.18)}
+  .chap h3{margin:0 0 4px;font-size:19px;color:#332c25;letter-spacing:.08em}
+  .chap .meta{font-size:12.5px;color:var(--ink3)}
+  .page-block{margin:10px 0;padding:6px 4px 6px 2px}
+  .page-tag{display:inline-block;font-family:var(--kai);font-size:12px;color:var(--cinnabar);
+    border:1px solid rgba(158,43,37,.3);padding:1px 7px;border-radius:2px;margin-right:8px;background:rgba(158,43,37,.04)}
+  .loadbox{padding:80px 20px;text-align:center;color:var(--ink3);font-family:var(--kai);font-size:16px}
+  .footnote{margin-top:20px;font-size:12.5px;color:var(--ink3);text-align:center}
+</style>
+</head>
+<body>
+<header>
+  <span class="seal">西游</span>
+  <h1>西游未完</h1>
+  <div class="sub">一心向道 · 三教合一 · 群魔尽伏</div>
+  <nav>
+    <a href="index.html">总览</a>
+    <a href="read.html" class="on">正文·评点</a>
+    <a href="entities.html">本体实体</a>
+    <a href="versions.html">版本谱</a>
+    <a href="relics.html">法宝谱</a>
+    <a href="annotations.html">诙谐谱</a>
+    <a href="events.html">事件检索</a>
+    <a href="graph.html">图谱</a>
+    <a href="agent.html">Agent</a>
+  </nav>
+</header>
+
+<main>
+  <div class="hero" style="margin-top:2px">
+    <span class="seal solid">批评</span>
+    <div class="verse">批評西游記<br>世德堂本為源 · 批評本為血肉</div>
+    <div class="rule"></div>
+    <p class="lead">本頁所讀者，<b>新刻全像批評西遊記</b>（清，含評點）第七十六葉至第八十七葉，
+      涉及回目四回：第八十六回水母助威、第八十七回鳳仙郡、第八十八回玉華施法、第八十九回黃獅精。
+      正文與評點一併呈現，評點按類型分門着色。</p>
+  </div>
+
+  <h2>版本 · 評點類型</h2>
+  <div class="ch-controls" id="controls">
+    <label>版本</label>
+    <select id="edition">
+      <option value="xinke_pingbi">新刻全像批評西遊記（清）</option>
+    </select>
+    <span style="margin:0 6px;color:var(--line)">│</span>
+    <label>評點</label>
+    <div class="chips" id="typeChips"></div>
+  </div>
+
+  <div id="loading" class="loadbox">正在装载数据库与数据表……</div>
+  <div id="content" style="display:none"></div>
+
+  <div class="footnote">
+    数据：本地 DuckDB-WASM · Parquet · <b>lines</b> 表 1,105 行、<b>annotations</b> 表 113 条 · <b>chapters</b> 表 4 回
+  </div>
+</main>
+
+<footer>
+  <span class="seal">评本</span>
+  <div>底本：吴承恩《西游记》（新刻全像批評西遊記，清刻，含评点）。</div>
+  <div>本体论规范：<a href="../03_本体论规范/jtw_kg_ontology.ttl" target="_blank" rel="noopener">jtw_kg_ontology.ttl</a> · 受控词表：<a href="../03_本体论规范/vocabularies.yaml" target="_blank" rel="noopener">vocabularies.yaml</a></div>
+  <div>由多 Agent 生成，仅供研究玩索，非定本。</div>
+</footer>
+
+<script type="module">
+import { initDB, query } from './js/db.js';
+
+const TYPE_META = {
+  colophon: { label: '底端', color: '朱批', desc: '每回末页收语或批评总纲' },
+  side:     { label: '侧批', color: '朱批', desc: '边栏批语' },
+  inline:   { label: '夹批', color: '朱批', desc: '夹在行间' },
+  top:      { label: '眉批', color: '朱批', desc: '页眉批语' },
+  caption:  { label: '引诗', color: '墨批', desc: '插图的题画诗或回目诗' },
+  bottom:   { label: '底批', color: '朱批', desc: '页脚批语' },
+};
+
+// 状态
+const state = {
+  chapters: [],
+  lines: [],
+  annotations: [],
+  activeTypes: new Set(Object.keys(TYPE_META)),
+  edition: 'xinke_pingbi',
+};
+
+const elLoading = document.getElementById('loading');
+const elContent = document.getElementById('content');
+const elChips = document.getElementById('typeChips');
+const elEdition = document.getElementById('edition');
+
+function buildChips() {
+  elChips.innerHTML = '';
+  for (const [k, v] of Object.entries(TYPE_META)) {
+    const box = document.createElement('label');
+    box.className = 'chip on';
+    box.dataset.key = k;
+    box.innerHTML = `<input type="checkbox" checked> ${v.label} <span class="small">(${v.desc.slice(0, 4)})</span>`;
+    box.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (state.activeTypes.has(k)) state.activeTypes.delete(k);
+      else state.activeTypes.add(k);
+      box.classList.toggle('on');
+      box.querySelector('input').checked = state.activeTypes.has(k);
+      render();
+    });
+    elChips.appendChild(box);
+  }
+}
+
+function annoClass(ft) {
+  return TYPE_META[ft]?.color || '朱批';
+}
+
+// 把每行按 chapter 归属（page_no 落在 first_page 到下一个 first_page 之间）
+function buildChapterMap() {
+  const chs = [...state.chapters].sort((a, b) => (a.first_page || 0) - (b.first_page || 0));
+  for (let i = 0; i < chs.length; i++) {
+    const next = chs[i + 1];
+    chs[i].last_page = next ? (next.first_page - 1) : Infinity;
+  }
+  return chs;
+}
+
+function chapterForPage(pageNo) {
+  for (const c of state.chapters) {
+    if (pageNo >= c.first_page && pageNo <= c.last_page) return c;
+  }
+  return null;
+}
+
+function render() {
+  const chs = buildChapterMap();
+  elContent.innerHTML = '';
+
+  // 版本说明卡
+  const banner = document.createElement('div');
+  banner.className = 'card';
+  banner.innerHTML = `<b>底本</b>：新刻全像批評西遊記（清，含评点）　·　
+    共 <b>${state.lines.length}</b> 行（正文 ${state.lines.filter(x => x.form_type === 'main').length} 行 · 
+    其它 <b>${state.lines.length - state.lines.filter(x => x.form_type === 'main').length}</b> 行）　·　
+    <b>${state.annotations.length}</b> 条评点　·　
+    <b>${chs.length}</b> 回`;
+  elContent.appendChild(banner);
+
+  for (const ch of chs) {
+    const chapDiv = document.createElement('div');
+    chapDiv.className = 'chap';
+    chapDiv.innerHTML = `
+      <h3>${ch.chapter_label}　<span style="color:var(--ink3);font-weight:400;font-size:15px">${ch.chapter_title || ''}</span></h3>
+      <div class="meta">页 ${ch.first_page} — ${ch.last_page} · 起点 line_id：${ch.first_line_id || ''}</div>
+    `;
+    elContent.appendChild(chapDiv);
+
+    // 该回下所有 lines（按 page_no, line_idx 排序）
+    const chLines = state.lines
+      .filter(l => {
+        const c = chapterForPage(l.page_no);
+        return c && c.chapter_id === ch.chapter_id;
+      })
+      .sort((a, b) => (a.page_no - b.page_no) || (a.line_idx - b.line_idx));
+
+    // 该回下所有 annotations
+    const chAnnos = state.annotations
+      .filter(a => a.chapter_ref === ch.chapter_label)
+      .sort((a, b) => (a.page_no - b.page_no) || (a.line_idx - b.line_idx));
+
+    // 合并并按位置穿插
+    const nodes = [];
+    for (const l of chLines) nodes.push({ kind: 'line', key: [l.page_no, l.line_idx], data: l });
+    for (const a of chAnnos) {
+      if (!state.activeTypes.has(a.form_type)) continue;
+      nodes.push({ kind: 'anno', key: [a.page_no, a.line_idx, 'a'], data: a });
+    }
+    nodes.sort((x, y) => (x.key[0] - y.key[0]) || (x.key[1] - y.key[1]) || (x.kind === 'line' ? -1 : 1));
+
+    // 按 page_no 分组渲染
+    const byPage = new Map();
+    for (const n of nodes) {
+      if (!byPage.has(n.key[0])) byPage.set(n.key[0], []);
+      byPage.get(n.key[0]).push(n);
+    }
+
+    for (const [pn, list] of byPage) {
+      const block = document.createElement('div');
+      block.className = 'page-block';
+      let html = `<div class="page-tag">页 ${pn}</div>`;
+      for (const n of list) {
+        if (n.kind === 'line') {
+          const ft = n.data.form_type;
+          const text = n.data.text || '';
+          if (ft === 'main') {
+            html += `<div class="main-p">${esc(text)}</div>`;
+          } else if (ft === 'title' || ft === 'poem') {
+            html += `<div class="poem">${esc(text)}</div>`;
+          } else if (ft === 'caption') {
+            html += `<div class="anno 墨批"><span class="src">页${pn}·L${n.data.line_idx}</span>${esc(text)}</div>`;
+          } else {
+            html += `<div class="anno 朱批"><span class="src">页${pn}·L${n.data.line_idx}·${ft}</span>${esc(text)}</div>`;
+          }
+        } else {
+          // annotation
+          const ft = n.data.form_type;
+          const cls = annoClass(ft);
+          html += `<div class="anno ${cls}"><span class="src">页${pn}·L${n.data.line_idx}·${TYPE_META[ft]?.label || ft}</span>${esc(n.data.text || '')}</div>`;
+        }
+      }
+      block.innerHTML = html;
+      elContent.appendChild(block);
+    }
+  }
+}
+
+function esc(s) {
+  if (s === null || s === undefined) return '';
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+async function main() {
+  try {
+    await initDB(msg => { elLoading.textContent = msg; });
+    const [chs, lines, annos] = await Promise.all([
+      query(`SELECT chapter_id, edition, chapter_label, chapter_title, first_page, first_line_id FROM chapters ORDER BY first_page`),
+      query(`SELECT page_id, page_no, line_idx, form_type, text, char_count, is_commentary FROM lines WHERE edition='xinke_pingbi'`),
+      query(`SELECT page_id, page_no, line_idx, form_type, text, confidence, chapter_ref FROM annotations WHERE edition='xinke_pingbi'`),
+    ]);
+    state.chapters = chs.rows;
+    state.lines = lines.rows;
+    state.annotations = annos.rows;
+    elLoading.style.display = 'none';
+    elContent.style.display = 'block';
+    render();
+  } catch (e) {
+    elLoading.textContent = '加载失败：' + (e && e.message ? e.message : String(e));
+    console.error(e);
+  }
+}
+
+buildChips();
+main();
+</script>
+</body>
+</html>
