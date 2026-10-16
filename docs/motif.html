@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>母题链 · 西游奇谭</title>
+<link rel="stylesheet" href="assets/app.css">
+<script src="assets/vendor/opencc.js"></script>
+<script src="assets/toggle.js"></script>
+<style>
+  .motiflist{display:grid;grid-template-columns:1fr;gap:12px}
+  .motif{position:relative;padding:16px 20px}
+  .motif .mhead{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+  .motif .mname{font-family:var(--kai);font-size:20px;color:#332c25;letter-spacing:.06em}
+  .motif .mname .en{color:var(--ink3);font-size:12.5px;margin-left:8px;letter-spacing:.02em;font-family:var(--serif)}
+  .motif .mstats{color:var(--ink3);font-size:12.5px}
+  .motif .mstats b{color:var(--cinnabar);font-family:var(--kai);margin:0 3px;font-size:15px}
+  .motif .tmplab{font-family:var(--kai);font-size:13.5px;color:var(--ink3);margin-bottom:6px}
+  .motif .tmpline{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:12px}
+  .motif .step{display:inline-block;padding:4px 10px;border:1px solid var(--line-gold);border-radius:2px;
+    background:linear-gradient(180deg,rgba(255,253,248,.94),rgba(247,240,226,.92));
+    font-family:var(--kai);font-size:13.5px;color:#4a3a26}
+  .motif .arrow{color:var(--gold-d);font-size:14px}
+  .motif .chainlab{font-family:var(--kai);font-size:13.5px;color:var(--ink2);margin:6px 0 4px}
+  .motif .chartwrap{position:relative;height:120px;margin:6px 0 4px;
+    background:linear-gradient(180deg,rgba(255,253,248,.7),rgba(251,245,232,.6));
+    border:1px solid var(--line-gold);border-radius:2px;padding:8px 12px}
+  .motif .chartwrap svg{display:block;width:100%;height:100%}
+  .motif .inslist{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin-top:8px}
+  .motif .inst{padding:6px 10px;border:1px dashed rgba(176,141,87,.4);border-radius:2px;font-size:12.5px;
+    background:rgba(255,253,248,.6)}
+  .motif .inst .cn{color:var(--cinnabar);font-family:var(--kai);margin-right:5px}
+  .motif .inst .dev{font-family:var(--kai);color:var(--ink3);margin-left:4px}
+  .motif .devlow{color:var(--jade);font-family:var(--kai)}
+  .motif .devhigh{color:var(--cinnabar);font-family:var(--kai)}
+  .trend{font-family:var(--kai);font-size:12.5px;padding:2px 8px;border-radius:2px;border:1px solid var(--line-gold);margin-left:8px}
+  .trend.up{color:var(--cinnabar);border-color:rgba(158,43,37,.4);background:rgba(158,43,37,.06)}
+  .trend.down{color:var(--jade);border-color:rgba(63,107,94,.4);background:rgba(63,107,94,.06)}
+  .trend.flat{color:var(--gold-d);border-color:rgba(176,141,87,.5);background:rgba(176,141,87,.08)}
+  .trend.osc{color:var(--nebula);border-color:rgba(106,74,139,.4);background:rgba(106,74,139,.06)}
+  .legend-motif{display:flex;flex-wrap:wrap;gap:14px;font-size:12.5px;color:var(--ink2);margin:6px 0 4px;align-items:center}
+  .legend-motif .sw{display:inline-block;width:22px;height:3px;margin-right:6px;vertical-align:middle;border-radius:2px}
+  .legend-motif .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px;vertical-align:middle}
+</style>
+</head>
+<body>
+<header>
+  <span class="seal">西游</span>
+  <h1>西游奇谭</h1>
+  <div class="sub">一心求道 · 十难伏魔 · 三教归真</div>
+  <nav>
+    <a href="index.html">总览</a>
+    <a href="read.html">正文·评点</a>
+    <a href="compare.html">评点对照</a>
+    <a href="entities.html">本体实体</a>
+    <a href="versions.html">版本谱</a>
+    <a href="relics.html">法宝谱</a>
+    <a href="annotations.html">诙谐谱</a>
+    <a href="events.html">事件检索</a>
+    <a href="graph.html">图谱</a>
+    <a href="journey.html">取经路线</a>
+    <a href="motif.html" class="on">母题链</a>
+    <a href="symbols.html">意象星座</a>
+    <a href="voice.html">口吻字镜</a>
+    <a href="witmap.html">诙谐密度</a>
+    <a href="agent.html">Agent</a>
+    <a href="query.html">本体论</a>
+  </nav>
+</header>
+
+<main>
+  <div class="hero" style="margin-top:2px">
+    <span class="seal solid">母题</span>
+    <div class="verse">妖现悟辨　寶鬥師救<br>六範九難　離經入妙</div>
+    <div class="rule"></div>
+    <p class="lead">西游反复出现的叙事模板，是理解本书节奏的钥匙。此页以本体层 <b>Motif / MotifInstance / MotifChain</b> 三张卡为骨，
+      逐母题给出模板骨架、实例分布与偏离度曲线。
+      <b>偏离度低</b>——高度套路化（如收徒五回同构）；<b>偏离度高</b>——胡闹感强、创新性强（如真假美猴王）；
+      <b>递增</b>表示越写越胡闹，是作者创作节奏的指纹。仿红楼「伏线三栏对账」之意，以偏离度时间曲线反推叙事张力。</p>
+  </div>
+
+  <div class="legend-motif">
+    <span><span class="sw" style="background:linear-gradient(90deg,rgba(90,169,179,.9),rgba(158,43,37,.9))"></span>偏离度曲线（0.0–1.0）</span>
+    <span><span class="dot" style="background:var(--jade)"></span>低偏离·套路化</span>
+    <span><span class="dot" style="background:var(--cinnabar)"></span>高偏离·胡闹</span>
+    <span class="small">趋势标签：<span class="trend up">递增</span> <span class="trend down">递减</span> <span class="trend flat">平稳</span> <span class="trend osc">震荡</span></span>
+  </div>
+
+  <h2>六大母题</h2>
+  <div class="motiflist" id="motiflist"></div>
+</main>
+
+<footer>
+  <span class="seal">评本</span>
+  <div>本体论依据：<code>jtw:Motif / jtw:MotifInstance / jtw:MotifChain / jtw:motif_template / jtw:instance_deviation / jtw:deviation_trend</code></div>
+  <div>实例分布依世德堂本一百回回目整理，为研究示意，非考订定本。</div>
+</footer>
+
+<script>
+// ---- 母题数据（依世德堂本一百回回目整理，为研究示意）----
+// 每个母题：template=模板骨架数组, instances=[{name,ch,dev}]
+// trend: up(递增) / down(递减) / flat(平稳) / osc(震荡)
+const MOTIFS = [
+  {
+    id:"maoguai", name:"打怪除妖", en:"Monster-Slaying Formula",
+    freq:52, trend:"osc", trendNote:"中段高（火焰山·狮驼国），末段回落",
+    template:["【妖精现】","【唐僧陷】","【悟空辨】","【法宝斗】","【祖师救】","【受降归】"],
+    instances:[
+      {name:"黑熊精",ch:"16",dev:0.20},
+      {name:"白骨精",ch:"27",dev:0.22},
+      {name:"黄袍怪",ch:"31",dev:0.28},
+      {name:"金角银角",ch:"34",dev:0.30},
+      {name:"六耳猕猴",ch:"58",dev:0.92},
+      {name:"红孩儿",ch:"42",dev:0.35},
+      {name:"黄风怪",ch:"19",dev:0.25},
+      {name:"青狮·白象·大鹏",ch:"74-77",dev:0.45},
+      {name:"赛太岁",ch:"66",dev:0.40},
+      {name:"黄狮精",ch:"89",dev:0.15},
+      {name:"黄眉大王",ch:"84-86",dev:0.38},
+      {name:"七蛛精",ch:"73",dev:0.32},
+    ]
+  },
+  {
+    id:"baishi", name:"拜师受戒", en:"Master-Disciple Initiation",
+    freq:9, trend:"flat", trendNote:"各次几乎同构，作者刻意保持仪式感",
+    template:["【遇仙】","【问法】","【考验】","【授徒】","【赐号】","【拜别】"],
+    instances:[
+      {name:"菩提祖师授悟空",ch:"02",dev:0.10},
+      {name:"观音授三藏",ch:"12",dev:0.12},
+      {name:"五庄观收八戒",ch:"18",dev:0.18},
+      {name:"流沙河收沙僧",ch:"22",dev:0.15},
+      {name:"金兜山授悟空",ch:"15",dev:0.20},
+      {name:"龙宫求兵器",ch:"03",dev:0.30},
+      {name:"观音赐紧箍",ch:"14",dev:0.14},
+      {name:"玉帝授齐天",ch:"07",dev:0.35},
+      {name:"如来授金身",ch:"100",dev:0.22},
+    ]
+  },
+  {
+    id:"fengxian", name:"受封受赏", en:"Reward & Enfeoffment",
+    freq:14, trend:"down", trendNote:"越到后段越简略，仪式感递减",
+    template:["【功成】","【奏表】","【封赏】","【赐号】","【授职】","【归位】"],
+    instances:[
+      {name:"悟空大闹天宫",ch:"07",dev:0.85},
+      {name:"悟空齐天大圣",ch:"08",dev:0.60},
+      {name:"八戒天蓬元帅",ch:"18",dev:0.20},
+      {name:"沙僧卷帘大将",ch:"22",dev:0.18},
+      {name:"悟空弼马温",ch:"07",dev:0.55},
+      {name:"悟空斗战胜佛",ch:"100",dev:0.10},
+      {name:"八戒金身罗汉",ch:"100",dev:0.10},
+      {name:"沙僧金身罗汉",ch:"100",dev:0.10},
+      {name:"龙马天河神龙",ch:"100",dev:0.10},
+      {name:"红孩儿善财童子",ch:"43",dev:0.25},
+      {name:"八戒受戒者",ch:"18",dev:0.20},
+    ]
+  },
+  {
+    id:"bianhua", name:"变化斗法", en:"Transformation Duel",
+    freq:23, trend:"up", trendNote:"越写越玄，从斗鸡眼到斗元神",
+    template:["【悟变】","【妖变】","【斗形】","【见破】","【法宝压】","【定胜负】"],
+    instances:[
+      {name:"小圣施威降大圣",ch:"06",dev:0.20},
+      {name:"悟空变虫探妖洞",ch:"30",dev:0.25},
+      {name:"悟空变牛魔王",ch:"60",dev:0.35},
+      {name:"悟空变大虫救师",ch:"50",dev:0.40},
+      {name:"悟空变大虫降黄眉",ch:"86",dev:0.55},
+      {name:"悟空变大象",ch:"84",dev:0.50},
+      {name:"悟空变蜜蜂",ch:"72",dev:0.60},
+      {name:"悟空变二郎神",ch:"06",dev:0.30},
+      {name:"悟空变大鹚",ch:"89",dev:0.45},
+      {name:"悟空变大鹏",ch:"75",dev:0.85},
+      {name:"悟空变观音",ch:"84",dev:0.90},
+      {name:"悟空元神出窍",ch:"96",dev:0.80},
+    ]
+  },
+  {
+    id:"jiebai", name:"结拜盟约", en:"Sworn Brotherhood",
+    freq:5, trend:"flat", trendNote:"极少，多为点景（如与龙王）",
+    template:["【相遇】","【论交】","【拜盟】","【约誓】","【分道】"],
+    instances:[
+      {name:"悟空与龙王结拜",ch:"03",dev:0.20},
+      {name:"八戒与悟空论交",ch:"18",dev:0.25},
+      {name:"悟空与沙僧结义",ch:"22",dev:0.20},
+      {name:"悟空与李天王",ch:"05",dev:0.40},
+      {name:"悟空与玉帝",ch:"07",dev:0.60},
+    ]
+  },
+  {
+    id:"chouxi", name:"戏谑反讽", en:"Wit & Irony",
+    freq:113, trend:"up", trendNote:"越写越胡闹，是全书诙谐谱上升的主线",
+    template:["【猴言】","【妖言】","【反讽】","【戏谑】","【自嘲】","【破功】"],
+    instances:[
+      {name:"悟空自号石猴",ch:"01",dev:0.20},
+      {name:"悟空大闹天宫",ch:"07",dev:0.85},
+      {name:"悟空戏玉帝",ch:"08",dev:0.90},
+      {name:"悟空戏观音",ch:"14",dev:0.60},
+      {name:"八戒耍嘴",ch:"27",dev:0.55},
+      {name:"悟空骗唐僧",ch:"27",dev:0.50},
+      {name:"悟空戏八戒",ch:"38",dev:0.45},
+      {name:"悟空戏沙僧",ch:"15",dev:0.30},
+      {name:"悟空戏观音",ch:"31",dev:0.60},
+      {name:"悟空戏黄风怪",ch:"19",dev:0.35},
+      {name:"悟空戏牛魔",ch:"60",dev:0.75},
+      {name:"悟空戏大鹏",ch:"75",dev:0.85},
+      {name:"悟空戏如来",ch:"05",dev:0.70},
+      {name:"悟空戏玉皇",ch:"07",dev:0.80},
+    ]
+  }
+];
+
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+function buildChart(instances, w, h){
+  // 偏离度曲线 SVG
+  const ns = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(ns,"svg");
+  svg.setAttribute("viewBox",`0 0 ${w} ${h}`);
+  svg.setAttribute("preserveAspectRatio","none");
+
+  // 网格
+  const grid = document.createElementNS(ns,"g");
+  grid.setAttribute("stroke","rgba(176,141,87,0.15)");
+  grid.setAttribute("stroke-width","0.5");
+  grid.setAttribute("stroke-dasharray","2 3");
+  for(let i=1;i<=4;i++){
+    const y = h*i/5;
+    const line = document.createElementNS(ns,"line");
+    line.setAttribute("x1",0); line.setAttribute("x2",w);
+    line.setAttribute("y1",y); line.setAttribute("y2",y);
+    grid.appendChild(line);
+  }
+  svg.appendChild(grid);
+
+  // 折线
+  const n = instances.length;
+  const stepX = w/(n-1||1);
+  const pts = instances.map((inst,i)=>{
+    const x = i*stepX;
+    const y = h - inst.dev*h*0.85 - h*0.08;
+    return [x,y,inst];
+  });
+
+  // 面积填充
+  const areaPath = "M 0,"+h+" L "+pts.map(p=>p[0]+","+p[1]).join(" L ")+" L "+w+","+h+" Z";
+  const area = document.createElementNS(ns,"path");
+  area.setAttribute("d",areaPath);
+  area.setAttribute("fill","url(#devgrad)");
+  area.setAttribute("opacity","0.22");
+  svg.appendChild(area);
+
+  // 折线本身
+  const linePath = "M "+pts.map(p=>p[0]+","+p[1]).join(" L ");
+  const line = document.createElementNS(ns,"path");
+  line.setAttribute("d",linePath);
+  line.setAttribute("fill","none");
+  line.setAttribute("stroke","url(#diffgrad)");
+  line.setAttribute("stroke-width","1.8");
+  line.setAttribute("stroke-linejoin","round");
+  line.setAttribute("stroke-linecap","round");
+  svg.appendChild(line);
+
+  // 数据点
+  for(const [x,y,inst] of pts){
+    const c = document.createElementNS(ns,"circle");
+    c.setAttribute("cx",x); c.setAttribute("cy",y);
+    c.setAttribute("r",3.2);
+    c.setAttribute("fill", inst.dev>0.6?"#9e2b25":(inst.dev>0.4?"#b08d57":"#5aa9b3"));
+    c.setAttribute("stroke","#fdf6ec");
+    c.setAttribute("stroke-width","1");
+    const t = document.createElementNS(ns,"title");
+    t.textContent = inst.name+" · 第"+inst.ch+"回 · 偏离度 "+inst.dev.toFixed(2);
+    c.appendChild(t);
+    svg.appendChild(c);
+  }
+
+  // 顶/底标注
+  const y0 = document.createElementNS(ns,"text");
+  y0.setAttribute("x",4); y0.setAttribute("y",10);
+  y0.setAttribute("font-size","9"); y0.setAttribute("fill","rgba(138,127,109,0.7)");
+  y0.textContent = "1.0";
+  svg.appendChild(y0);
+  const y1 = document.createElementNS(ns,"text");
+  y1.setAttribute("x",4); y1.setAttribute("y",h-3);
+  y1.setAttribute("font-size","9"); y1.setAttribute("fill","rgba(138,127,109,0.7)");
+  y1.textContent = "0.0";
+  svg.appendChild(y1);
+
+  // 渐变 def
+  const defs = document.createElementNS(ns,"defs");
+  defs.innerHTML = `<linearGradient id="devgrad" x1="0" y1="1" x2="1" y2="0">
+    <stop offset="0%" stop-color="#5aa9b3"/>
+    <stop offset="50%" stop-color="#b08d57"/>
+    <stop offset="100%" stop-color="#9e2b25"/>
+  </linearGradient>`;
+  svg.insertBefore(defs, svg.firstChild);
+
+  return svg;
+}
+
+function buildMotif(m){
+  const card = document.createElement('div');
+  card.className = 'card motif';
+
+  // 模板骨架
+  const steps = m.template.map(s=>`<span class="step">${esc(s)}</span>`).join('<span class="arrow">→</span>');
+  // 实例 chips
+  const chips = m.instances.map(inst=>{
+    const cls = inst.dev<0.35?"devlow":(inst.dev>0.6?"devhigh":"");
+    return `<div class="inst"><span class="cn">第${esc(inst.ch)}回</span>${esc(inst.name)}<span class="dev ${cls}">Δ${inst.dev.toFixed(2)}</span></div>`;
+  }).join('');
+
+  // 趋势
+  const trendMap = {up:'递增·越写越胡闹', down:'递减·仪式感收敛', flat:'平稳·模板稳定', osc:'震荡·起伏有致'};
+
+  card.innerHTML = `
+    <div class="mhead">
+      <div class="mname">${esc(m.name)}<span class="en">${esc(m.en)}</span></div>
+      <div class="mstats">
+        频次 <b>${m.freq}</b> · 实例 <b>${m.instances.length}</b> ·
+        <span class="trend ${m.trend}">${esc(trendMap[m.trend]||m.trend)}</span>
+      </div>
+    </div>
+    <div class="small muted">趋势说明：${esc(m.trendNote)}</div>
+    <div class="tmplab">模板骨架（motif_template）：</div>
+    <div class="tmpline">${steps}</div>
+    <div class="chainlab">偏离度曲线（instance_deviation · 由 ${m.instances[0].name} → ${m.instances[m.instances.length-1].name}）</div>
+    <div class="chartwrap" id="chart-${m.id}"></div>
+    <div class="chainlab">实例分布（MotifInstance）</div>
+    <div class="inslist">${chips}</div>
+  `;
+  return card;
+}
+
+function build(){
+  const box = document.getElementById('motiflist');
+  for(const m of MOTIFS){
+    const card = buildMotif(m);
+    box.appendChild(card);
+    // 图表（在 DOM 里再插入 SVG）
+    const cw = document.getElementById('chart-'+m.id);
+    const svg = buildChart(m.instances, 600, 100);
+    cw.appendChild(svg);
+  }
+}
+build();
+</script>
+</body>
+</html>

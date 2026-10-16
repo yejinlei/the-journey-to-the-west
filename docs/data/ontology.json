@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-10-16T01:42:56+00:00",
+    "generated_at": "2026-10-16T02:45:26+00:00",
     "project": "西游记多版本古籍知识图谱本体",
     "layers": [
       {
@@ -1676,11 +1676,12 @@
             "annotation_seconds"
           ],
           "stats": {
-            "rows": 272,
+            "rows": 338,
             "edition": {
               "gubao": 100,
               "baihui_xiangzhu": 100,
-              "xinke_pingbi": 72
+              "xinke_pingbi": 72,
+              "zhu_ping": 66
             }
           },
           "samples": [
@@ -1790,18 +1791,19 @@
             "is_commentary"
           ],
           "stats": {
-            "rows": 5022,
+            "rows": 5787,
             "edition": {
               "gubao": 2538,
               "baihui_xiangzhu": 1379,
-              "xinke_pingbi": 1105
+              "xinke_pingbi": 1105,
+              "zhu_ping": 765
             },
             "form_type": {
-              "main": 4639,
+              "main": 5403,
               "title": 116,
               "commentary": 96,
               "colophon": 48,
-              "verse": 41,
+              "verse": 42,
               "side": 33,
               "poem": 17,
               "inline": 13,
@@ -1938,7 +1940,7 @@
         }
       },
       "totals": {
-        "rows": 5407
+        "rows": 6238
       }
     },
     "thematic": {
@@ -2404,7 +2406,7 @@
             "desc"
           ],
           "stats": {
-            "rows": 10
+            "rows": 11
           },
           "samples": [
             {
@@ -2450,10 +2452,11 @@
             "first_line_id"
           ],
           "stats": {
-            "rows": 204,
+            "rows": 270,
             "edition": {
               "gubao": 100,
               "baihui_xiangzhu": 100,
+              "zhu_ping": 66,
               "xinke_pingbi": 4
             }
           },
@@ -2498,7 +2501,7 @@
         }
       },
       "totals": {
-        "rows": 214
+        "rows": 281
       }
     }
   }
