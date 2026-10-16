@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-10-16T13:27:29+00:00",
+    "generated_at": "2026-10-16T17:57:45+00:00",
     "project": "西游记多版本古籍知识图谱本体",
     "layers": [
       {
@@ -1709,12 +1709,17 @@
             "annotation_seconds"
           ],
           "stats": {
-            "rows": 338,
+            "rows": 639,
             "edition": {
+              "xiyou_yuanzhi": 101,
+              "xu_xiyouji": 101,
               "gubao": 100,
               "baihui_xiangzhu": 100,
               "xinke_pingbi": 72,
-              "zhu_ping": 66
+              "zhu_ping": 66,
+              "xiyouji_zhuan": 41,
+              "hou_xiyouji": 41,
+              "xiyou_bu": 17
             }
           },
           "samples": [
@@ -1824,19 +1829,24 @@
             "is_commentary"
           ],
           "stats": {
-            "rows": 5787,
+            "rows": 10981,
             "edition": {
+              "xu_xiyouji": 3075,
               "gubao": 2538,
               "baihui_xiangzhu": 1379,
+              "hou_xiyouji": 1250,
               "xinke_pingbi": 1105,
-              "zhu_ping": 765
+              "zhu_ping": 765,
+              "xiyou_bu": 469,
+              "xiyou_yuanzhi": 256,
+              "xiyouji_zhuan": 144
             },
             "form_type": {
-              "main": 5403,
+              "main": 10315,
+              "commentary": 329,
               "title": 116,
-              "commentary": 96,
+              "verse": 91,
               "colophon": 48,
-              "verse": 42,
               "side": 33,
               "poem": 17,
               "inline": 13,
@@ -2038,7 +2048,7 @@
         }
       },
       "totals": {
-        "rows": 12025
+        "rows": 17520
       }
     },
     "thematic": {
@@ -2597,10 +2607,19 @@
             "display_name",
             "year",
             "publisher",
-            "desc"
+            "desc",
+            "category"
           ],
           "stats": {
-            "rows": 11
+            "rows": 20,
+            "category": {
+              "评点": 8,
+              "正传底本": 4,
+              "文献": 3,
+              "简本": 2,
+              "续书": 2,
+              "补书": 1
+            }
           },
           "samples": [
             {
@@ -2608,28 +2627,32 @@
               "display_name": "世德堂本",
               "year": 1592,
               "publisher": "金陵世德堂",
-              "desc": "现存最早刻本，1592"
+              "desc": "现存最早刻本，1592",
+              "category": "正传底本"
             },
             {
               "edition_id": "li_ping",
               "display_name": "李评本",
               "year": -1,
               "publisher": "明李廷机评点本",
-              "desc": "含评点"
+              "desc": "含评点",
+              "category": "评点"
             },
             {
               "edition_id": "daqishi",
               "display_name": "大奇书本",
               "year": -1,
               "publisher": "大奇书堂",
-              "desc": "Gallica 分册 4031-4035"
+              "desc": "Gallica 分册 4031-4035",
+              "category": "评点"
             },
             {
               "edition_id": "xinke_pingbi",
               "display_name": "新刻全像批评西游记",
               "year": -1,
               "publisher": "清",
-              "desc": "含评点"
+              "desc": "含评点",
+              "category": "评点"
             }
           ]
         },
@@ -2646,11 +2669,16 @@
             "first_line_id"
           ],
           "stats": {
-            "rows": 270,
+            "rows": 571,
             "edition": {
+              "xiyou_yuanzhi": 101,
+              "xu_xiyouji": 101,
               "gubao": 100,
               "baihui_xiangzhu": 100,
               "zhu_ping": 66,
+              "xiyouji_zhuan": 41,
+              "hou_xiyouji": 41,
+              "xiyou_bu": 17,
               "xinke_pingbi": 4
             }
           },
@@ -2753,7 +2781,7 @@
             "note"
           ],
           "stats": {
-            "rows": 10
+            "rows": 15
           },
           "samples": [
             {
@@ -2788,7 +2816,7 @@
         }
       },
       "totals": {
-        "rows": 302
+        "rows": 617
       }
     }
   }
