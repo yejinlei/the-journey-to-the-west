@@ -26,6 +26,22 @@
     border:1px solid rgba(158,43,37,.3);padding:1px 7px;border-radius:2px;margin-right:8px;background:rgba(158,43,37,.04)}
   .loadbox{padding:80px 20px;text-align:center;color:var(--ink3);font-family:var(--kai);font-size:16px}
   .footnote{margin-top:20px;font-size:12.5px;color:var(--ink3);text-align:center}
+  .commentary{font-family:var(--kai);font-size:15px;margin:6px 0;padding:6px 10px;
+    background:linear-gradient(90deg,rgba(230,201,138,.16),rgba(230,201,138,0) 78%);
+    border-left:2px solid var(--gold-l);border-radius:0 2px 2px 0;color:#6a5223;
+    text-indent:0;line-height:1.7}
+  .commentary .src{display:inline-block;font-size:11.5px;background:rgba(240,230,209,.9);
+    border-radius:8px;padding:0 6px;margin-right:7px;color:#6b6155;border:1px solid var(--line-gold)}
+  .edition-note{margin:8px 0;padding:8px 12px;border:1px dashed var(--line-gold);border-radius:3px;
+    background:rgba(255,253,248,.6);font-size:13.5px;color:var(--ink2);line-height:1.7}
+  .ch-navigator{display:flex;gap:6px;align-items:center;margin:8px 0 4px;font-size:13px;color:var(--ink2)}
+  .ch-navigator button{font-family:inherit;font-size:13px;padding:3px 10px;
+    background:linear-gradient(180deg,#fdf1ee,#f8e6e2);border:1px solid rgba(158,43,37,.3);
+    border-radius:14px;color:var(--cinnabar);cursor:pointer;letter-spacing:.06em}
+  .ch-navigator button:hover{background:linear-gradient(180deg,#f8e6e2,#f1d4cd)}
+  .ch-navigator button[disabled]{opacity:.35;cursor:not-allowed}
+  .ch-navigator span{color:var(--ink3)}
+  .empty-hint{padding:40px 20px;text-align:center;color:var(--ink3);font-family:var(--kai);font-size:15px}
 </style>
 </head>
 <body>
@@ -48,38 +64,42 @@
 
 <main>
   <div class="hero" style="margin-top:2px">
-    <span class="seal solid">評點</span>
-    <div class="verse">批評西游記　凡四回<br>水母鳳仙　玉華黃獅</div>
+    <span class="seal solid">正評</span>
+    <div class="verse">三版並讀　古今對照</div>
     <div class="rule"></div>
-    <p class="lead">本頁所讀者，<b>新刻全像批評西遊記</b>（清，含評點）第七十六葉至第八十七葉，
-      涉及回目四回：第八十六回<b>水母助威征怪物</b>、第八十七回<b>鳳仙郡冒天止雨</b>、
-      第八十八回<b>禪到玉華施法會</b>、第八十九回<b>開箱盡寶　閉嶺逢妖</b>。
-      正文與評點一併呈現，評點按類型分門着色：<b>眉批</b>朱丹、<b>側批</b>朱砂、
-      <b>夾批</b>朱印、<b>底端</b>墨色、<b>題款</b>黑批、<b>引詩</b>靛字。</p>
+    <p class="lead">本頁支持<b>三個版本</b>切換：
+      <b>新刻全像批評西遊記</b>（清，含評點，第八十六至八十九回）、
+      <b>古本西遊記</b>（維基文庫，1592 世德堂系統，全一百回正文）、
+      <b>西遊記百回詳注</b>（悟元子，清，含每回評點，全一百回）。
+      切換版本後正文／評點／回數重繪。</p>
   </div>
 
   <h2>版本 · 評點類型</h2>
   <div class="ch-controls" id="controls">
     <label>版本</label>
     <select id="edition">
-      <option value="xinke_pingbi">新刻全像批評西遊記（清）</option>
+      <option value="xinke_pingbi">新刻全像批評西遊記（清，含评点）</option>
+      <option value="gubao">古本（維基西遊記，100 回）</option>
+      <option value="baihui_xiangzhu">西遊記百回詳注（悟元子，100 回）</option>
     </select>
     <span style="margin:0 6px;color:var(--line)">│</span>
     <label>評點</label>
     <div class="chips" id="typeChips"></div>
   </div>
 
-  <div id="loading" class="loadbox">正在装载数据库与数据表……</div>
+  <div id="editionNote" class="edition-note" style="display:none"></div>
+
+  <div id="loading" class="loadbox">正在加载页面数据……</div>
   <div id="content" style="display:none"></div>
 
-  <div class="footnote">
+  <div class="footnote" id="footnote">
     数据：本地 DuckDB-WASM · Parquet · <b>lines</b> 表 1,105 行、<b>annotations</b> 表 113 条 · <b>chapters</b> 表 4 回
   </div>
 </main>
 
 <footer>
-  <span class="seal">评本</span>
-  <div>底本：吴承恩《西游记》（新刻全像批評西遊記，清刻，含评点）。</div>
+  <span class="seal">底本</span>
+  <div>支持 3 版：新刻全像批評西遊記（清，含評點）· 古本西遊記（維基文庫）· 西遊記百回詳注（悟元子）。</div>
   <div>本体论规范：<a href="../03_本体论规范/jtw_kg_ontology.ttl" target="_blank" rel="noopener">jtw_kg_ontology.ttl</a> · 受控词表：<a href="../03_本体论规范/vocabularies.yaml" target="_blank" rel="noopener">vocabularies.yaml</a></div>
   <div>由多 Agent 生成，仅供研究玩索，非定本。</div>
 </footer>
@@ -87,6 +107,7 @@
 <script type="module">
 import { loadPageData } from './js/page.js';
 
+// 评点类型元数据（用于 anno 表；百回详注的评点走 line.form_type='commentary'）
 const TYPE_META = {
   colophon: { label: '底端', color: '朱批', desc: '每回末页收语或批评总纲' },
   side:     { label: '侧批', color: '朱批', desc: '边栏批语' },
@@ -96,19 +117,50 @@ const TYPE_META = {
   bottom:   { label: '底批', color: '朱批', desc: '页脚批语' },
 };
 
+// 版本说明（渲染到 #editionNote）
+const EDITION_META = {
+  xinke_pingbi: {
+    title: '新刻全像批評西遊記（清，含評點）',
+    note: '<b>結構</b>：第七十六葉至第八十七葉，共 4 回。'
+        + '正文與評點分表存儲（<code>lines</code> + <code>annotations</code>），'
+        + '評點按類型分門着色：<b>眉批</b>朱丹、<b>側批</b>朱砂、<b>夾批</b>朱印、'
+        + '<b>底端</b>墨色、<b>題款</b>靛字。',
+    hasTypeFilter: true,
+  },
+  gubao: {
+    title: '古本西遊記（維基文庫，1592 世德堂系統）',
+    note: '<b>結構</b>：全一百回。每回以「詩曰」起首（標記為 <code>verse</code>），'
+        + '接續白話敘述（<code>main</code>）。此版本<b>無評點表</b>，'
+        + '為白文本對照。',
+    hasTypeFilter: false,
+  },
+  baihui_xiangzhu: {
+    title: '西遊記百回詳注（悟元子，清）',
+    note: '<b>結構</b>：全一百回。每回次序：<b>回目</b>（title）→ '
+        + '<b>悟元子評點</b>（commentary，黃底）→ <b>正文</b>（main，白話）。'
+        + '評點嵌入正文行流，不用 annotations 表。',
+    hasTypeFilter: false,
+  },
+};
+
 // 状态
 const state = {
-  chapters: [],
-  lines: [],
-  annotations: [],
+  allChapters: [],
+  allLines: [],
+  allAnnotations: [],
+  editions: [],
   activeTypes: new Set(Object.keys(TYPE_META)),
   edition: 'xinke_pingbi',
+  rangeFrom: 0,   // 回章起始 idx（含）
+  rangeTo: -1,    // 回章結束 idx（含），-1 表示「未初始化」，Infinity 表示「全部」
 };
 
 const elLoading = document.getElementById('loading');
 const elContent = document.getElementById('content');
 const elChips = document.getElementById('typeChips');
 const elEdition = document.getElementById('edition');
+const elEditionNote = document.getElementById('editionNote');
+const elFootnote = document.getElementById('footnote');
 
 function buildChips() {
   elChips.innerHTML = '';
@@ -133,60 +185,205 @@ function annoClass(ft) {
   return TYPE_META[ft]?.color || '朱批';
 }
 
-// 把每行按 chapter 归属（page_no 落在 first_page 到下一个 first_page 之间）
-function buildChapterMap() {
-  const chs = [...state.chapters].sort((a, b) => (a.first_page || 0) - (b.first_page || 0));
-  for (let i = 0; i < chs.length; i++) {
-    const next = chs[i + 1];
-    chs[i].last_page = next ? (next.first_page - 1) : Infinity;
-  }
-  return chs;
+function annoLabel(ft) {
+  return TYPE_META[ft]?.label || ft;
 }
 
-function chapterForPage(pageNo) {
-  for (const c of state.chapters) {
+// 版本相关：仅 xinke_pingbi 有独立的 annotations 表 & 評點類型分門
+function currentEditionMeta() {
+  return EDITION_META[state.edition] || {};
+}
+
+// 从全量数据中筛出当前版本的数据
+function filteredData() {
+  const ed = state.edition;
+  return {
+    chapters: state.allChapters.filter(c => c.edition === ed),
+    lines:    state.allLines.filter(l => l.edition === ed),
+    annos:    state.allAnnotations.filter(a => a.edition === ed),
+  };
+}
+
+// 构建当前版本的 chapter 序列（已按 first_page 排序）
+function buildChs(chs) {
+  const sorted = [...chs].sort((a, b) => (a.first_page || 0) - (b.first_page || 0));
+  for (let i = 0; i < sorted.length; i++) {
+    const next = sorted[i + 1];
+    sorted[i].last_page = next ? (next.first_page - 1) : Infinity;
+  }
+  return sorted;
+}
+
+// 把 pageNo 匹配到 chapter
+function chapterForPage(chs, pageNo) {
+  for (const c of chs) {
     if (pageNo >= c.first_page && pageNo <= c.last_page) return c;
   }
   return null;
 }
 
-function render() {
-  const chs = buildChapterMap();
-  elContent.innerHTML = '';
+// 判断该版本是否 1 回 = 1 页（决定是否显示"页"标签）
+function isSinglePagePerChap(chs) {
+  if (!chs.length) return false;
+  return chs.every(c => c.first_page === c.last_page);
+}
+
+// 更新版本文案说明 + footnote + 評點類型的可用性
+function updateEditionChrome() {
+  const meta = currentEditionMeta();
 
   // 版本说明卡
-  const banner = document.createElement('div');
-  banner.className = 'card';
-  banner.innerHTML = `<b>底本</b>：新刻全像批評西遊記（清，含评点）　·　
-    共 <b>${state.lines.length}</b> 行（正文 ${state.lines.filter(x => x.form_type === 'main').length} 行 · 
-    其它 <b>${state.lines.length - state.lines.filter(x => x.form_type === 'main').length}</b> 行）　·　
-    <b>${state.annotations.length}</b> 条评点　·　
-    <b>${chs.length}</b> 回`;
-  elContent.appendChild(banner);
+  if (meta.note) {
+    elEditionNote.innerHTML = `<b>${esc(meta.title)}</b>　·　${meta.note}`;
+    elEditionNote.style.display = 'block';
+  } else {
+    elEditionNote.style.display = 'none';
+  }
 
+  // 評點類型 chips：只有 xinke_pingbi 需要（其它版本没有独立 anno 表）
+  elChips.style.display = meta.hasTypeFilter ? '' : 'none';
+
+  // footnote 数字
+  const { lines, annos } = filteredData();
+  const mainCount = lines.filter(x => x.form_type === 'main').length;
+  const annoCount = lines.filter(x => x.form_type === 'commentary').length;
+  const chipAnno = annos.length;
+  elFootnote.innerHTML = `數據：<b>${esc(meta.title)}</b> · `
+    + `<b>${lines.length}</b> 行（正文 ${mainCount} · 其它 ${lines.length - mainCount}）`
+    + (annoCount ? ` · 內嵌評點 ${annoCount}` : '')
+    + (chipAnno ? ` · 評點表 ${chipAnno}` : '')
+    + ` · <b>${state.allChapters.filter(c => c.edition === state.edition).length}</b> 回`;
+}
+
+function render() {
+  updateEditionChrome();
+  const { chapters, lines, annos } = filteredData();
+  const chs = buildChs(chapters);
+  elContent.innerHTML = '';
+
+  if (!chs.length) {
+    const empty = document.createElement('div');
+    empty.className = 'empty-hint';
+    empty.textContent = '該版本暫無數據。';
+    elContent.appendChild(empty);
+    return;
+  }
+
+  const totalChaps = chs.length;
+  
+  // 回章范围选择器（仅当 totalChaps > 8 时才显示，xinke_pingbi 只有 4 回无需分页）
+  const needNav = totalChaps > 8;
+  if (needNav) {
+    // 首次进入多回版本（rangeTo = -1 表示未初始化）→ 缩到 1-3 回
+    if (state.rangeTo === -1) {
+      state.rangeFrom = 0;
+      state.rangeTo = Math.min(2, totalChaps - 1);
+    }
+    const nav = document.createElement('div');
+    nav.className = 'ch-navigator';
+    const isAll = state.rangeTo === Infinity;
+    const labelFrom = state.rangeFrom + 1;
+    const labelTo = isAll ? totalChaps : state.rangeTo + 1;
+    nav.innerHTML = `
+      <button id="prevChap" ${state.rangeFrom <= 0 ? 'disabled' : ''}>◀ 上一回</button>
+      <span>第 <b>${labelFrom}</b> — <b>${labelTo}</b> 回</span>
+      <span style="color:var(--line)">/ 共 ${totalChaps} 回</span>
+      <button id="nextChap" ${!isAll && state.rangeTo >= totalChaps - 1 ? 'disabled' : ''}>下一回 ▶</button>
+      <span style="margin-left:12px">範圍</span>
+      <input id="rngFrom" type="number" min="1" max="${totalChaps}" value="${labelFrom}" style="width:56px">
+      <span>—</span>
+      <input id="rngTo" type="number" min="1" max="${totalChaps}" value="${labelTo}" style="width:56px">
+      <button id="rngApply">套用</button>
+      <button id="rngAll" ${isAll ? 'disabled' : ''}>全部</button>
+    `;
+    elContent.appendChild(nav);
+
+    nav.querySelector('#prevChap').onclick = () => {
+      const step = Math.max(1, state.rangeTo - state.rangeFrom);
+      state.rangeFrom = Math.max(0, state.rangeFrom - step);
+      state.rangeTo = state.rangeFrom + step - 1;
+      render();
+    };
+    nav.querySelector('#nextChap').onclick = () => {
+      const step = Math.max(1, state.rangeTo - state.rangeFrom + 1);
+      state.rangeFrom = Math.min(totalChaps - step, state.rangeFrom + step);
+      state.rangeTo = Math.min(totalChaps - 1, state.rangeFrom + step - 1);
+      render();
+    };
+    nav.querySelector('#rngApply').onclick = () => {
+      const a = parseInt(nav.querySelector('#rngFrom').value, 10);
+      const b = parseInt(nav.querySelector('#rngTo').value, 10);
+      if (a >= 1 && b >= a && b <= totalChaps) {
+        state.rangeFrom = a - 1;
+        state.rangeTo = b - 1;
+        render();
+      }
+    };
+    nav.querySelector('#rngAll').onclick = () => {
+      state.rangeFrom = 0;
+      state.rangeTo = Infinity;
+      render();
+    };
+
+    // 应用版本内的可视范围到 chs
+    const visible = chs.slice(state.rangeFrom, state.rangeTo + 1);
+    const singlePage = isSinglePagePerChap(chs);
+
+    // 版本内 banner
+    const banner = document.createElement('div');
+    banner.className = 'card';
+    const mainC = visible.length;
+    const bannerLines = lines.filter(l => visible.some(c => l.page_no >= c.first_page && l.page_no <= c.last_page));
+    const bannerMain = bannerLines.filter(x => x.form_type === 'main').length;
+    banner.innerHTML = `<b>底本</b>：${esc(currentEditionMeta().title)}　·　`
+      + `共 <b>${chs.length}</b> 回，當前顯示 <b>${visible.length}</b> 回　·　`
+      + `<b>${bannerLines.length}</b> 行（正文 ${bannerMain}）`;
+    elContent.appendChild(banner);
+
+    renderChapters(visible, lines, annos, singlePage, chs);
+  } else {
+    const singlePage = isSinglePagePerChap(chs);
+
+    const banner = document.createElement('div');
+    banner.className = 'card';
+    const mainCount = lines.filter(x => x.form_type === 'main').length;
+    banner.innerHTML = `<b>底本</b>：${esc(currentEditionMeta().title)}　·　`
+      + `共 <b>${chs.length}</b> 回　·　`
+      + `<b>${lines.length}</b> 行（正文 ${mainCount} · 其它 <b>${lines.length - mainCount}</b>）　·　`
+      + `<b>${annos.length}</b> 条評點`;
+    elContent.appendChild(banner);
+
+    renderChapters(chs, lines, annos, singlePage, chs);
+  }
+}
+
+function renderChapters(chs, lines, annos, singlePage, allChs) {
   for (const ch of chs) {
     const chapDiv = document.createElement('div');
     chapDiv.className = 'chap';
+    const rangeStr = singlePage
+      ? `回 ${ch.first_page}`
+      : `頁 ${ch.first_page} — ${ch.last_page}`;
     chapDiv.innerHTML = `
-      <h3>${ch.chapter_label}　<span style="color:var(--ink3);font-weight:400;font-size:15px">${ch.chapter_title || ''}</span></h3>
-      <div class="meta">页 ${ch.first_page} — ${ch.last_page} · 起点 line_id：${ch.first_line_id || ''}</div>
+      <h3>${esc(ch.chapter_label)}　<span style="color:var(--ink3);font-weight:400;font-size:15px">${esc(ch.chapter_title || '')}</span></h3>
+      <div class="meta">${rangeStr} · 起點 line_id：${esc(ch.first_line_id || '')}</div>
     `;
     elContent.appendChild(chapDiv);
 
-    // 该回下所有 lines（按 page_no, line_idx 排序）
-    const chLines = state.lines
+    // 該回下所有 lines
+    const chLines = lines
       .filter(l => {
-        const c = chapterForPage(l.page_no);
+        const c = chapterForPage(allChs, l.page_no);
         return c && c.chapter_id === ch.chapter_id;
       })
       .sort((a, b) => (a.page_no - b.page_no) || (a.line_idx - b.line_idx));
 
-    // 该回下所有 annotations
-    const chAnnos = state.annotations
+    // 該回下所有 annotations（目前只有 xinke_pingbi 有）
+    const chAnnos = annos
       .filter(a => a.chapter_ref === ch.chapter_label)
       .sort((a, b) => (a.page_no - b.page_no) || (a.line_idx - b.line_idx));
 
-    // 合并并按位置穿插
+    // 合併並按位置穿插
     const nodes = [];
     for (const l of chLines) nodes.push({ kind: 'line', key: [l.page_no, l.line_idx], data: l });
     for (const a of chAnnos) {
@@ -195,7 +392,7 @@ function render() {
     }
     nodes.sort((x, y) => (x.key[0] - y.key[0]) || (x.key[1] - y.key[1]) || (x.kind === 'line' ? -1 : 1));
 
-    // 按 page_no 分组渲染
+    // 按 page_no 分組渲染
     const byPage = new Map();
     for (const n of nodes) {
       if (!byPage.has(n.key[0])) byPage.set(n.key[0], []);
@@ -205,7 +402,8 @@ function render() {
     for (const [pn, list] of byPage) {
       const block = document.createElement('div');
       block.className = 'page-block';
-      let html = `<div class="page-tag">页 ${pn}</div>`;
+      // 1 回 = 1 頁 時不顯示頁號（避免 100 個 "頁 1, 頁 2..." ）
+      let html = singlePage ? '' : `<div class="page-tag">頁 ${pn}</div>`;
       for (const n of list) {
         if (n.kind === 'line') {
           const ft = n.data.form_type;
@@ -214,16 +412,21 @@ function render() {
             html += `<div class="main-p">${esc(text)}</div>`;
           } else if (ft === 'title' || ft === 'poem') {
             html += `<div class="poem">${esc(text)}</div>`;
+          } else if (ft === 'verse') {
+            // 古本起首詩：詩歌樣式
+            html += `<div class="poem">${esc(text)}</div>`;
+          } else if (ft === 'commentary') {
+            // 百回詳注悟元子評點
+            html += `<div class="commentary"><span class="src">評</span>${esc(text)}</div>`;
           } else if (ft === 'caption') {
-            html += `<div class="anno 墨批"><span class="src">页${pn}·L${n.data.line_idx}</span>${esc(text)}</div>`;
+            html += `<div class="anno 墨批"><span class="src">頁${pn}·L${n.data.line_idx}</span>${esc(text)}</div>`;
           } else {
-            html += `<div class="anno 朱批"><span class="src">页${pn}·L${n.data.line_idx}·${ft}</span>${esc(text)}</div>`;
+            html += `<div class="anno 朱批"><span class="src">頁${pn}·L${n.data.line_idx}·${esc(ft)}</span>${esc(text)}</div>`;
           }
         } else {
-          // annotation
           const ft = n.data.form_type;
           const cls = annoClass(ft);
-          html += `<div class="anno ${cls}"><span class="src">页${pn}·L${n.data.line_idx}·${TYPE_META[ft]?.label || ft}</span>${esc(n.data.text || '')}</div>`;
+          html += `<div class="anno ${cls}"><span class="src">頁${pn}·L${n.data.line_idx}·${esc(annoLabel(ft))}</span>${esc(n.data.text || '')}</div>`;
         }
       }
       block.innerHTML = html;
@@ -241,11 +444,22 @@ async function main() {
   try {
     elLoading.textContent = '正在加载页面数据…';
     const d = await loadPageData('read');
-    state.chapters = d.chapters || [];
-    state.lines = d.lines || [];
-    state.annotations = d.annotations || [];
+    state.allChapters = d.chapters || [];
+    state.allLines = d.lines || [];
+    state.allAnnotations = d.annotations || [];
+    state.editions = d.editions || [];
     elLoading.style.display = 'none';
     elContent.style.display = 'block';
+
+    // 事件：版本切換
+    elEdition.addEventListener('change', (e) => {
+      state.edition = e.target.value;
+      // 切換版本時重置回章範圍
+      state.rangeFrom = 0;
+      state.rangeTo = -1;
+      render();
+    });
+
     render();
   } catch (e) {
     elLoading.textContent = '加载失败：' + (e && e.message ? e.message : String(e));
