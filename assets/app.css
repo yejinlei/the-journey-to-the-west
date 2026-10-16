@@ -129,15 +129,19 @@ nav a.on{color:var(--cinnabar);border-color:rgba(158,43,37,.42);
 
 /* ---------- 版心 ---------- */
 main{max-width:1120px;margin:0 auto;padding:24px 20px 70px}
-h2{font-size:21px;letter-spacing:.14em;margin:32px 0 14px;padding-left:16px;
-  border-left:3px solid transparent;
+h2{font-size:22px;letter-spacing:.14em;margin:44px 0 20px;padding-left:18px;
+  border-left:4px solid transparent;
   border-image:linear-gradient(180deg,var(--gold),var(--cinnabar),var(--nebula)) 1;
   position:relative;
   background:linear-gradient(180deg,#2b2010 0%, #5a3d18 100%);
   -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
   text-shadow:0 1px 3px rgba(176,141,87,.2)}
+h2::after{content:'';position:absolute;left:0;bottom:-8px;width:72px;height:2px;
+  background:linear-gradient(90deg,var(--gold),transparent);
+  box-shadow:0 0 6px rgba(230,201,138,.5)}
 h2:first-of-type{margin-top:14px}
-h3{font-size:17px;letter-spacing:.08em;color:var(--cinnabar-d);margin:4px 0 8px;
+h3{font-size:17.5px;letter-spacing:.08em;color:var(--cinnabar-d);margin:8px 0 10px;
+  padding-left:12px;border-left:3px solid var(--gold-l);
   font-family:var(--kai)}
 big{font-family:var(--kai);font-size:26px;margin:0 4px;
   background:linear-gradient(180deg,var(--cinnabar) 0%, var(--gold) 100%);
@@ -160,8 +164,8 @@ h2,h3,big,.small,.muted,.legend,.gstat{text-shadow:0 1px 0 rgba(255,255,255,.6)}
   opacity:.5;pointer-events:none}
 .card:hover{transform:translateY(-3px);
   box-shadow:var(--shadow-h), 0 0 0 1px var(--gold-l), 0 0 26px -6px rgba(176,141,87,.55)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));gap:14px}
-.grid>.card{margin:0}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:24px}
+.grid>.card{margin:0;padding:22px 24px}
 .tag{display:inline-block;background:linear-gradient(180deg,rgba(246,238,221,.95),
     rgba(239,228,205,.92));
   border:1px solid var(--line-gold);border-radius:11px;padding:1px 9px;font-size:12px;
@@ -241,21 +245,59 @@ tbody tr:hover td{background:rgba(230,201,138,.20)}
   color:var(--nebula);font-family:var(--kai)}
 pre{white-space:pre-wrap;font-family:var(--kai);font-size:14.5px;margin:6px 0 0}
 
-/* ---------- 图谱 ---------- */
-.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:16px 0 10px;
-  border-bottom:1px solid rgba(176,141,87,.35);padding-bottom:10px}
-.tabs button{letter-spacing:.12em;font-family:var(--kai)}
-.gwrap{display:grid;grid-template-columns:1fr 338px;gap:14px;align-items:start}
-@media (max-width:960px){.gwrap{grid-template-columns:1fr}}
-.gcanvas{padding:10px 12px 6px;margin:0;
-  border:1px solid var(--line-gold);border-radius:3px}
-.gcanvas svg{display:block;width:100%;height:auto;touch-action:none;cursor:grab;
+/* ---------- 图谱交互（力导向布局版） ---------- */
+.gcanvas{position:relative;overflow:hidden}
+.gcanvas svg{display:block;width:100%;height:520px;touch-action:none;cursor:grab;
   border-radius:2px;
   background:
     radial-gradient(420px 300px at 50% 46%,rgba(255,255,255,.85),rgba(255,255,255,0) 72%),
     repeating-linear-gradient(180deg,transparent,transparent 27px,
       rgba(176,141,87,.06) 27px,rgba(176,141,87,.06) 28px),
     linear-gradient(180deg,rgba(255,253,248,.96),rgba(251,245,233,.93))}
+.gcanvas svg:active{cursor:grabbing}
+/* 图谱缩放指示器 */
+.gzoom-tip{position:absolute;right:10px;bottom:8px;font-size:11px;color:var(--ink3);
+  background:rgba(255,253,248,.85);padding:2px 8px;border-radius:3px;
+  border:1px solid var(--line-gold);pointer-events:none;opacity:.7}
+/* 节点样式 */
+.gnode circle{transition:all .18s ease;stroke-width:1.5px}
+.gnode:hover circle{stroke:var(--cinnabar);stroke-width:2.5px;
+  filter:drop-shadow(0 0 4px rgba(158,43,37,.4))}
+.gnode text{font-family:var(--kai);pointer-events:none;user-select:none}
+.gnode.dim circle{opacity:.25}
+.gnode.dim text{opacity:.2}
+.gnode.hl circle{stroke:var(--cinnabar);stroke-width:3px;
+  filter:drop-shadow(0 0 6px rgba(158,43,37,.5))}
+.gnode.hl text{font-weight:700}
+/* 连线样式 */
+.glink{stroke:var(--ink3);stroke-width:1px;opacity:.28;transition:all .18s ease}
+.glink.dim{opacity:.06}
+.glink.hl{stroke:var(--cinnabar);stroke-width:2px;opacity:.85}
+/* 连线标签 */
+.glink-label{font-size:11px;fill:var(--ink3);opacity:.55;pointer-events:none;user-select:none}
+.glink-label.hl{fill:var(--cinnabar);opacity:1;font-weight:600}
+/* 节点详情卡片 */
+.gdetail{position:absolute;left:14px;top:14px;max-width:260px;padding:12px 16px;
+  background:rgba(255,253,248,.97);border:1px solid var(--line-gold);border-radius:3px;
+  box-shadow:var(--shadow-h), 0 0 20px -4px rgba(176,141,87,.4);
+  font-size:13.5px;line-height:1.8;z-index:10;
+  opacity:0;transform:translateY(-6px);pointer-events:none;
+  transition:opacity .2s ease,transform .2s ease}
+.gdetail.on{opacity:1;transform:translateY(0);pointer-events:auto}
+.gdetail .ttl{font-family:var(--kai);font-size:16px;color:var(--cinnabar-d);
+  margin-bottom:4px;letter-spacing:.06em}
+.gdetail .typ{display:inline-block;font-size:11px;padding:1px 7px;border-radius:2px;
+  background:rgba(176,141,87,.12);color:var(--ink2);margin-bottom:6px}
+.gdetail .row{display:flex;gap:8px;margin:2px 0}
+.gdetail .lbl{color:var(--ink3);white-space:nowrap;min-width:52px}
+
+/* ---------- 旧图谱样式（保留兼容） ---------- */
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:16px 0 10px;
+  border-bottom:1px solid rgba(176,141,87,.35);padding-bottom:10px}
+.tabs button{letter-spacing:.12em;font-family:var(--kai)}
+.gwrap{display:grid;grid-template-columns:1fr 338px;gap:14px;align-items:start}
+@media (max-width:960px){.gwrap{grid-template-columns:1fr}}
+.gcanvas{padding:0;margin:0;border:1px solid var(--line-gold);border-radius:3px}
 .gtools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 8px}
 .gtools input{width:190px}
 .gside{position:sticky;top:14px;max-height:84vh;overflow:auto;margin:0;
