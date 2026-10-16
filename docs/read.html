@@ -109,11 +109,13 @@
 <main>
   <div class="hero" style="margin-top:2px">
     <span class="seal solid">正評</span>
-    <div class="verse">四版並讀　古今對照</div>
+    <div class="verse">十版並讀　古今對照</div>
     <div class="rule"></div>
     <p class="lead">以<b>通行本</b>（世德堂系统百回正文）為<b>主本</b>與默認載入，其余
-      <b>百回詳注</b>（悟元子）、<b>唐三藏取經釋厄傳</b>（朱鼎臣·簡本）、
-      <b>新刻全像批評西遊記</b>（清·實存第八十六至八十九回）為<b>參校</b>。
+      <b>百回詳注</b>（悟元子）、<b>西游原旨</b>（劉一明·丹道詩訣）、
+      <b>朱鼎臣釋厄傳</b>（簡本）、<b>楊致和西遊記傳</b>（簡本）、
+      <b>新刻全像批評</b>（清·實存四回）為<b>參校</b>；
+      另有<b>西游補</b>（董說）、<b>後西游記</b>、<b>續西游記</b>三部衍生。
       切換版本後正文／評點／回數重繪。</p>
   </div>
 
@@ -121,10 +123,23 @@
   <div class="ch-controls" id="controls">
     <label>版本</label>
     <select id="edition">
-      <option value="gubao" selected>通行本 · 古本百回正文（世德堂系统）· 主本</option>
-      <option value="baihui_xiangzhu">百回詳注（悟元子）· 参校</option>
-      <option value="zhu_ping">唐三藏取經釋厄傳（朱鼎臣·簡本）· 参校</option>
-      <option value="xinke_pingbi">新刻全像批評西遊記（清·实存 4 回）· 参校</option>
+      <optgroup label="正传底本">
+        <option value="gubao" selected>通行本 · 古本百回正文（世德堂系统）· 主本</option>
+      </optgroup>
+      <optgroup label="评点汇本">
+        <option value="baihui_xiangzhu">百回詳注（悟元子）· 参校</option>
+        <option value="xiyou_yuanzhi">西游原旨（劉一明·丹道詩訣 100 回）· 参校</option>
+        <option value="xinke_pingbi">新刻全像批評西遊記（清·实存 4 回）· 参校</option>
+      </optgroup>
+      <optgroup label="简本">
+        <option value="zhu_ping">唐三藏取經釋厄傳（朱鼎臣·66 回）· 参校</option>
+        <option value="xiyouji_zhuan">楊致和西遊記傳（4 卷 41 則）· 参校</option>
+      </optgroup>
+      <optgroup label="补续衍生">
+        <option value="xiyou_bu">西游補（董說·16 回）</option>
+        <option value="hou_xiyouji">後西游記（40 回）</option>
+        <option value="xu_xiyouji">續西游記（100 回）</option>
+      </optgroup>
     </select>
     <span style="margin:0 6px;color:var(--line)">│</span>
     <label>字體</label>
@@ -148,7 +163,7 @@
 
 <footer>
   <span class="seal">底本</span>
-  <div>支持 4 版：古本西遊記（維基文庫，100 回）· 西遊記百回詳注（悟元子，100 回）· 唐三藏取經釋厄傳（朱鼎臣·典藏簡本，66 回）· 新刻全像批評西遊記（清，實存 4 回）。</div>
+  <div>支持 10 版正文：古本（100 回）· 百回詳注（100 回）· 西游原旨（丹道詩訣 100 回）· 朱鼎臣釋厄傳（66 回）· 楊致和西遊記傳（41 則）· 新刻全像批評（4 回）· 西游補（16 回）· 後西游記（40 回）· 續西游記（100 回）。</div>
   <div>本体论规范：<a href="../03_本体论规范/jtw_kg_ontology.ttl" target="_blank" rel="noopener">jtw_kg_ontology.ttl</a> · 受控词表：<a href="../03_本体论规范/vocabularies.yaml" target="_blank" rel="noopener">vocabularies.yaml</a></div>
   <div>由多 Agent 生成，仅供研究玩索，非定本。</div>
 </footer>
@@ -195,6 +210,39 @@ const EDITION_META = {
     note: '<b>結構</b>：世德堂系統之坊刻簡本，十卷六十六回。每回一頁正文（<code>main</code>）'
         + '，行間多錄 <b>原作異字</b>（形如「茫原作忙」），為校勘底本。'
         + '無獨立評點表，為白文本對照。',
+    hasTypeFilter: false,
+  },
+  xiyouji_zhuan: {
+    title: '楊致和《西游記傳》（明·簡本，4 卷 41 則）',
+    note: '<b>結構</b>：三大簡本之一，4 卷 41 則。每則有短題（如「猴王得仙賜姓」），'
+        + '正文（<code>main</code>）夾詩句（<code>verse</code>）。'
+        + '與朱鼎臣《釋厄傳》互證簡本系統。',
+    hasTypeFilter: false,
+  },
+  xiyou_yuanzhi: {
+    title: '劉一明《西游原旨》（清·丹道評點，100 回詩訣）',
+    note: '<b>結構</b>：清代丹道評點代表。每回錄一首<b>丹道詩訣</b>（commentary，黃底），'
+        + '闡三教一家之理。此版本<b>非全文</b>，為評點節錄，'
+        + '正文請對照通行本。',
+    hasTypeFilter: false,
+  },
+  xiyou_bu: {
+    title: '董說《西游補》（明·補書，16 回 + 序）',
+    note: '<b>結構</b>：插入火焰山之後的補敘衍生，16 回 + 序。'
+        + '正文中夾詩句（<code>verse</code>）。文學價值極高，'
+        + '魯迅《中國小說史略》盛讚其「造事遣辭，豐贍多姿」。',
+    hasTypeFilter: false,
+  },
+  hou_xiyouji: {
+    title: '《後西游記》（清·續書，40 回 + 序）',
+    note: '<b>結構</b>：孫小聖、豬一戒二代取經故事，40 回 + 序。'
+        + '每回以詩起首（<code>verse</code>），接續白話敘述（<code>main</code>）。',
+    hasTypeFilter: false,
+  },
+  xu_xiyouji: {
+    title: '《續西游記》（清·續書，100 回 + 序）',
+    note: '<b>結構</b>：取經東還故事，100 回 + 序。'
+        + '體量最大之衍生續書。',
     hasTypeFilter: false,
   },
 };

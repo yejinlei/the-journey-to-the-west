@@ -1,0 +1,12 @@
+{{header
+| title    = 楊東來先生批評西游記
+| section  = 卷之五
+| author   = 楊訥
+| previous = [[../第4本|卷之四]]
+| next     = [[../第6本|卷之六]]
+| notes    =
+}}
+
+<pages index="NDL1194319 楊東来先生批評西游記.pdf" from=70 to=78 fromsection=楊東來先生批評西游記卷之五 tosection=楊東來先生批評西游記卷之五 />
+
+[[Category:襍劇西游記]]
