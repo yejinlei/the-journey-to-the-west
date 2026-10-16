@@ -59,9 +59,9 @@
       return;
     }
     try {
-      // 直接使用 ConverterFactory + Locale，避免 Converter 的参数检查在某些环境下异常
-      state.cn2t = window.OpenCC.ConverterFactory(window.OpenCC.Locale.from.cn);
-      state.t2cn = window.OpenCC.ConverterFactory(window.OpenCC.Locale.to.cn);
+      // 标准公开 API：Converter({from,to}) 返回裸转换函数 convert(text)
+      state.cn2t = window.OpenCC.Converter({ from: 'cn', to: 't' });
+      state.t2cn = window.OpenCC.Converter({ from: 't', to: 'cn' });
       state.ready = true;
     } catch (e) {
       console.error('[JTW toggle] OpenCC 初始化失败', e);
@@ -79,8 +79,8 @@
   function convert(text, mode) {
     if (!state.ready || !text || !hasCJK(text)) return text;
     try {
-      if (mode === 's') return state.t2cn.convert(text);
-      if (mode === 't') return state.cn2t.convert(text);
+      if (mode === 's') return state.t2cn(text);
+      if (mode === 't') return state.cn2t(text);
     } catch (e) {
       /* 单点失败不影响整体 */
     }
