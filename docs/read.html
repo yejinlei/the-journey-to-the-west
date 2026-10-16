@@ -8,6 +8,7 @@
 <script src="assets/vendor/opencc.js"></script>
 <script src="assets/toggle.js"></script>
 <style>
+  :root{--read-scale:1}
   .ch-controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:6px 0 4px;padding:10px 14px;
     background:linear-gradient(180deg,rgba(255,253,248,.85),rgba(253,248,238,.7));
     border:1px solid var(--line);border-radius:3px;box-shadow:var(--shadow)}
@@ -67,17 +68,22 @@
     margin-top:7px;line-height:1.55}
   .ch-meta{font-size:12px;color:var(--ink3);margin-top:9px;letter-spacing:.1em}
 
-  /* 正文段落 */
-  .main-p{margin:0 0 18px;text-indent:2em;font-size:16.5px;line-height:2.05;
+  /* 正文段落（字号可调：--read-scale） */
+  .main-p{margin:0 0 18px;text-indent:2em;
+    font-size:calc(16.5px * var(--read-scale,1));line-height:2.05;
     text-align:justify;color:#2b241b;letter-spacing:.03em}
   .page-block{margin:4px 0 16px}
   .page-tag{display:inline-block;font-family:var(--kai);font-size:12px;color:var(--cinnabar);
     border:1px solid rgba(158,43,37,.32);padding:1px 8px;border-radius:2px;margin-right:8px;
     background:rgba(158,43,37,.05)}
 
-  /* 评点与引诗 */
-  .commentary{line-height:1.95;border-left:3px solid var(--gold-l)}
-  .poem{line-height:2.35}
+  /* 评点与引诗（引诗改居中式，贴合书卷而非大卡片） */
+  .commentary{line-height:1.95;border-left:3px solid var(--gold-l);
+    font-size:calc(15px * var(--read-scale,1))}
+  .poem{background:transparent;border:0;box-shadow:none;text-align:center;
+    font-family:var(--kai);font-size:calc(16.5px * var(--read-scale,1));
+    line-height:2.3;letter-spacing:.12em;color:#5a4a2a;padding:6px 0;margin:4px 0 16px}
+  .poem::before,.poem::after{display:none}
 </style>
 </head>
 <body>
@@ -120,6 +126,11 @@
       <option value="zhu_ping">唐三藏取經釋厄傳（朱鼎臣·簡本）· 参校</option>
       <option value="xinke_pingbi">新刻全像批評西遊記（清·实存 4 回）· 参校</option>
     </select>
+    <span style="margin:0 6px;color:var(--line)">│</span>
+    <label>字體</label>
+    <button type="button" class="chip" id="fontMin" title="縮小正文字號">縮</button>
+    <button type="button" class="chip" id="fontPlus" title="放大正文字號">放</button>
+    <span id="fontVal" style="font-size:12.5px;color:var(--ink3);min-width:38px;text-align:center"></span>
     <span style="margin:0 6px;color:var(--line)">│</span>
     <label>評點</label>
     <div class="chips" id="typeChips"></div>
@@ -502,11 +513,24 @@ async function main() {
     // 事件：版本切換
     elEdition.addEventListener('change', (e) => {
       state.edition = e.target.value;
-      // 切換版本時重置回章範圍
       state.rangeFrom = 0;
       state.rangeTo = -1;
       render();
     });
+
+    // 字号调节（0.75 — 1.6，随 --read-scale 作用于正文/评点/引诗）
+    let scale = parseFloat(localStorage.getItem('jtw.read-scale')) || 1;
+    scale = Math.min(1.6, Math.max(0.75, Math.round(scale * 100) / 100));
+    const applyScale = (s) => {
+      scale = Math.min(1.6, Math.max(0.75, Math.round(s * 100) / 100));
+      document.documentElement.style.setProperty('--read-scale', scale);
+      localStorage.setItem('jtw.read-scale', String(scale));
+      const el = document.getElementById('fontVal');
+      if (el) el.textContent = Math.round(scale * 100) + '%';
+    };
+    document.getElementById('fontMin').addEventListener('click', () => applyScale(scale - 0.1));
+    document.getElementById('fontPlus').addEventListener('click', () => applyScale(scale + 0.1));
+    applyScale(scale);
 
     render();
   } catch (e) {
