@@ -33,20 +33,26 @@ PAGE_QUERIES: dict[str, dict[str, str]] = {
     "read": {
         "editions": (
             'SELECT edition_id, display_name, publisher, "desc" FROM editions '
-            "WHERE edition_id IN ('xinke_pingbi','zhu_ping','gubao','baihui_xiangzhu') "
-            "ORDER BY edition_id"
+            "WHERE edition_id IN ("
+            "  'gubao','baihui_xiangzhu','xinke_pingbi','zhu_ping',"
+            "  'xiyouji_zhuan','xiyou_yuanzhi','xiyou_bu','hou_xiyouji','xu_xiyouji'"
+            ") ORDER BY edition_id"
         ),
         "chapters": (
             "SELECT chapter_id, edition, chapter_label, chapter_title, "
             "first_page, first_line_id FROM chapters "
-            "WHERE edition IN ('xinke_pingbi','zhu_ping','gubao','baihui_xiangzhu') "
-            "ORDER BY edition, first_page"
+            "WHERE edition IN ("
+            "  'gubao','baihui_xiangzhu','xinke_pingbi','zhu_ping',"
+            "  'xiyouji_zhuan','xiyou_yuanzhi','xiyou_bu','hou_xiyouji','xu_xiyouji'"
+            ") ORDER BY edition, first_page"
         ),
         "lines": (
             "SELECT page_id, page_no, line_idx, form_type, text, "
             "char_count, is_commentary, edition FROM lines "
-            "WHERE edition IN ('xinke_pingbi','zhu_ping','gubao','baihui_xiangzhu') "
-            "ORDER BY edition, page_no, line_idx"
+            "WHERE edition IN ("
+            "  'gubao','baihui_xiangzhu','xinke_pingbi','zhu_ping',"
+            "  'xiyouji_zhuan','xiyou_yuanzhi','xiyou_bu','hou_xiyouji','xu_xiyouji'"
+            ") ORDER BY edition, page_no, line_idx"
         ),
         "annotations": (
             "SELECT page_id, page_no, line_idx, form_type, text, "
