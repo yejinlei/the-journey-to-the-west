@@ -101,10 +101,23 @@
   <div class="cmp-controls">
     <label>底本</label>
     <select id="baseEd" style="font-family:inherit;font-size:13.5px;padding:3px 6px">
-      <option value="xinke_pingbi">新刻全像批評西遊記（清，含评点）</option>
-      <option value="zhu_ping">朱評本·朱鼎臣《唐三藏西游釋厄傳》（明，10卷67回）</option>
-      <option value="gubao">古本（維基西遊記）</option>
-      <option value="baihui_xiangzhu">西遊記百回詳注（悟元子）</option>
+      <optgroup label="正传底本">
+        <option value="gubao">通行本 · 古本百回正文（世德堂系统）</option>
+      </optgroup>
+      <optgroup label="评点汇本">
+        <option value="xinke_pingbi">新刻全像批評西遊記（清，含评点）</option>
+        <option value="baihui_xiangzhu">西遊記百回詳注（悟元子）</option>
+        <option value="xiyou_yuanzhi">西游原旨（劉一明·丹道詩訣）</option>
+      </optgroup>
+      <optgroup label="简本">
+        <option value="zhu_ping">朱評本·朱鼎臣《唐三藏西游釋厄傳》</option>
+        <option value="xiyouji_zhuan">楊致和《西遊記傳》（4卷41則）</option>
+      </optgroup>
+      <optgroup label="补续衍生">
+        <option value="xiyou_bu">西游補（董說·16回）</option>
+        <option value="hou_xiyouji">後西游記（40回）</option>
+        <option value="xu_xiyouji">續西游記（100回）</option>
+      </optgroup>
     </select>
     <span style="margin:0 6px;color:var(--line)">│</span>
     <label>評點源</label>
@@ -165,10 +178,15 @@ const ANNO_TYPE_META = {
 
 // 版本中文名（腳本用）
 const EDITION_NAMES = {
+  gubao: '通行本',
+  baihui_xiangzhu: '百回詳注',
   xinke_pingbi: '批評本',
   zhu_ping: '朱評本',
-  gubao: '古本',
-  baihui_xiangzhu: '百回詳注',
+  xiyouji_zhuan: '楊致和傳',
+  xiyou_yuanzhi: '西游原旨',
+  xiyou_bu: '西游補',
+  hou_xiyouji: '後西游記',
+  xu_xiyouji: '續西游記',
 };
 
 const state = {
