@@ -1,25 +1,37 @@
 /* sw.js —— 西游记 Agent · Service Worker
  * 目标：让 GitHub Pages 用户第二次打开时秒开，首次也要能离线缓存核心资源。
  * 策略：
- *   - lib/*, data/*, css/*, js/*（不含 main.js）走 Cache First
- *   - index.html, data/manifest.json 走 Network First（数据/代码迭代时能立即生效）
+ *   - lib/*, data/*, css/*, assets/*, js/* 走 Cache First（wasm 引擎、parquet 表全部长期缓存）
+ *   - index.html / 其它 .html / data/manifest.json 走 Network First（页面/代码迭代能立即生效）
  *   - 其它请求回退到网络
+ * 路径说明：GitHub Pages 是 site.github.io/USER/REPO/ 子路径，SCOPE 用 self.registration.scope 自动适配。
  */
 
-const CACHE = 'jtw-kg-v1';
-const KEEP = 60; // 缓存条目上限，DuckDB-WASM + 19 张表约 40MB
+const CACHE = 'jtw-kg-v3';
+const KEEP = 200; // 缓存条目上限，19 张 parquet + wasm + html/js/css
 
-const ALWAYS_CACHE = [/^\/lib\//, /^\/data\//, /^\/css\//, /^\/js\//];
-const NETWORK_FIRST = [/^\/index\.html$/, /^\/data\/manifest\.json$/];
+// SW 注册后 scope 形如 https://host/the-journey-to-the-west/，转成站内根前缀
+const SCOPE = self.registration.scope.replace(/[^/]+$/, '');
+const toLocal = (u) => u.startsWith(SCOPE) ? u.substring(SCOPE.length - 1) : u;
+
+const ALWAYS_CACHE = [/\/lib\//, /\/data\//, /\/css\//, /\/assets\//, /\/js\//];
+const NETWORK_FIRST = [/\.html$/, /\/data\/manifest\.json$/];
 
 self.addEventListener('install', (e) => {
   self.skipWaiting();
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(['/index.html']).catch(() => {})));
+  // install 阶段预缓存 index.html（scope 相对，兼容 GitHub Pages 子路径）
+  const idxUrl = SCOPE + 'index.html';
+  e.waitUntil(
+    fetch(idxUrl).then((resp) => {
+      if (resp.ok) return caches.open(CACHE).then((c) => c.put(idxUrl, resp));
+    }).catch(() => {})
+  );
 });
 
 self.addEventListener('activate', (e) => {
   e.waitUntil(
-    caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+    caches.keys()
+      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
@@ -30,13 +42,19 @@ self.addEventListener('fetch', (e) => {
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
 
-  // 网络优先：HTML 入口和清单
-  if (NETWORK_FIRST.some((r) => r.test(url.pathname))) {
+  const local = toLocal(req.url);
+  const isNetworkFirst = NETWORK_FIRST.some((r) => r.test(local));
+  const isCacheFirst = ALWAYS_CACHE.some((r) => r.test(local));
+
+  // 网络优先：HTML 入口和清单（页面/代码更新后立即生效）
+  if (isNetworkFirst) {
     e.respondWith(
       fetch(req)
         .then((resp) => {
-          const clone = resp.clone();
-          caches.open(CACHE).then((c) => c.put(req, clone)).catch(() => {});
+          if (resp.ok && resp.type === 'basic') {
+            const clone = resp.clone();
+            caches.open(CACHE).then((c) => c.put(req, clone)).catch(() => {});
+          }
           return resp;
         })
         .catch(() => caches.match(req))
@@ -44,8 +62,8 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // 缓存优先：库/数据/样式
-  if (ALWAYS_CACHE.some((r) => r.test(url.pathname))) {
+  // 缓存优先：库/数据/样式/图片（wasm 引擎、parquet 表长期复用）
+  if (isCacheFirst) {
     e.respondWith(
       caches.match(req).then((hit) => {
         if (hit) return hit;

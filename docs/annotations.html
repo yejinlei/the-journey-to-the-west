@@ -35,6 +35,7 @@
   <nav>
     <a href="index.html">总览</a>
     <a href="read.html">正文·评点</a>
+    <a href="compare.html">评点对照</a>
     <a href="entities.html">本体实体</a>
     <a href="versions.html">版本谱</a>
     <a href="relics.html">法宝谱</a>
@@ -42,6 +43,7 @@
     <a href="events.html">事件检索</a>
     <a href="graph.html">图谱</a>
     <a href="agent.html">Agent</a>
+    <a href="query.html">本体论</a>
   </nav>
 </header>
 
@@ -68,7 +70,7 @@
 </footer>
 
 <script type="module">
-import { initDB, query } from './js/db.js';
+import { loadPageData } from './js/page.js';
 
 const elLoading = document.getElementById('loading');
 const elContent = document.getElementById('content');
@@ -92,11 +94,9 @@ let active = new Set(Object.keys(TYPE_META));
 
 async function main() {
   try {
-    await initDB(msg => { elLoading.textContent = msg; });
-    const r = await query(`SELECT annotation_id, page_no, line_idx, form_type, text, confidence, chapter_ref
-                           FROM annotations WHERE edition='xinke_pingbi'
-                           ORDER BY page_no, line_idx`);
-    ALL = r.rows;
+    elLoading.textContent = '正在加载页面数据…';
+    const d = await loadPageData('annotations');
+    ALL = d.annotations || [];
     elLoading.style.display = 'none';
     elContent.style.display = 'block';
     render();

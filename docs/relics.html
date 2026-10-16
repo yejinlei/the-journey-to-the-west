@@ -23,6 +23,7 @@
   <nav>
     <a href="index.html">总览</a>
     <a href="read.html">正文·评点</a>
+    <a href="compare.html">评点对照</a>
     <a href="entities.html">本体实体</a>
     <a href="versions.html">版本谱</a>
     <a href="relics.html" class="on">法宝谱</a>
@@ -30,6 +31,7 @@
     <a href="events.html">事件检索</a>
     <a href="graph.html">图谱</a>
     <a href="agent.html">Agent</a>
+    <a href="query.html">本体论</a>
   </nav>
 </header>
 
@@ -55,7 +57,7 @@
 </footer>
 
 <script type="module">
-import { initDB, query } from './js/db.js';
+import { loadPageData } from './js/page.js';
 
 const elLoading = document.getElementById('loading');
 const elContent = document.getElementById('content');
@@ -67,16 +69,11 @@ function esc(s) {
 
 async function main() {
   try {
-    await initDB(msg => { elLoading.textContent = msg; });
-
-    // 拉出 artifact 类实体 + 关联到"人"的关系
-    const [artifacts, rels, entities] = await Promise.all([
-      query(`SELECT entity_id, entity_id_raw, label, canonical_name, aliases, mention_count
-             FROM entities WHERE type='artifact' ORDER BY mention_count DESC`),
-      query(`SELECT subject_id, predicate, object_id, evidence, line_idx
-             FROM relationships WHERE predicate='jtw:hasWeapon'`),
-      query(`SELECT entity_id, label, canonical_name, type FROM entities`)
-    ]);
+    elLoading.textContent = '正在加载页面数据…';
+    const d = await loadPageData('relics');
+    const artifacts = { rows: d.artifacts || [] };
+    const rels = { rows: d.hasWeapon || [] };
+    const entities = { rows: d.entities || [] };
 
     // 建立 id → label/canonical 索引
     const id2Label = new Map();

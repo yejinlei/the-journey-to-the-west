@@ -68,71 +68,68 @@ relation_type:
     desc: 灵性化生，如唐僧
 
   # 亲属 kinship
-  兄妹: en: sibling
-  父子: en: parent_child
+  兄妹: {en: sibling}
+  父子: {en: parent_child}
   师徒同源:
     en: same_lineage
     desc: 同源不同门，如菩提祖师与如来
 
   # 敌对 antagonism
-  仇敌: en: arch_enemy
-  宿敌: en: longterm_enemy
-  临时敌对: en: temporary_enemy
-  主从: en: master_servant
+  仇敌: {en: arch_enemy}
+  宿敌: {en: longterm_enemy}
+  临时敌对: {en: temporary_enemy}
+  主从: {en: master_servant}
 
   # 归属 membership
-  祖师: en: patriarch
-  弟子: en: disciple
-  使者: en: envoy
-  客卿: en: advisor
-  成员: en: member
+  祖师: {en: patriarch}
+  弟子: {en: disciple}
+  使者: {en: envoy}
+  客卿: {en: advisor}
+  成员: {en: member}
 
   # 法宝持有 possession
-  持有者: en: holder
-  制造者: en: maker
-  传递者: en: transmitter
+  持有者: {en: holder}
+  制造者: {en: maker}
+  传递者: {en: transmitter}
 
   # 事件参与 involvement
-  主角: en: protagonist
-  配角: en: supporting
-  观察者: en: observer
-  参与者: en: participant
+  主角: {en: protagonist}
+  配角: {en: supporting}
+  观察者: {en: observer}
+  参与者: {en: participant}
 
 sect_type:
-  佛: en: buddhist
-  道: en: daoist
-  天庭: en: celestial
-  地府: en: underworld
-  世俗: en: mortal_kingdom
-  妖魔: en: demon
-  山水: en: mountain
-  龙宫: en: dragon_palace
-
+  佛: {en: buddhist}
+  道: {en: daoist}
+  天庭: {en: celestial}
+  地府: {en: underworld}
+  世俗: {en: mortal_kingdom}
+  妖魔: {en: demon}
+  山水: {en: mountain}
+  龙宫: {en: dragon_palace}
 event_category:
-  降妖: en: demon_subdue
-  斗法: en: magic_duel
-  拜师: en: disciple_bow
-  结拜: en: sworn_brothers
-  出行: en: journey
-  朝见: en: audience
-  战斗: en: combat
-  变化: en: transformation
-  受封: en: enfeoffment
-  授宝: en: artifact_grant
-  受戒: en: precept_taking
-  论道: en: dao_discourse
-  讲经: en: dharma_talk
-
+  降妖: {en: demon_subdue}
+  斗法: {en: magic_duel}
+  拜师: {en: disciple_bow}
+  结拜: {en: sworn_brothers}
+  出行: {en: journey}
+  朝见: {en: audience}
+  战斗: {en: combat}
+  变化: {en: transformation}
+  受封: {en: enfeoffment}
+  授宝: {en: artifact_grant}
+  受戒: {en: precept_taking}
+  论道: {en: dao_discourse}
+  讲经: {en: dharma_talk}
 annotation_form:
-  眉批: en: top_margin
-  夹批: en: inline
-  旁批: en: side_margin
-  回前总评: en: chapter_pre
-  回后总评: en: chapter_post
-  图注: en: caption
-  题署: en: colophon
-  序跋: en: preface_postscript
-
+  眉批: {en: top_margin}
+  夹批: {en: inline}
+  旁批: {en: side_margin}
+  回前总评: {en: chapter_pre}
+  回后总评: {en: chapter_post}
+  图注: {en: caption}
+  题署: {en: colophon}
+  序跋: {en: preface_postscript}
 register_id:
   # 语体（Register）— 隐性约束核心，对应 TextLine.form 之外的第二个维度
   market_colloquial:
@@ -267,14 +264,14 @@ three_teachings:
     representative: "太上老君 元始天尊 灵宝天尊"
 
 wit_type:
-  戏谑: en: teasing
-  反讽: en: irony
-  双关: en: pun
-  谐音: en: homophone_pun
-  胡闹: en: mischief
-  挑衅: en: provocation
-  自嘲: en: self_deprecation
-  冷幽默: en: deadpan
+  戏谑: {en: teasing}
+  反讽: {en: irony}
+  双关: {en: pun}
+  谐音: {en: homophone_pun}
+  胡闹: {en: mischief}
+  挑衅: {en: provocation}
+  自嘲: {en: self_deprecation}
+  冷幽默: {en: deadpan}
 
 edition_id:
   shidetang:

@@ -41,6 +41,7 @@
   <nav>
     <a href="index.html">总览</a>
     <a href="read.html">正文·评点</a>
+    <a href="compare.html">评点对照</a>
     <a href="entities.html">本体实体</a>
     <a href="versions.html" class="on">版本谱</a>
     <a href="relics.html">法宝谱</a>
@@ -48,6 +49,7 @@
     <a href="events.html">事件检索</a>
     <a href="graph.html">图谱</a>
     <a href="agent.html">Agent</a>
+    <a href="query.html">本体论</a>
   </nav>
 </header>
 
@@ -74,7 +76,7 @@
 </footer>
 
 <script type="module">
-import { initDB, query } from './js/db.js';
+import { loadPageData } from './js/page.js';
 
 const elLoading = document.getElementById('loading');
 const elContent = document.getElementById('content');
@@ -109,11 +111,10 @@ const TYPE_BAR = [
 
 async function main() {
   try {
-    await initDB(msg => { elLoading.textContent = msg; });
-    const [editions, annosByCh] = await Promise.all([
-      query(`SELECT edition_id, display_name, year, publisher, desc FROM editions ORDER BY CASE WHEN year > 0 THEN 0 ELSE 1 END, year, display_name`),
-      query(`SELECT chapter_ref, count(*) as n FROM annotations WHERE edition='xinke_pingbi' GROUP BY 1 ORDER BY 1`),
-    ]);
+    elLoading.textContent = '正在加载页面数据…';
+    const d = await loadPageData('versions');
+    const editions = { rows: d.editions || [] };
+    const annosByCh = { rows: d.annosByCh || [] };
 
     elLoading.style.display = 'none';
     elContent.style.display = 'block';

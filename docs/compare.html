@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>评点对照 · 西游奇谭</title>
+<link rel="stylesheet" href="assets/app.css">
+<style>
+  .cmp-intro{margin:8px 0;padding:10px 14px;border:1px dashed var(--line-gold);border-radius:3px;
+    background:rgba(255,253,248,.65);font-size:13.5px;color:var(--ink2);line-height:1.75}
+  .cmp-intro b{color:var(--cinnabar)}
+  .cmp-controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:10px 0;padding:10px 14px;
+    background:linear-gradient(180deg,rgba(255,253,248,.85),rgba(253,248,238,.7));
+    border:1px solid var(--line);border-radius:3px;box-shadow:var(--shadow)}
+  .cmp-controls label{font-size:13.5px;color:var(--ink2);letter-spacing:.06em}
+  .cmp-chips{display:flex;flex-wrap:wrap;gap:6px}
+  .cmp-chip{display:inline-flex;align-items:center;gap:6px;padding:4px 11px;font-size:12.5px;letter-spacing:.06em;
+    border:1px solid var(--line);border-radius:14px;background:rgba(255,253,248,.7);color:var(--ink2);
+    cursor:pointer;user-select:none;transition:all .2s}
+  .cmp-chip.on{color:#3a2a10;border-color:rgba(158,43,37,.4);
+    background:linear-gradient(180deg,#fdf1ee,#f8e6e2);font-weight:600}
+  .cmp-chip .dot{width:8px;height:8px;border-radius:50%;background:var(--cinnabar)}
+  .cmp-chip .n{font-size:11px;color:var(--ink3);background:rgba(240,230,209,.9);
+    border-radius:8px;padding:0 5px;border:1px solid var(--line-gold)}
+  .loadbox{padding:80px 20px;text-align:center;color:var(--ink3);font-family:var(--kai);font-size:16px}
+  .empty-hint{padding:40px 20px;text-align:center;color:var(--ink3);font-family:var(--kai);font-size:15px}
+
+  .cmp-chap{margin:22px 0;padding:16px 18px;background:linear-gradient(180deg,rgba(255,253,248,.9),rgba(253,248,238,.75));
+    border:1px solid var(--line);border-radius:4px;box-shadow:var(--shadow)}
+  .cmp-chap > h3{margin:0 0 4px;font-size:20px;color:#332c25;letter-spacing:.08em;
+    border-bottom:1px solid rgba(158,43,37,.18);padding-bottom:6px}
+  .cmp-chap .meta{font-size:12.5px;color:var(--ink3);margin-bottom:12px}
+  .cmp-chap .meta .badge{display:inline-block;padding:1px 8px;margin-right:6px;
+    border:1px solid var(--line-gold);border-radius:10px;background:rgba(240,230,209,.9);color:#6a5223;font-size:11.5px}
+
+  .cmp-main{padding:10px 14px;margin-bottom:12px;
+    background:linear-gradient(180deg,rgba(255,253,248,.6),rgba(245,239,227,.35));
+    border:1px solid rgba(176,141,87,.28);border-radius:3px}
+  .cmp-main .lbl{display:inline-block;font-family:var(--kai);font-size:12px;color:var(--cinnabar);
+    border:1px solid rgba(158,43,37,.3);padding:1px 8px;border-radius:2px;margin-bottom:8px;
+    background:rgba(158,43,37,.04)}
+  .cmp-main .txt{font-family:var(--kai);font-size:15px;line-height:1.85;color:var(--ink);
+    white-space:pre-wrap;text-indent:2em;margin:0}
+
+  .cmp-sources{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+  .cmp-src{padding:10px 14px;border-radius:3px;
+    background:linear-gradient(180deg,rgba(255,253,248,.9),rgba(253,248,238,.75));
+    border:1px solid var(--line);border-left:4px solid var(--cinnabar)}
+  .cmp-src.wuyuanzi{border-left-color:#b08d57;background:linear-gradient(180deg,rgba(240,230,209,.6),rgba(230,201,138,.18))}
+  .cmp-src-header{display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:6px;
+    border-bottom:1px dotted var(--line)}
+  .cmp-src-title{font-family:var(--kai);font-size:14px;font-weight:700;letter-spacing:.08em}
+  .cmp-src .dot{width:9px;height:9px;border-radius:50%;background:var(--cinnabar)}
+  .cmp-src.wuyuanzi .dot{background:#b08d57}
+  .cmp-src.count{font-size:11.5px;color:var(--ink3)}
+  .cmp-item{margin:8px 0;padding:6px 10px;border-radius:2px;font-size:13.5px;line-height:1.75;
+    border-left:2px solid var(--cinnabar);background:rgba(255,253,248,.5)}
+  .cmp-item .anno-label{display:inline-block;font-family:var(--kai);font-size:11px;
+    padding:0 6px;border-radius:8px;margin-right:6px;background:rgba(158,43,37,.08);
+    border:1px solid rgba(158,43,37,.25);color:var(--cinnabar);letter-spacing:.06em}
+  .cmp-item .page-ref{display:inline-block;font-size:11px;color:var(--ink3);margin-left:6px}
+  .cmp-item.wuyuanzi{border-left-color:#b08d57;background:rgba(230,201,138,.14)}
+  .cmp-item.wuyuanzi .anno-label{background:rgba(176,141,87,.12);border-color:rgba(176,141,87,.4);color:#7d5a1a}
+
+  .footnote{margin-top:20px;font-size:12.5px;color:var(--ink3);text-align:center}
+</style>
+</head>
+<body>
+<header>
+  <span class="seal">西游</span>
+  <h1>西游奇谭</h1>
+  <div class="sub">一心求道 · 十难伏魔 · 三教归真</div>
+  <nav>
+    <a href="index.html">总览</a>
+    <a href="read.html">正文·评点</a>
+    <a href="compare.html" class="on">评点对照</a>
+    <a href="entities.html">本体实体</a>
+    <a href="versions.html">版本谱</a>
+    <a href="relics.html">法宝谱</a>
+    <a href="annotations.html">诙谐谱</a>
+    <a href="events.html">事件检索</a>
+    <a href="graph.html">图谱</a>
+    <a href="agent.html">Agent</a>
+    <a href="query.html">本体论</a>
+  </nav>
+</header>
+
+<main>
+  <div class="hero" style="margin-top:2px">
+    <span class="seal solid">對勘</span>
+    <div class="verse">同回並置　評點互參</div>
+    <div class="rule"></div>
+    <p class="lead">按<b>回章交集</b>自動列舉：<b>批评本</b>與<b>其它版本</b>在同一回的正文、評點並置。
+      切換評點源：眉批／側批／夾批（批评本）· 悟元子詳注（百回詳注）· <code>verse</code>（古本引詩）等。
+      新增版本、評點源自動納入——只改數據，不改 HTML。</p>
+  </div>
+
+  <h2>評點源</h2>
+  <div class="cmp-controls">
+    <label>底本</label>
+    <select id="baseEd" style="font-family:inherit;font-size:13.5px;padding:3px 6px">
+      <option value="xinke_pingbi">新刻全像批評西遊記（清，含评点）</option>
+      <option value="gubao">古本（維基西遊記）</option>
+      <option value="baihui_xiangzhu">西遊記百回詳注（悟元子）</option>
+    </select>
+    <span style="margin:0 6px;color:var(--line)">│</span>
+    <label>評點源</label>
+    <div class="cmp-chips" id="srcChips"></div>
+  </div>
+
+  <div class="cmp-intro" id="intro"></div>
+
+  <div id="loading" class="loadbox">正在加载页面数据……</div>
+  <div id="content" style="display:none"></div>
+
+  <div class="footnote" id="footnote">数据：本地 DuckDB · Parquet · <code>read.json</code></div>
+</main>
+
+<footer>
+  <span class="seal">對勘</span>
+  <div>批評本 · 百回詳注 · 古本 —— 同回並置，評點互參。新增評點版本後自動納入。</div>
+  <div>本体论规范：<a href="../03_本体论规范/jtw_kg_ontology.ttl" target="_blank" rel="noopener">jtw_kg_ontology.ttl</a></div>
+  <div>由多 Agent 生成，仅供研究玩索，非定本。</div>
+</footer>
+
+<script type="module">
+import { loadPageData } from './js/page.js';
+
+// 評點源定義：新增版本只需加一條，前端自動納入。
+// - kind='annotations': 从 annotations 表讀（獨立表存儲）
+// - kind='inline': 从 lines 表過濾 form_type（內嵌評點）
+// - kind='verse': 引詩/詩歌體（視作文體樣本）
+const SOURCES = [
+  {
+    id: 'xinke_annos',
+    edition: 'xinke_pingbi',
+    label: '批评本評點',
+    color: 'cinnabar',
+    kind: 'annotations',
+    desc: '批評本獨立評點表（眉/側/夾/底批）',
+  },
+  {
+    id: 'wuyuanzi',
+    edition: 'baihui_xiangzhu',
+    label: '悟元子詳注',
+    color: 'gold',
+    kind: 'inline',
+    form_type: 'commentary',
+    desc: '悟元子每回評述（內嵌于 lines 表）',
+  },
+];
+
+// 評點表類型元數據
+const ANNO_TYPE_META = {
+  top:      { label: '眉批', color: '朱' },
+  side:     { label: '側批', color: '朱' },
+  inline:   { label: '夾批', color: '朱' },
+  bottom:   { label: '底批', color: '朱' },
+  colophon: { label: '底端', color: '墨' },
+  caption:  { label: '題款', color: '靛' },
+};
+
+// 版本中文名（腳本用）
+const EDITION_NAMES = {
+  xinke_pingbi: '批評本',
+  gubao: '古本',
+  baihui_xiangzhu: '百回詳注',
+};
+
+const state = {
+  allChapters: [],
+  allLines: [],
+  allAnnotations: [],
+  baseEdition: 'xinke_pingbi',
+  activeSources: new Set(['xinke_annos', 'wuyuanzi']),
+  showAll: false,  // false = 只顯示交集；true = 顯示底本所有回（缺評點也顯示）
+};
+
+const elLoading = document.getElementById('loading');
+const elContent = document.getElementById('content');
+const elChips = document.getElementById('srcChips');
+const elIntro = document.getElementById('intro');
+const elBase = document.getElementById('baseEd');
+const elFootnote = document.getElementById('footnote');
+
+function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+// 回次歸一化：把 "第87回" / "第八十七回" / "卷十八" / "第X回" 統一為 "第N回"（阿拉伯）
+// 用於跨欄對齊 chapter_ref ↔ chapter_label
+const CN_DIGITS = { '零':0,'一':1,'二':2,'兩':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9 };
+function cnToNum(s) {
+  if (!s) return 0;
+  s = String(s).replace(/\s/g, '');
+  if (/^\d+$/.test(s)) return parseInt(s, 10);
+  let n = 0, hasHigh = false, pending = 0;
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
+    const v = CN_DIGITS[c];
+    if (v !== undefined) {
+      if (hasHigh) { n += v; }
+      else { pending = pending * 10 + v; }
+    } else if (c === '十') {
+      n += (pending || 1) * 10; pending = 0; hasHigh = true;
+    } else if (c === '百') {
+      n += (pending || 1) * 100; pending = 0; hasHigh = true;
+    } else if (c === '廿') {
+      n += 20; hasHigh = true;
+    } else if (c === '卅') {
+      n += 30; hasHigh = true;
+    } else {
+      return 0;
+    }
+  }
+  return n + pending;
+}
+function chapNum(ref) {
+  if (!ref) return 0;
+  ref = String(ref).replace(/\s/g, '');
+  // 第N回 / 第X回
+  let m = ref.match(/^第([0-9一二三四五六七八九十兩廿卅百]+)回$/);
+  if (m) return cnToNum(m[1]);
+  // 卷N
+  m = ref.match(/^卷([0-9一二三四五六七八九十兩廿卅百]+)$/);
+  if (m) return cnToNum(m[1]);
+  return 0;
+}
+// 把 chapter_ref 歸一化到"第N回"
+function normChap(ref) {
+  const n = chapNum(ref);
+  return n ? `第${n}回` : '';
+}
+
+function buildChips() {
+  elChips.innerHTML = '';
+  // 交集/全集 切換
+  const toggle = document.createElement('span');
+  toggle.className = 'cmp-chip ' + (state.showAll ? 'on' : '');
+  toggle.innerHTML = state.showAll ? '全集 <span class="n">全部回</span>' : '交集 <span class="n">共評回</span>';
+  toggle.onclick = () => { state.showAll = !state.showAll; render(); };
+  elChips.appendChild(toggle);
+
+  for (const src of SOURCES) {
+    const box = document.createElement('span');
+    box.className = 'cmp-chip ' + (state.activeSources.has(src.id) ? 'on' : '');
+    box.dataset.id = src.id;
+    const dotColor = src.color === 'gold' ? '#b08d57' : 'var(--cinnabar)';
+    box.innerHTML = `<span class="dot" style="background:${dotColor}"></span> ${esc(src.label)} <span class="n">${esc(EDITION_NAMES[src.edition])}</span>`;
+    box.onclick = () => {
+      if (state.activeSources.has(src.id)) state.activeSources.delete(src.id);
+      else state.activeSources.add(src.id);
+      render();
+    };
+    elChips.appendChild(box);
+  }
+}
+
+// 從當前狀態收集每個源的評點條目（按 chapter_label 分組）
+// lookupChapLabel: 給定版次和 page_no，返回歸一化 chapter key（如"第87回"）
+function lookupChapLabel(edition, pageNo) {
+  if (!pageNo) return '';
+  const chs = state.allChapters.filter(c => c.edition === edition)
+    .sort((a, b) => (a.first_page || 0) - (b.first_page || 0));
+  for (let i = 0; i < chs.length; i++) {
+    const cur = chs[i];
+    const next = chs[i + 1];
+    const start = cur.first_page || 0;
+    const end = next ? (next.first_page - 1) : Infinity;
+    if (pageNo >= start && pageNo <= end) {
+      return normChap(cur.chapter_label);
+    }
+  }
+  return '';
+}
+function collectSources() {
+  const activeSources = SOURCES.filter(s => state.activeSources.has(s.id));
+  const result = {};  // srcId -> { byChap: Map<chapter_label, items[]> }
+  for (const src of activeSources) {
+    const byChap = new Map();
+    if (src.kind === 'annotations') {
+      const items = state.allAnnotations.filter(a => a.edition === src.edition);
+      for (const a of items) {
+        // 優先用 page_no 反查底本 chapter_label，其次才用 chapter_ref 歸一化
+        const key = lookupChapLabel(src.edition, a.page_no) || normChap(a.chapter_ref);
+        if (!key) continue;
+        if (!byChap.has(key)) byChap.set(key, []);
+        byChap.get(key).push({
+          type: a.form_type,
+          text: a.text,
+          page: a.page_no,
+          line: a.line_idx,
+          ref: a.chapter_ref || '',
+        });
+      }
+    } else if (src.kind === 'inline') {
+      const items = state.allLines.filter(l => l.edition === src.edition && l.form_type === src.form_type);
+      for (const l of items) {
+        const key = lookupChapLabel(src.edition, l.page_no) || normChap(l.chapter_ref);
+        if (!key) continue;
+        if (!byChap.has(key)) byChap.set(key, []);
+        byChap.get(key).push({
+          type: 'commentary',
+          text: l.text,
+          page: l.page_no,
+          line: l.line_idx,
+          ref: key,
+        });
+      }
+    }
+    result[src.id] = byChap;
+  }
+  return result;
+}
+
+// 底本該版本的所有回
+function baseChapters() {
+  const chs = state.allChapters.filter(c => c.edition === state.baseEdition);
+  return [...chs].sort((a, b) => (a.first_page || 0) - (b.first_page || 0));
+}
+
+// 底本某回下所有正文行（含 verse/title 等，除評點/annotations）
+function baseChLines(ch, allChs) {
+  // xinke_pingbi 是多頁版：last_page = next.first_page - 1
+  const sorted = [...allChs].sort((a, b) => (a.first_page || 0) - (b.first_page || 0));
+  const idx = sorted.findIndex(c => c.chapter_id === ch.chapter_id);
+  const next = sorted[idx + 1];
+  const lastPage = next ? next.first_page - 1 : Infinity;
+  return state.allLines
+    .filter(l => l.edition === state.baseEdition
+      && l.page_no >= (ch.first_page || 0) && l.page_no <= lastPage
+      && l.form_type === 'main')
+    .sort((a, b) => (a.page_no - b.page_no) || (a.line_idx - b.line_idx));
+}
+
+function buildIntro(sources, chapters, nCommon) {
+  const baseChapters = chapters.length;
+  const lines = [`底本：<b>${esc(EDITION_NAMES[state.baseEdition] || state.baseEdition)}</b> · 共 <b>${baseChapters}</b> 回`];
+  if (state.showAll) {
+    lines.push(`顯示範圍：<b>底本全部 ${baseChapters} 回</b>（缺評點亦顯示，便於對照文體）。`);
+  } else {
+    lines.push(`顯示範圍：<b>交集 ${nCommon} 回</b>（至少一個評點源有内容的回）。`);
+  }
+  for (const src of SOURCES) {
+    if (!state.activeSources.has(src.id)) continue;
+    const byChap = sources[src.id] || new Map();
+    lines.push(`<b>${esc(src.label)}</b>：共 <b>${[...byChap.values()].reduce((s, arr) => s + arr.length, 0)}</b> 條 · ${byChap.size} 回（${esc(src.desc)}）`);
+  }
+  elIntro.innerHTML = lines.join('　·　');
+}
+
+function renderChapterBlock(ch, chLines, sources, allChs) {
+  const chapDiv = document.createElement('div');
+  chapDiv.className = 'cmp-chap';
+  const title = ch.chapter_label || `第 ${ch.first_page} 頁`;
+  const titleText = ch.chapter_title || '';
+
+  const srcChips = SOURCES.filter(s => state.activeSources.has(s.id))
+    .map(src => {
+      const byChap = sources[src.id] || new Map();
+      const items = byChap.get(normChap(ch.chapter_label)) || [];
+      const dotColor = src.color === 'gold' ? '#b08d57' : 'var(--cinnabar)';
+      return `<span class="badge" style="border-left:3px solid ${dotColor};padding-left:6px">
+        ${esc(src.label)} · ${items.length}
+      </span>`;
+    }).join('');
+
+  let html = `
+    <h3>${esc(title)}　<span style="color:var(--ink3);font-weight:400;font-size:15px">${esc(titleText)}</span></h3>
+    <div class="meta">
+      ${srcChips}
+      <span style="color:var(--ink3)">頁 ${ch.first_page}${ch.last_page && ch.last_page !== ch.first_page && ch.last_page !== Infinity ? ' — ' + ch.last_page : ''}</span>
+    </div>
+  `;
+
+  // 底本正文
+  if (chLines.length) {
+    const text = chLines.map(l => l.text).join('\n');
+    html += `<div class="cmp-main">
+      <span class="lbl">底本 · ${esc(EDITION_NAMES[state.baseEdition] || state.baseEdition)}</span>
+      <p class="txt">${esc(text)}</p>
+    </div>`;
+  } else {
+    html += `<div class="cmp-main"><span class="lbl">底本</span><p class="txt" style="color:var(--ink3);text-indent:0">（此版本此回無正文）</p></div>`;
+  }
+
+  // 評點源（每源一列）
+  const activeSources = SOURCES.filter(s => state.activeSources.has(s.id));
+  if (activeSources.length) {
+    html += '<div class="cmp-sources">';
+    for (const src of activeSources) {
+      const byChap = sources[src.id] || new Map();
+      const items = byChap.get(normChap(ch.chapter_label)) || [];
+      const cssClass = src.color === 'gold' ? 'cmp-src wuyuanzi' : 'cmp-src';
+      html += `<div class="${cssClass}">
+        <div class="cmp-src-header">
+          <span class="dot"></span>
+          <span class="cmp-src-title">${esc(src.label)}</span>
+          <span class="count">${items.length} 條</span>
+        </div>`;
+      if (!items.length) {
+        html += `<div class="cmp-item" style="opacity:.5"><span class="anno-label">—</span>本回無</div>`;
+      } else {
+        for (const item of items) {
+          const itemCss = src.color === 'gold' ? 'cmp-item wuyuanzi' : 'cmp-item';
+          let label = item.type;
+          const meta = ANNO_TYPE_META[item.type];
+          if (meta) label = `${meta.label}`;
+          if (item.type === 'commentary') label = '悟元子曰';
+          html += `<div class="${itemCss}">
+            <span class="anno-label">${esc(label)}</span>
+            <span class="page-ref">頁 ${esc(item.page)}·L${esc(item.line ?? 0)}</span>
+            <div>${esc(item.text)}</div>
+          </div>`;
+        }
+      }
+      html += '</div>';
+    }
+    html += '</div>';
+  }
+
+  chapDiv.innerHTML = html;
+  return chapDiv;
+}
+
+function render() {
+  buildChips();
+
+  // 收集每個源的評點
+  const sources = collectSources();
+
+  // 底本章節 + 交集/全集
+  const allChs = baseChapters();
+  const activeSources = SOURCES.filter(s => state.activeSources.has(s.id));
+  const chsToShow = allChs.filter(ch => {
+    if (state.showAll) return true;
+    // 交集：至少一個評點源在此回有內容（按歸一化 key 對齊）
+    const key = normChap(ch.chapter_label);
+    return activeSources.some(src => {
+      const byChap = sources[src.id] || new Map();
+      return byChap.has(key) && byChap.get(key).length > 0;
+    });
+  });
+
+  const nCommon = chsToShow.length;
+
+  buildIntro(sources, allChs, nCommon);
+
+  elContent.innerHTML = '';
+  if (!chsToShow.length) {
+    const empty = document.createElement('div');
+    empty.className = 'empty-hint';
+    empty.textContent = '當前篩選無交集，試試勾選"全集"或添加更多評點源。';
+    elContent.appendChild(empty);
+  }
+  for (const ch of chsToShow) {
+    const lines = baseChLines(ch, allChs);
+    elContent.appendChild(renderChapterBlock(ch, lines, sources, allChs));
+  }
+
+  // footnote
+  const totalAnno = state.allAnnotations.length;
+  const totalLineComm = state.allLines.filter(l => l.form_type === 'commentary').length;
+  elFootnote.innerHTML = `數據：<b>read.json</b> · `
+    + `<b>${state.allChapters.length}</b> 回 · `
+    + `<b>${state.allLines.length}</b> 行 · `
+    + `<b>${totalAnno}</b> 條 anno 表評點 · `
+    + `<b>${totalLineComm}</b> 條 line 表內嵌評點（悟元子）`;
+}
+
+async function main() {
+  try {
+    const d = await loadPageData('read');
+    state.allChapters = d.chapters || [];
+    state.allLines = d.lines || [];
+    state.allAnnotations = d.annotations || [];
+    elLoading.style.display = 'none';
+    elContent.style.display = 'block';
+    elBase.addEventListener('change', (e) => {
+      state.baseEdition = e.target.value;
+      render();
+    });
+    render();
+  } catch (e) {
+    elLoading.textContent = '加載失敗：' + (e?.message || e);
+  }
+}
+
+main();
+</script>
+</body>
+</html>

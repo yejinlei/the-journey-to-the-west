@@ -44,6 +44,7 @@
   <nav>
     <a href="index.html">总览</a>
     <a href="read.html">正文·评点</a>
+    <a href="compare.html">评点对照</a>
     <a href="entities.html">本体实体</a>
     <a href="versions.html">版本谱</a>
     <a href="relics.html">法宝谱</a>
@@ -51,6 +52,7 @@
     <a href="events.html">事件检索</a>
     <a href="graph.html" class="on">图谱</a>
     <a href="agent.html">Agent</a>
+    <a href="query.html">本体论</a>
   </nav>
 </header>
 
@@ -82,7 +84,7 @@
 </footer>
 
 <script type="module">
-import { initDB, query } from './js/db.js';
+import { loadPageData } from './js/page.js';
 
 const elLoading = document.getElementById('loading');
 const elContent = document.getElementById('content');
@@ -132,13 +134,12 @@ let VIEW = 'rel';
 
 async function main() {
   try {
-    await initDB(msg => { elLoading.textContent = msg; });
-    const [rels, ents, events, annos] = await Promise.all([
-      query(`SELECT relation_id, subject_id, predicate, object_id, evidence, page_no FROM relationships WHERE edition='xinke_pingbi'`),
-      query(`SELECT entity_id, label, canonical_name, type, mention_count, aliases FROM entities`),
-      query(`SELECT event_id, page_no, name, summary FROM events WHERE edition='xinke_pingbi' ORDER BY page_no`),
-      query(`SELECT page_no, form_type, text FROM annotations WHERE edition='xinke_pingbi'`)
-    ]);
+    elLoading.textContent = '正在加载页面数据…';
+    const d = await loadPageData('graph');
+    const rels = { rows: d.rels || [] };
+    const ents = { rows: d.ents || [] };
+    const events = { rows: d.events || [] };
+    const annos = { rows: d.annos || [] };
     STATE = {
       rels: rels.rows,
       ents: ents.rows,
