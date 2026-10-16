@@ -44,6 +44,18 @@
   .ch-navigator button[disabled]{opacity:.35;cursor:not-allowed}
   .ch-navigator span{color:var(--ink3)}
   .empty-hint{padding:40px 20px;text-align:center;color:var(--ink3);font-family:var(--kai);font-size:15px}
+
+  /* ---- 正文阅读美化（覆盖 app.css 的宽松布局，聚焦竖排阅读栏） ---- */
+  main{max-width:860px}
+  .main-p{margin:0 0 16px;text-indent:2em;font-size:16.5px;line-height:2.05;
+    color:#2b241b;letter-spacing:.02em}
+  .chap{margin:30px 0 10px}
+  .chap h3{margin:0 0 6px;font-size:22px;letter-spacing:.1em;
+    background:linear-gradient(90deg,rgba(178,106,36,.12),transparent 70%);
+    padding:6px 0 6px 10px;border-left:3px solid var(--cinnabar)}
+  .commentary{line-height:1.9;border-left:3px solid var(--gold-l)}
+  .page-block{margin:12px 0}
+  .poem{line-height:2.3}
 </style>
 </head>
 <body>
@@ -69,12 +81,11 @@
 <main>
   <div class="hero" style="margin-top:2px">
     <span class="seal solid">正評</span>
-    <div class="verse">三版並讀　古今對照</div>
+    <div class="verse">四版並讀　古今對照</div>
     <div class="rule"></div>
-    <p class="lead">本頁支持<b>三個版本</b>切換：
-      <b>新刻全像批評西遊記</b>（清，含評點，第八十六至八十九回）、
-      <b>古本西遊記</b>（維基文庫，1592 世德堂系統，全一百回正文）、
-      <b>西遊記百回詳注</b>（悟元子，清，含每回評點，全一百回）。
+    <p class="lead">以<b>通行本</b>（世德堂系统百回正文）為<b>主本</b>與默認載入，其余
+      <b>百回詳注</b>（悟元子）、<b>唐三藏取經釋厄傳</b>（朱鼎臣·簡本）、
+      <b>新刻全像批評西遊記</b>（清·實存第八十六至八十九回）為<b>參校</b>。
       切換版本後正文／評點／回數重繪。</p>
   </div>
 
@@ -82,9 +93,10 @@
   <div class="ch-controls" id="controls">
     <label>版本</label>
     <select id="edition">
-      <option value="xinke_pingbi">新刻全像批評西遊記（清，含评点）</option>
-      <option value="gubao">古本（維基西遊記，100 回）</option>
-      <option value="baihui_xiangzhu">西遊記百回詳注（悟元子，100 回）</option>
+      <option value="gubao" selected>通行本 · 古本百回正文（世德堂系统）· 主本</option>
+      <option value="baihui_xiangzhu">百回詳注（悟元子）· 参校</option>
+      <option value="zhu_ping">唐三藏取經釋厄傳（朱鼎臣·簡本）· 参校</option>
+      <option value="xinke_pingbi">新刻全像批評西遊記（清·实存 4 回）· 参校</option>
     </select>
     <span style="margin:0 6px;color:var(--line)">│</span>
     <label>評點</label>
@@ -103,7 +115,7 @@
 
 <footer>
   <span class="seal">底本</span>
-  <div>支持 3 版：新刻全像批評西遊記（清，含評點）· 古本西遊記（維基文庫）· 西遊記百回詳注（悟元子）。</div>
+  <div>支持 4 版：古本西遊記（維基文庫，100 回）· 西遊記百回詳注（悟元子，100 回）· 唐三藏取經釋厄傳（朱鼎臣·典藏簡本，66 回）· 新刻全像批評西遊記（清，實存 4 回）。</div>
   <div>本体论规范：<a href="../03_本体论规范/jtw_kg_ontology.ttl" target="_blank" rel="noopener">jtw_kg_ontology.ttl</a> · 受控词表：<a href="../03_本体论规范/vocabularies.yaml" target="_blank" rel="noopener">vocabularies.yaml</a></div>
   <div>由多 Agent 生成，仅供研究玩索，非定本。</div>
 </footer>
@@ -132,10 +144,10 @@ const EDITION_META = {
     hasTypeFilter: true,
   },
   gubao: {
-    title: '古本西遊記（維基文庫，1592 世德堂系統）',
-    note: '<b>結構</b>：全一百回。每回以「詩曰」起首（標記為 <code>verse</code>），'
+    title: '通行本 · 古本西遊記（世德堂系統，全一百回）',
+    note: '<b>主本</b>：全一百回，為本站默認底本。每回以「詩曰」起首（<code>verse</code>），'
         + '接續白話敘述（<code>main</code>）。此版本<b>無評點表</b>，'
-        + '為白文本對照。',
+        + '為通行正文對照。',
     hasTypeFilter: false,
   },
   baihui_xiangzhu: {
@@ -143,6 +155,13 @@ const EDITION_META = {
     note: '<b>結構</b>：全一百回。每回次序：<b>回目</b>（title）→ '
         + '<b>悟元子評點</b>（commentary，黃底）→ <b>正文</b>（main，白話）。'
         + '評點嵌入正文行流，不用 annotations 表。',
+    hasTypeFilter: false,
+  },
+  zhu_ping: {
+    title: '唐三藏取經釋厄傳（朱鼎臣·典藏簡本）',
+    note: '<b>結構</b>：世德堂系統之坊刻簡本，十卷六十六回。每回一頁正文（<code>main</code>）'
+        + '，行間多錄 <b>原作異字</b>（形如「茫原作忙」），為校勘底本。'
+        + '無獨立評點表，為白文本對照。',
     hasTypeFilter: false,
   },
 };
@@ -154,7 +173,7 @@ const state = {
   allAnnotations: [],
   editions: [],
   activeTypes: new Set(Object.keys(TYPE_META)),
-  edition: 'xinke_pingbi',
+  edition: 'gubao',   // 默认取回数最多的古本（100 回）以便通读；批评本仍可切换
   rangeFrom: 0,   // 回章起始 idx（含）
   rangeTo: -1,    // 回章結束 idx（含），-1 表示「未初始化」，Infinity 表示「全部」
 };
