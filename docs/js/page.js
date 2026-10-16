@@ -27,8 +27,8 @@ const _cache = new Map();
  */
 export async function loadPageData(page) {
   if (_cache.has(page)) return _cache.get(page);
-  const url = assetUrl(`data/pages/${page}.json`);
-  const resp = await fetch(url, { cache: 'force-cache' });
+  const url = assetUrl(`data/pages/${page}.json?v=098`);
+  const resp = await fetch(url, { cache: 'no-cache' });
   if (!resp.ok) throw new Error(`页面数据加载失败（HTTP ${resp.status} @ ${url}）`);
   const data = await resp.json();
   _cache.set(page, data);

@@ -7,7 +7,7 @@
  * 路径说明：GitHub Pages 是 site.github.io/USER/REPO/ 子路径，SCOPE 用 self.registration.scope 自动适配。
  */
 
-const CACHE = 'jtw-kg-v7';
+const CACHE = 'jtw-kg-v8';
 const KEEP = 200; // 缓存条目上限，19 张 parquet + wasm + html/js/css
 
 // SW 注册后 scope 形如 https://host/the-journey-to-the-west/，转成站内根前缀
@@ -15,9 +15,9 @@ const SCOPE = self.registration.scope.replace(/[^/]+$/, '');
 const toLocal = (u) => u.startsWith(SCOPE) ? u.substring(SCOPE.length - 1) : u;
 
 // JS 代码更新频繁，走 Network First 确保用户拿到最新版
-const NETWORK_FIRST = [/\.html$/, /\/data\/manifest\.json$/, /\.js$/];
-// 数据/样式/库文件稳定，走 Cache First
-const ALWAYS_CACHE = [/\/lib\//, /\/data\//, /\/css\//, /\/assets\//];
+const NETWORK_FIRST = [/\.html$/, /\/data\/manifest\.json$/, /\/data\/pages\//, /\.js$/];
+// 数据/样式/库文件稳定，走 Cache First（data/ 下仅 parquet 长期缓存）
+const ALWAYS_CACHE = [/\/lib\//, /\/data\/[^/]*\.parquet/, /\/css\//, /\/assets\//];
 
 self.addEventListener('install', (e) => {
   self.skipWaiting();
