@@ -1,21 +1,23 @@
 /* sw.js —— 西游记 Agent · Service Worker
  * 目标：让 GitHub Pages 用户第二次打开时秒开，首次也要能离线缓存核心资源。
  * 策略：
- *   - lib/*, data/*, css/*, assets/*, js/* 走 Cache First（wasm 引擎、parquet 表全部长期缓存）
- *   - index.html / 其它 .html / data/manifest.json 走 Network First（页面/代码迭代能立即生效）
+ *   - lib/*, data/*, css/*, assets/* 走 Cache First（wasm 引擎、parquet 表全部长期缓存）
+ *   - *.js / *.html / data/manifest.json 走 Network First（代码/页面迭代立即生效）
  *   - 其它请求回退到网络
  * 路径说明：GitHub Pages 是 site.github.io/USER/REPO/ 子路径，SCOPE 用 self.registration.scope 自动适配。
  */
 
-const CACHE = 'jtw-kg-v4';
+const CACHE = 'jtw-kg-v5';
 const KEEP = 200; // 缓存条目上限，19 张 parquet + wasm + html/js/css
 
 // SW 注册后 scope 形如 https://host/the-journey-to-the-west/，转成站内根前缀
 const SCOPE = self.registration.scope.replace(/[^/]+$/, '');
 const toLocal = (u) => u.startsWith(SCOPE) ? u.substring(SCOPE.length - 1) : u;
 
-const ALWAYS_CACHE = [/\/lib\//, /\/data\//, /\/css\//, /\/assets\//, /\/js\//];
-const NETWORK_FIRST = [/\.html$/, /\/data\/manifest\.json$/];
+// JS 代码更新频繁，走 Network First 确保用户拿到最新版
+const NETWORK_FIRST = [/\.html$/, /\/data\/manifest\.json$/, /\.js$/];
+// 数据/样式/库文件稳定，走 Cache First
+const ALWAYS_CACHE = [/\/lib\//, /\/data\//, /\/css\//, /\/assets\//];
 
 self.addEventListener('install', (e) => {
   self.skipWaiting();
