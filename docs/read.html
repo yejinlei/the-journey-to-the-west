@@ -45,17 +45,39 @@
   .ch-navigator span{color:var(--ink3)}
   .empty-hint{padding:40px 20px;text-align:center;color:var(--ink3);font-family:var(--kai);font-size:15px}
 
-  /* ---- 正文阅读美化（覆盖 app.css 的宽松布局，聚焦竖排阅读栏） ---- */
-  main{max-width:860px}
-  .main-p{margin:0 0 16px;text-indent:2em;font-size:16.5px;line-height:2.05;
-    color:#2b241b;letter-spacing:.02em}
-  .chap{margin:30px 0 10px}
-  .chap h3{margin:0 0 6px;font-size:22px;letter-spacing:.1em;
-    background:linear-gradient(90deg,rgba(178,106,36,.12),transparent 70%);
-    padding:6px 0 6px 10px;border-left:3px solid var(--cinnabar)}
-  .commentary{line-height:1.9;border-left:3px solid var(--gold-l)}
-  .page-block{margin:12px 0}
-  .poem{line-height:2.3}
+  /* ---- 正文阅读美化：书卷纸感阅读块 + 两端对齐 ---- */
+  main{max-width:840px}
+
+  /* 每章为一纸面阅读块 */
+  .chap{position:relative;margin:34px 0 24px;padding:24px 28px 22px;
+    background:linear-gradient(180deg,rgba(255,253,248,.99),rgba(252,247,236,.95));
+    border:1px solid var(--line-gold);
+    border-top:3px solid rgba(176,141,87,.6);
+    box-shadow:var(--shadow);border-radius:3px}
+  .chap + .chap{margin-top:44px}
+
+  /* 回目：居中书签式标题 */
+  .ch-head{text-align:center;margin:0 0 20px;padding:2px 0 16px;
+    border-bottom:1px solid rgba(176,141,87,.35);
+    position:relative}
+  .ch-head::after{content:'◆';font-size:9px;color:rgba(176,141,87,.6);
+    position:absolute;left:50%;bottom:-8px;transform:translateX(-50%);letter-spacing:0}
+  .ch-no{font-family:var(--kai);font-size:14.5px;color:var(--cinnabar);letter-spacing:.22em}
+  .ch-title{font-family:var(--kai);font-size:22px;color:#33200f;letter-spacing:.14em;
+    margin-top:7px;line-height:1.55}
+  .ch-meta{font-size:12px;color:var(--ink3);margin-top:9px;letter-spacing:.1em}
+
+  /* 正文段落 */
+  .main-p{margin:0 0 18px;text-indent:2em;font-size:16.5px;line-height:2.05;
+    text-align:justify;color:#2b241b;letter-spacing:.03em}
+  .page-block{margin:4px 0 16px}
+  .page-tag{display:inline-block;font-family:var(--kai);font-size:12px;color:var(--cinnabar);
+    border:1px solid rgba(158,43,37,.32);padding:1px 8px;border-radius:2px;margin-right:8px;
+    background:rgba(158,43,37,.05)}
+
+  /* 评点与引诗 */
+  .commentary{line-height:1.95;border-left:3px solid var(--gold-l)}
+  .poem{line-height:2.35}
 </style>
 </head>
 <body>
@@ -388,8 +410,11 @@ function renderChapters(chs, lines, annos, singlePage, allChs) {
       ? `回 ${ch.first_page}`
       : `頁 ${ch.first_page} — ${ch.last_page}`;
     chapDiv.innerHTML = `
-      <h3>${esc(ch.chapter_label)}　<span style="color:var(--ink3);font-weight:400;font-size:15px">${esc(ch.chapter_title || '')}</span></h3>
-      <div class="meta">${rangeStr} · 起點 line_id：${esc(ch.first_line_id || '')}</div>
+      <div class="ch-head">
+        <div class="ch-no">${esc(ch.chapter_label)}</div>
+        <div class="ch-title">${esc(ch.chapter_title || '')}</div>
+        <div class="ch-meta">${rangeStr} · 起句 ${esc(ch.first_line_id || '')}</div>
+      </div>
     `;
     elContent.appendChild(chapDiv);
 
