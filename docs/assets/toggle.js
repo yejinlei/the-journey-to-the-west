@@ -45,10 +45,17 @@
   };
 
   // ---------- OpenCC 初始化 ----------
+  var initRetryCount = 0;
+  var MAX_INIT_RETRY = 5;
   function initConverters() {
     if (state.ready) return;
     if (typeof window.OpenCC === 'undefined' || !window.OpenCC.Converter) {
-      console.warn('[JTW toggle] OpenCC 未加载，繁简切换不可用');
+      if (initRetryCount < MAX_INIT_RETRY) {
+        initRetryCount++;
+        setTimeout(initConverters, 100);
+      } else {
+        console.warn('[JTW toggle] OpenCC 未加载，繁简切换不可用');
+      }
       return;
     }
     try {
@@ -57,6 +64,10 @@
       state.ready = true;
     } catch (e) {
       console.error('[JTW toggle] OpenCC 初始化失败', e);
+      if (initRetryCount < MAX_INIT_RETRY) {
+        initRetryCount++;
+        setTimeout(initConverters, 100);
+      }
     }
   }
 
@@ -232,7 +243,17 @@
   function boot() {
     initConverters();
     mountToolbar();
-    applyAll();
+    // 延迟应用：等待 initConverters 重试完成
+    var applyRetry = 0;
+    function tryApply() {
+      if (state.ready) {
+        applyAll();
+      } else if (applyRetry < MAX_INIT_RETRY) {
+        applyRetry++;
+        setTimeout(tryApply, 100);
+      }
+    }
+    tryApply();
 
     if (window.MutationObserver) {
       var pending = null;
