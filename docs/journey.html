@@ -7,15 +7,19 @@
 <link rel="stylesheet" href="assets/app.css">
 <script src="assets/vendor/opencc.js"></script>
 <script src="assets/toggle.js?v=097"></script>
+<script type="importmap">
+{ "imports": { "three": "./assets/vendor/three.module.js" } }
+</script>
 <style>
-  .mapwrap{position:relative;padding:14px 18px;margin:0;
+  .mapwrap{position:relative;padding:0;margin:0;overflow:hidden;
     border:1px solid var(--line-gold);border-radius:3px;
     background:
       radial-gradient(800px 460px at 20% 30%, rgba(230,201,138,.18), transparent 68%),
       radial-gradient(600px 380px at 82% 78%, rgba(90,169,179,.12), transparent 70%),
       linear-gradient(180deg,rgba(255,253,248,.92),rgba(251,245,232,.86));
     box-shadow:var(--shadow), 0 0 0 1px rgba(176,141,87,.14)}
-  .mapwrap svg{display:block;width:100%;height:auto;touch-action:none;cursor:grab}
+  #scene3d{width:100%;height:620px;display:block;cursor:grab;touch-action:none}
+  #scene3d:active{cursor:grabbing}
   .legend-line{display:flex;flex-wrap:wrap;gap:14px;margin:8px 0 4px;font-size:12.5px;color:var(--ink2);align-items:center}
   .legend-line .sw{display:inline-block;width:22px;height:3px;margin-right:6px;vertical-align:middle;border-radius:2px}
   .legend-line .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle}
@@ -41,11 +45,8 @@
   .kpi b{font-size:22px;color:var(--cinnabar);margin:0 3px;
     background:linear-gradient(180deg,var(--cinnabar),var(--gold));
     -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-  svg .nlab{font-family:var(--kai);font-size:12px;fill:#332c25;pointer-events:none}
-  svg .nlab.start,svg .nlab.end{font-weight:700}
-  svg .edge{fill:none;stroke-linecap:round;stroke-dasharray:4 3}
-  svg .stopcircle{stroke:#fdf6ec;stroke-width:1.4;cursor:pointer;transition:filter .2s}
-  svg .stopcircle:hover{filter:drop-shadow(0 0 6px rgba(176,141,87,.85))}
+  .maphint{position:absolute;right:12px;bottom:10px;font-size:12px;color:var(--ink3);
+    letter-spacing:.08em;pointer-events:none}
 </style>
 </head>
 <body>
@@ -80,8 +81,8 @@
     <div class="rule"></div>
     <p class="lead">取经路上共 <b>九九八十一难</b>，然以地理路径论，可切分为若干「旅程段」（JourneySegment）——
       每一段由起点 Place、终点 Place、覆盖章回、行程天数、难度、途经妖怪数六项构成，
-      并以 next_segment 有向串联，重建取经路线。此页以静态示意方式呈现 <b>18 段关键行程</b>，
-      以「难度」色带与「妖数」点数标注，供跨回章对读参考。
+      并以 next_segment 有向串联，重建取经路线。此页以 <b>Three.js 立体沙盘</b>呈现 <b>18 段关键行程</b>：
+      <b>难度即海拔</b>，火焰山为最高峰；金色光点为行进中的取经人。
       数据依世德堂本一百回回目整理，为研究示意，非考订定本。</p>
   </div>
 
@@ -94,17 +95,18 @@
     <div>最难段 · 狮驼国</div>
   </div>
 
-  <h2>路线示意</h2>
+  <h2>立体路线沙盘</h2>
   <div class="legend-line">
-    <span><span class="sw" style="background:linear-gradient(90deg,rgba(90,169,179,.85),rgba(158,43,37,.85))"></span>难度渐变</span>
-    <span><span class="dot" style="background:var(--cinnabar)"></span>关键节点</span>
+    <span><span class="sw" style="background:linear-gradient(90deg,rgba(90,169,179,.85),rgba(158,43,37,.85))"></span>难度渐变（亦映射海拔）</span>
+    <span><span class="dot" style="background:var(--cinnabar)"></span>降妖节点</span>
     <span><span class="dot" style="background:var(--gold-d)"></span>起点／终点</span>
-    <span><span class="dot" style="background:var(--jade)"></span>收徒／收妖</span>
-    <span class="small">点击节点查看详情；虚线为跨山海段。</span>
+    <span><span class="dot" style="background:var(--jade)"></span>收徒节点</span>
+    <span class="small">拖动旋转 · 滚轮缩放 · 悬停节点查看 · 点击跳转段卡</span>
   </div>
   <div class="mapwrap">
     <div id="tip" class="node-tip"></div>
-    <svg id="map" viewBox="0 0 1080 620" xmlns="http://www.w3.org/2000/svg" aria-label="取经路线示意"></svg>
+    <div id="scene3d"></div>
+    <div class="maphint">拖拽旋转 · 滚轮缩放 · 右键平移</div>
   </div>
 
   <h2>逐段一览</h2>
@@ -117,10 +119,11 @@
   <div>本体论依据：<code>jtw:JourneySegment / jtw:from_place / jtw:to_place / jtw:cover_chapters / jtw:difficulty / jtw:encounters_monsters / jtw:next_segment</code></div>
 </footer>
 
-<script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from './assets/vendor/OrbitControls.js';
+
 // ---- 数据：18 段取经旅程（依世德堂本一百回回目整理，为研究示意）----
-// 每条：{name, ch, days, diff (0-1), mons (妖怪数), from, to, kind}
-// kind: start/end/monk/monster/temple
 const SEGS = [
   {name:"长安起程", from:"长安城", to:"双叉岭", ch:"12", days:9, diff:0.35, mons:1, kind:"start", note:"三藏西行，遇寅将军"},
   {name:"五行山收悟空", from:"双叉岭", to:"五行山", ch:"13-14", days:15, diff:0.55, mons:1, kind:"monk", note:"救出悟空，六贼伏诛"},
@@ -142,12 +145,11 @@ const SEGS = [
   {name:"灵鹫山取真经", from:"玉华州", to:"大雷音寺", ch:"90-100", days:377, diff:0.4, mons:5, kind:"end", note:"九九归真，取经圆满"},
 ];
 
-// ---- 布局：手工坐标（模拟地图，非地理比例）----
-// 起点长安右下 → 一路向西北 → 折回西南 → 直抵灵山
+// ---- 节点：2D 示意坐标（非地理比例），海拔由难度决定 ----
 const NODES = [
-  {id:"start", label:"长安", x:940, y:540, kind:"start", name:"长安城", ch:"12", role:"大唐都城·起程"},
+  {id:"start", label:"长安", x:940, y:540, kind:"start", ch:"12", role:"大唐都城·起程"},
   {id:"s1",  label:"双叉岭", x:820, y:520, kind:"monster"},
-  {id:"s2",  label:"五行山", x:700, y:500, kind:"monk", ch:"13-14", name:"五行山"},
+  {id:"s2",  label:"五行山", x:700, y:500, kind:"monk", ch:"13-14"},
   {id:"s3",  label:"鹰愁涧", x:600, y:490, kind:"monk", ch:"15"},
   {id:"s4",  label:"高老庄", x:500, y:500, kind:"monk", ch:"18-19"},
   {id:"s5",  label:"流沙河", x:400, y:510, kind:"monk", ch:"22"},
@@ -155,10 +157,10 @@ const NODES = [
   {id:"s7",  label:"黄袍怪", x:210, y:460, kind:"monster", ch:"29-31"},
   {id:"s8",  label:"车迟国", x:130, y:400, kind:"monster", ch:"33-37"},
   {id:"s9",  label:"女儿国", x:230, y:340, kind:"monster", ch:"53-55"},
-  {id:"s10", label:"火焰山", x:400, y:300, kind:"monster", ch:"57-61", diff:1.0},
+  {id:"s10", label:"火焰山", x:400, y:300, kind:"monster", ch:"57-61"},
   {id:"s11", label:"六耳猕猴", x:530, y:340, kind:"monster", ch:"58-59"},
   {id:"s12", label:"朱紫国", x:660, y:300, kind:"monster", ch:"64-67"},
-  {id:"s13", label:"狮驼国", x:780, y:220, kind:"monster", ch:"74-77", diff:0.95},
+  {id:"s13", label:"狮驼国", x:780, y:220, kind:"monster", ch:"74-77"},
   {id:"s14", label:"比丘国", x:660, y:150, kind:"monster", ch:"79-82"},
   {id:"s15", label:"盘丝洞", x:520, y:130, kind:"monster", ch:"72-73"},
   {id:"s16", label:"小雷音", x:380, y:150, kind:"monster", ch:"84-87"},
@@ -166,163 +168,217 @@ const NODES = [
   {id:"end", label:"灵山", x:80, y:80, kind:"end", ch:"100", role:"大雷音寺·终点"},
 ];
 
-// 段-节点边：按 SEGS 顺序连接（简化：相邻 kind=monster 之间跳过）
-const EDGES = [
-  ["start","s1"],["s1","s2"],["s2","s3"],["s3","s4"],["s4","s5"],["s5","s6"],
-  ["s6","s7"],["s7","s8"],["s8","s9"],["s9","s10"],["s10","s11"],["s11","s12"],
-  ["s12","s13"],["s13","s14"],["s14","s15"],["s15","s16"],["s16","s17"],["s17","end"],
-];
+// EDGES[i] 与 SEGS[i] 一一对应（18 段串联 19 节点）
+const EDGES = [];
+for (let i = 0; i < NODES.length - 1; i++) EDGES.push([NODES[i].id, NODES[i + 1].id]);
 
 const KIND_COLOR = {
-  start:"#8f6f3a", end:"#8f6f3a", monk:"#3f6b5e",
-  monster:"#9e2b25", temple:"#6a4a8b"
+  start: 0x8f6f3a, end: 0x8f6f3a, monk: 0x3f6b5e,
+  monster: 0x9e2b25, temple: 0x6a4a8b
 };
-const KIND_R = {start:9, end:9, monk:7, monster:6, temple:6};
+const KIND_R = { start: 3.2, end: 3.2, monk: 2.5, monster: 2.1, temple: 2.1 };
 
-function diffColor(d){
+// 节点难度：SEGS[i] 的难度落在其终点 NODES[i+1] 上；起点 0.3
+const nodeDiff = { start: 0.3 };
+for (let i = 0; i < SEGS.length; i++) nodeDiff[NODES[i + 1].id] = SEGS[i].diff;
+
+function diffColorHex(d) {
   // 0.3 蓝玉 → 0.7 金 → 1.0 朱
-  if(d<0.55) return `rgba(90,169,179,${0.55+d*0.35})`;
-  if(d<0.8)  return `rgba(176,141,87,${0.55+d*0.4})`;
-  return `rgba(158,43,37,${0.65+d*0.35})`;
+  const jade = new THREE.Color(0x5aa9b3), gold = new THREE.Color(0xb08d57), red = new THREE.Color(0x9e2b25);
+  if (d < 0.65) return jade.clone().lerp(gold, (d - 0.3) / 0.35);
+  return gold.clone().lerp(red, (d - 0.65) / 0.35);
 }
 
-function nodeById(id){
-  for(const n of NODES){if(n.id===id) return n;}
-  return null;
+// 2D 示意坐标 → 3D（x 右行、z 纵深、y 海拔=难度）
+function to3D(n) {
+  const d = nodeDiff[n.id] ?? 0.5;
+  return new THREE.Vector3((n.x - 540) / 8.5, 4 + d * 30, (n.y - 310) / 8.5);
 }
 
-function buildSVG(){
-  const svg = document.getElementById('map');
-  const NS = "http://www.w3.org/2000/svg";
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
-  // 云纹底纹
-  const defs = document.createElementNS(NS,"defs");
-  defs.innerHTML = `
-    <linearGradient id="diffgrad" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0%" stop-color="#5aa9b3"/>
-      <stop offset="50%" stop-color="#b08d57"/>
-      <stop offset="100%" stop-color="#9e2b25"/>
-    </linearGradient>
-    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="rgba(230,201,138,0.8)"/>
-      <stop offset="100%" stop-color="rgba(230,201,138,0)"/>
-    </radialGradient>
-    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-      <path d="M0,0 L10,5 L0,10 z" fill="rgba(176,141,87,0.7)"/>
-    </marker>
-  `;
-  svg.appendChild(defs);
+// ================= Three.js 场景 =================
+const container = document.getElementById('scene3d');
+const tip = document.getElementById('tip');
 
-  // 云纹背景
-  const cloud = document.createElementNS(NS,"g");
-  cloud.setAttribute("opacity","0.35");
-  cloud.innerHTML = `
-    <path d="M0 100 Q120 80 240 100 Q360 120 480 100 Q600 80 720 100 Q840 120 960 100 L1080 100"
-          fill="none" stroke="#b08d57" stroke-width="1"/>
-    <path d="M0 560 Q120 580 240 560 Q360 540 480 560 Q600 580 720 560 Q840 540 960 560 L1080 560"
-          fill="none" stroke="#b08d57" stroke-width="1"/>
-    <text x="880" y="30" font-family="var(--kai),Kaiti" font-size="22" fill="rgba(158,43,37,0.35)" letter-spacing="0.2em">灵山</text>
-    <text x="820" y="600" font-family="var(--kai),Kaiti" font-size="22" fill="rgba(143,111,58,0.4)" letter-spacing="0.2em">长安</text>
-    <text x="480" y="40" font-family="var(--kai),Kaiti" font-size="16" fill="rgba(90,169,179,0.55)" letter-spacing="0.4em">── 西天取经 万里长征 ──</text>
-  `;
-  svg.appendChild(cloud);
+const scene = new THREE.Scene();
+scene.fog = new THREE.Fog(0xf5eddb, 220, 560);
 
-  // 边
-  for(const [a,b] of EDGES){
-    const na = nodeById(a), nb = nodeById(b);
-    if(!na||!nb) continue;
-    const midX = (na.x+nb.x)/2, midY = (na.y+nb.y)/2;
-    // 找对应段的难度：从相邻节点推断
-    let seg=null;
-    for(let i=0;i<SEGS.length;i++){
-      // 找到端点匹配的段
-      const names = SEGS[i].name;
-      // 简化：直接按顺序匹配 edges[i]
-    }
-    // 直接按 EDGES 顺序映射 SEGS（18 段 1:1）
-    const ei = EDGES.indexOf([a,b]);
-    const seg = SEGS[ei];
-    const d = seg ? seg.diff : 0.5;
-    const line = document.createElementNS(NS,"line");
-    line.setAttribute("x1",na.x); line.setAttribute("y1",na.y);
-    line.setAttribute("x2",nb.x); line.setAttribute("y2",nb.y);
-    line.setAttribute("class","edge");
-    line.setAttribute("stroke",diffColor(d));
-    line.setAttribute("stroke-width", 2 + d*3);
-    line.setAttribute("marker-end","url(#arrow)");
-    svg.appendChild(line);
+const camera = new THREE.PerspectiveCamera(46, container.clientWidth / 620, 0.1, 1000);
+camera.position.set(16, 96, 168);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(container.clientWidth, 620);
+container.appendChild(renderer.domElement);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.06;
+controls.target.set(-4, 14, 0);
+controls.minDistance = 40;
+controls.maxDistance = 320;
+controls.maxPolarAngle = Math.PI * 0.495;
+
+// 光照：暖色环境光 + 斜阳
+scene.add(new THREE.AmbientLight(0xf6ead2, 0.95));
+const sun = new THREE.DirectionalLight(0xfff2dd, 1.15);
+sun.position.set(60, 120, 80);
+scene.add(sun);
+
+// 地面：宣纸色平面
+const ground = new THREE.Mesh(
+  new THREE.PlaneGeometry(220, 150),
+  new THREE.MeshStandardMaterial({ color: 0xefe5cf, roughness: 1, metalness: 0 })
+);
+ground.rotation.x = -Math.PI / 2;
+ground.position.y = 0;
+scene.add(ground);
+
+// 文字标签：Canvas → Sprite（始终面向镜头）
+function makeLabel(text, color = '#332c25') {
+  const cv = document.createElement('canvas');
+  cv.width = 256; cv.height = 72;
+  const ctx = cv.getContext('2d');
+  ctx.font = '600 34px KaiTi, "Kaiti SC", serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.shadowColor = 'rgba(255,253,248,.9)'; ctx.shadowBlur = 7;
+  ctx.fillStyle = color;
+  ctx.fillText(text, 128, 38);
+  const tex = new THREE.CanvasTexture(cv);
+  tex.anisotropy = 4;
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: false, transparent: true }));
+  sp.scale.set(19, 5.4, 1);
+  return sp;
+}
+
+// 云：径向渐变 Sprite，缓慢漂移
+function makeCloud(scale) {
+  const cv = document.createElement('canvas');
+  cv.width = cv.height = 128;
+  const ctx = cv.getContext('2d');
+  const g = ctx.createRadialGradient(64, 64, 6, 64, 64, 62);
+  g.addColorStop(0, 'rgba(255,253,248,.85)');
+  g.addColorStop(1, 'rgba(255,253,248,0)');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, 128, 128);
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(cv), depthWrite: false, transparent: true, opacity: 0.8 }));
+  sp.scale.set(scale, scale * 0.42, 1);
+  return sp;
+}
+const clouds = [];
+for (let i = 0; i < 6; i++) {
+  const c = makeCloud(46 + Math.random() * 34);
+  c.position.set(-110 + Math.random() * 220, 46 + Math.random() * 26, -70 + Math.random() * 140);
+  c.userData.speed = 0.9 + Math.random() * 0.9;
+  clouds.push(c);
+  scene.add(c);
+}
+
+// 路线管道：每段一条，难度着色
+const nodePos = new Map(NODES.map(n => [n.id, to3D(n)]));
+for (let i = 0; i < EDGES.length; i++) {
+  const a = nodePos.get(EDGES[i][0]), b = nodePos.get(EDGES[i][1]);
+  const mid = a.clone().add(b).multiplyScalar(0.5);
+  mid.y = (a.y + b.y) / 2 + 3.5; // 段中微隆，山脊感
+  const curve = new THREE.QuadraticBezierCurve3(a, mid, b);
+  const tube = new THREE.Mesh(
+    new THREE.TubeGeometry(curve, 28, 1.05, 8, false),
+    new THREE.MeshStandardMaterial({ color: diffColorHex(SEGS[i].diff), roughness: 0.75 })
+  );
+  scene.add(tube);
+}
+
+// 全线平滑曲线（取经人光点行进用）
+const fullCurve = new THREE.CatmullRomCurve3(NODES.map(n => nodePos.get(n.id)), false, 'catmullrom', 0.15);
+
+// 节点：球体 + 起讫光环 + 标签
+const nodeMeshes = [];
+for (const n of NODES) {
+  const p = nodePos.get(n.id);
+  const r = KIND_R[n.kind] || 2.1;
+  const mesh = new THREE.Mesh(
+    new THREE.SphereGeometry(r, 24, 18),
+    new THREE.MeshStandardMaterial({ color: KIND_COLOR[n.kind] || 0x8f6f3a, roughness: 0.55 })
+  );
+  mesh.position.copy(p);
+  mesh.userData.node = n;
+  scene.add(mesh);
+  nodeMeshes.push(mesh);
+
+  if (n.kind === 'start' || n.kind === 'end') {
+    const ring = new THREE.Mesh(
+      new THREE.RingGeometry(r + 1.2, r + 2.1, 40),
+      new THREE.MeshBasicMaterial({ color: 0xe6c98a, side: THREE.DoubleSide, transparent: true, opacity: 0.9 })
+    );
+    ring.rotation.x = -Math.PI / 2;
+    ring.position.copy(p).y = 0.35;
+    scene.add(ring);
   }
 
-  // 节点
-  for(const n of NODES){
-    const r = KIND_R[n.kind]||6;
-    const g = document.createElementNS(NS,"g");
-    g.setAttribute("transform",`translate(${n.x},${n.y})`);
-    g.setAttribute("data-id", n.id);
-
-    // 光晕（关键节点）
-    if(n.kind==="start"||n.kind==="end"||(n.diff&&n.diff>=0.9)){
-      const halo = document.createElementNS(NS,"circle");
-      halo.setAttribute("r", r+10);
-      halo.setAttribute("fill","url(#glow)");
-      g.appendChild(halo);
-    }
-    const c = document.createElementNS(NS,"circle");
-    c.setAttribute("class","stopcircle");
-    c.setAttribute("r", r);
-    c.setAttribute("fill", KIND_COLOR[n.kind]||"#8f6f3a");
-    g.appendChild(c);
-
-    const t = document.createElementNS(NS,"text");
-    t.setAttribute("class","nlab"+(n.kind==="start"||n.kind==="end"?" "+n.kind:""));
-    t.setAttribute("x", r+4); t.setAttribute("y", -4);
-    t.textContent = n.label;
-    g.appendChild(t);
-
-    if(n.role){
-      const tr = document.createElementNS(NS,"text");
-      tr.setAttribute("class","nlab");
-      tr.setAttribute("x", r+4); tr.setAttribute("y", 10);
-      tr.setAttribute("font-size","10.5");
-      tr.setAttribute("fill","#8a7f6d");
-      tr.textContent = n.role;
-      g.appendChild(tr);
-    }
-
-    // tooltip 交互
-    g.addEventListener("mousemove", e => {
-      const tip = document.getElementById('tip');
-      const rect = svg.getBoundingClientRect();
-      const wrapRect = svg.parentElement.getBoundingClientRect();
-      const scaleX = rect.width / 1080;
-      const scaleY = rect.height / 620;
-      tip.style.left = ((e.clientX - wrapRect.left)) + "px";
-      tip.style.top  = ((e.clientY - wrapRect.top)) + "px";
-      const role = n.role || (n.ch?("第 "+n.ch+" 回"):"途中节点");
-      const color = KIND_COLOR[n.kind];
-      tip.innerHTML = `<div class="tt">${n.label}</div><div>${role}</div>`;
-      tip.style.borderColor = color;
-      tip.style.display = "block";
-    });
-    g.addEventListener("mouseleave", ()=>{
-      document.getElementById('tip').style.display = "none";
-    });
-    g.addEventListener("click", ()=>{
-      const idx = EDGES.findIndex(e => e[0]===n.id || e[1]===n.id);
-      if(idx>=0) highlightSeg(idx);
-    });
-
-    svg.appendChild(g);
-  }
+  const label = makeLabel(n.label);
+  label.position.copy(p);
+  label.position.y += r + 4.6;
+  scene.add(label);
 }
 
-function buildSegCards(){
+// 取经人光点 + 光晕
+const pilgrim = new THREE.Mesh(
+  new THREE.SphereGeometry(1.7, 18, 14),
+  new THREE.MeshBasicMaterial({ color: 0xf3d9a0 })
+);
+scene.add(pilgrim);
+const pilgrimGlow = makeCloud(14);
+pilgrimGlow.material.opacity = 0.65;
+scene.add(pilgrimGlow);
+
+// ================= 交互 =================
+const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
+let downX = 0, downY = 0;
+
+function pickNode(ev) {
+  const rect = renderer.domElement.getBoundingClientRect();
+  pointer.x = ((ev.clientX - rect.left) / rect.width) * 2 - 1;
+  pointer.y = -((ev.clientY - rect.top) / rect.height) * 2 + 1;
+  raycaster.setFromCamera(pointer, camera);
+  const hit = raycaster.intersectObjects(nodeMeshes, false)[0];
+  return hit ? hit.object.userData.node : null;
+}
+
+renderer.domElement.addEventListener('pointermove', (ev) => {
+  const n = pickNode(ev);
+  if (n) {
+    const rect = container.getBoundingClientRect();
+    const role = n.role || (n.ch ? ('第 ' + n.ch + ' 回') : '途中节点');
+    const d = nodeDiff[n.id];
+    tip.innerHTML = `<div class="tt">${esc(n.label)}</div><div>${esc(role)}${d != null ? ' · 难度 ' + (d * 10).toFixed(1) : ''}</div>`;
+    tip.style.left = (ev.clientX - rect.left) + 'px';
+    tip.style.top = (ev.clientY - rect.top) + 'px';
+    tip.style.display = 'block';
+    container.style.cursor = 'pointer';
+  } else {
+    tip.style.display = 'none';
+    container.style.cursor = 'grab';
+  }
+});
+renderer.domElement.addEventListener('pointerdown', (ev) => { downX = ev.clientX; downY = ev.clientY; });
+renderer.domElement.addEventListener('pointerup', (ev) => {
+  // 位移小于阈值才算点击（与旋转视角区分）
+  if (Math.hypot(ev.clientX - downX, ev.clientY - downY) > 5) return;
+  const n = pickNode(ev);
+  if (!n) return;
+  const idx = NODES.indexOf(n);
+  if (idx > 0) highlightSeg(idx - 1);
+  else highlightSeg(0);
+});
+
+// ================= 段卡 =================
+function buildSegCards() {
   const box = document.getElementById('seglist');
-  for(let i=0;i<SEGS.length;i++){
-    const s = SEGS[i];
+  for (const s of SEGS) {
     const card = document.createElement('div');
     card.className = 'card segcard';
-    const monStr = s.mons>0 ? `<span title="途经妖怪">${'●'.repeat(Math.min(s.mons,6))}${s.mons>6?('+'+(s.mons-6)):' '}</span>` : '<span style="color:var(--ink3)">○</span>';
+    const monStr = s.mons > 0 ? `<span title="途经妖怪">${'●'.repeat(Math.min(s.mons, 6))}${s.mons > 6 ? ('+' + (s.mons - 6)) : ' '}</span>` : '<span style="color:var(--ink3)">○</span>';
     card.innerHTML = `
       <div class="h">
         <div class="from-to">${esc(s.from)} <span style="color:var(--gold-d)">→</span> ${esc(s.to)}</div>
@@ -332,28 +388,49 @@ function buildSegCards(){
       <div class="stats">
         <span><b>${s.days}</b>日</span>
         <span><b>${s.mons}</b>妖</span>
-        <span>难度 <b>${(s.diff*10).toFixed(1)}/10</b></span>
+        <span>难度 <b>${(s.diff * 10).toFixed(1)}/10</b></span>
         <span style="margin-left:auto">${monStr}</span>
       </div>
-      <div class="diffbar"><span style="width:${Math.round(s.diff*100)}%"></span></div>
-    `;
+      <div class="diffbar"><span style="width:${Math.round(s.diff * 100)}%"></span></div>`;
     box.appendChild(card);
   }
 }
 
-function highlightSeg(idx){
+function highlightSeg(idx) {
   const card = document.querySelectorAll('.segcard')[idx];
-  if(card){
+  if (card) {
     card.style.boxShadow = '0 0 0 2px rgba(230,201,138,.8), 0 8px 26px rgba(176,141,87,.5)';
-    card.scrollIntoView({behavior:'smooth', block:'center'});
-    setTimeout(()=>{card.style.boxShadow='';}, 2400);
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(() => { card.style.boxShadow = ''; }, 2400);
   }
 }
 
-function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+// ================= 渲染循环 =================
+let t = 0;
+function animate() {
+  requestAnimationFrame(animate);
+  // 取经人沿路线行进
+  t = (t + 0.00042) % 1;
+  const p = fullCurve.getPointAt(t);
+  pilgrim.position.copy(p).y += 2.6;
+  pilgrimGlow.position.copy(pilgrim.position);
+  // 云漂移
+  for (const c of clouds) {
+    c.position.x += c.userData.speed * 0.016;
+    if (c.position.x > 130) c.position.x = -130;
+  }
+  controls.update();
+  renderer.render(scene, camera);
+}
 
-buildSVG();
+window.addEventListener('resize', () => {
+  camera.aspect = container.clientWidth / 620;
+  camera.updateProjectionMatrix();
+  renderer.setSize(container.clientWidth, 620);
+});
+
 buildSegCards();
+animate();
 </script>
 </body>
 </html>
