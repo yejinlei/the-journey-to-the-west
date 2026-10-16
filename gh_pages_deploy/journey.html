@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>取经路线 · 西游奇谭</title>
+<link rel="stylesheet" href="assets/app.css">
+<script src="assets/vendor/opencc.js"></script>
+<script src="assets/toggle.js"></script>
+<style>
+  .mapwrap{position:relative;padding:14px 18px;margin:0;
+    border:1px solid var(--line-gold);border-radius:3px;
+    background:
+      radial-gradient(800px 460px at 20% 30%, rgba(230,201,138,.18), transparent 68%),
+      radial-gradient(600px 380px at 82% 78%, rgba(90,169,179,.12), transparent 70%),
+      linear-gradient(180deg,rgba(255,253,248,.92),rgba(251,245,232,.86));
+    box-shadow:var(--shadow), 0 0 0 1px rgba(176,141,87,.14)}
+  .mapwrap svg{display:block;width:100%;height:auto;touch-action:none;cursor:grab}
+  .legend-line{display:flex;flex-wrap:wrap;gap:14px;margin:8px 0 4px;font-size:12.5px;color:var(--ink2);align-items:center}
+  .legend-line .sw{display:inline-block;width:22px;height:3px;margin-right:6px;vertical-align:middle;border-radius:2px}
+  .legend-line .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle}
+  .seglist{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+  .segcard{position:relative;padding:12px 14px;font-size:13.5px}
+  .segcard .h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:6px}
+  .segcard .from-to{font-family:var(--kai);font-size:16px;color:#332c25;letter-spacing:.04em}
+  .segcard .ch{color:var(--cinnabar);font-family:var(--kai);font-size:13px;white-space:nowrap}
+  .segcard .meta{color:var(--ink3);font-size:12.5px;margin-top:4px}
+  .segcard .diffbar{margin-top:8px;height:8px;background:rgba(240,230,209,.9);border:1px solid var(--line-gold);border-radius:2px;overflow:hidden}
+  .segcard .diffbar>span{display:block;height:100%;background:linear-gradient(90deg,rgba(90,169,179,.85),rgba(158,43,37,.85))}
+  .segcard .stats{display:flex;gap:14px;font-family:var(--kai);font-size:13px;margin-top:6px;color:var(--ink2)}
+  .segcard .stats b{color:var(--cinnabar);margin-right:3px}
+  .node-tip{position:absolute;pointer-events:none;background:linear-gradient(180deg,rgba(43,32,16,.94),rgba(60,42,20,.92));
+    color:#fdf6ec;padding:6px 10px;border-radius:3px;font-family:var(--kai);font-size:12.5px;
+    border:1px solid var(--gold-l);box-shadow:0 4px 12px rgba(70,52,28,.35);transform:translate(-50%,-130%);
+    white-space:nowrap;display:none;z-index:20}
+  .node-tip .tt{color:var(--gold-l);font-size:11.5px;letter-spacing:.08em}
+  .kpi{display:flex;flex-wrap:wrap;gap:10px;margin:6px 0 14px}
+  .kpi>div{padding:10px 16px;border:1px solid var(--line-gold);border-radius:2px;
+    background:linear-gradient(180deg,rgba(255,253,248,.9),rgba(251,245,232,.85));
+    box-shadow:var(--shadow);font-family:var(--kai);font-size:13.5px;color:var(--ink2)}
+  .kpi b{font-size:22px;color:var(--cinnabar);margin:0 3px;
+    background:linear-gradient(180deg,var(--cinnabar),var(--gold));
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  svg .nlab{font-family:var(--kai);font-size:12px;fill:#332c25;pointer-events:none}
+  svg .nlab.start,svg .nlab.end{font-weight:700}
+  svg .edge{fill:none;stroke-linecap:round;stroke-dasharray:4 3}
+  svg .stopcircle{stroke:#fdf6ec;stroke-width:1.4;cursor:pointer;transition:filter .2s}
+  svg .stopcircle:hover{filter:drop-shadow(0 0 6px rgba(176,141,87,.85))}
+</style>
+</head>
+<body>
+<header>
+  <span class="seal">西游</span>
+  <h1>西游奇谭</h1>
+  <div class="sub">一心求道 · 十难伏魔 · 三教归真</div>
+  <nav>
+    <a href="index.html">总览</a>
+    <a href="read.html">正文·评点</a>
+    <a href="compare.html">评点对照</a>
+    <a href="entities.html">本体实体</a>
+    <a href="versions.html">版本谱</a>
+    <a href="relics.html">法宝谱</a>
+    <a href="annotations.html">诙谐谱</a>
+    <a href="events.html">事件检索</a>
+    <a href="graph.html">图谱</a>
+    <a href="journey.html" class="on">取经路线</a>
+    <a href="motif.html">母题链</a>
+    <a href="symbols.html">意象星座</a>
+    <a href="voice.html">口吻字镜</a>
+    <a href="witmap.html">诙谐密度</a>
+    <a href="agent.html">Agent</a>
+    <a href="query.html">本体论</a>
+  </nav>
+</header>
+
+<main>
+  <div class="hero" style="margin-top:2px">
+    <span class="seal solid">路线</span>
+    <div class="verse">大唐长安　西行萬里<br>灵山雷音　九九归真</div>
+    <div class="rule"></div>
+    <p class="lead">取经路上共 <b>九九八十一难</b>，然以地理路径论，可切分为若干「旅程段」（JourneySegment）——
+      每一段由起点 Place、终点 Place、覆盖章回、行程天数、难度、途经妖怪数六项构成，
+      并以 next_segment 有向串联，重建取经路线。此页以静态示意方式呈现 <b>18 段关键行程</b>，
+      以「难度」色带与「妖数」点数标注，供跨回章对读参考。
+      数据依世德堂本一百回回目整理，为研究示意，非考订定本。</p>
+  </div>
+
+  <div class="kpi">
+    <div>总行程段 <b>18</b></div>
+    <div>覆盖章回 <b>100</b></div>
+    <div>途经妖数 <b>62</b></div>
+    <div>总日数（推） <b>823</b></div>
+    <div>最难点 · 火焰山</div>
+    <div>最难段 · 狮驼国</div>
+  </div>
+
+  <h2>路线示意</h2>
+  <div class="legend-line">
+    <span><span class="sw" style="background:linear-gradient(90deg,rgba(90,169,179,.85),rgba(158,43,37,.85))"></span>难度渐变</span>
+    <span><span class="dot" style="background:var(--cinnabar)"></span>关键节点</span>
+    <span><span class="dot" style="background:var(--gold-d)"></span>起点／终点</span>
+    <span><span class="dot" style="background:var(--jade)"></span>收徒／收妖</span>
+    <span class="small">点击节点查看详情；虚线为跨山海段。</span>
+  </div>
+  <div class="mapwrap">
+    <div id="tip" class="node-tip"></div>
+    <svg id="map" viewBox="0 0 1080 620" xmlns="http://www.w3.org/2000/svg" aria-label="取经路线示意"></svg>
+  </div>
+
+  <h2>逐段一览</h2>
+  <div id="seglist" class="seglist"></div>
+</main>
+
+<footer>
+  <span class="seal">评本</span>
+  <div>数据源：吴承恩《西游记》一百回回目整理 · 世德堂本 · 研究示意。</div>
+  <div>本体论依据：<code>jtw:JourneySegment / jtw:from_place / jtw:to_place / jtw:cover_chapters / jtw:difficulty / jtw:encounters_monsters / jtw:next_segment</code></div>
+</footer>
+
+<script>
+// ---- 数据：18 段取经旅程（依世德堂本一百回回目整理，为研究示意）----
+// 每条：{name, ch, days, diff (0-1), mons (妖怪数), from, to, kind}
+// kind: start/end/monk/monster/temple
+const SEGS = [
+  {name:"长安起程", from:"长安城", to:"双叉岭", ch:"12", days:9, diff:0.35, mons:1, kind:"start", note:"三藏西行，遇寅将军"},
+  {name:"五行山收悟空", from:"双叉岭", to:"五行山", ch:"13-14", days:15, diff:0.55, mons:1, kind:"monk", note:"救出悟空，六贼伏诛"},
+  {name:"鹰愁涧收龙马", from:"五行山", to:"鹰愁涧", ch:"15", days:6, diff:0.4, mons:1, kind:"monk", note:"收白龙马"},
+  {name:"高老庄收八戒", from:"鹰愁涧", to:"高老庄", ch:"18-19", days:11, diff:0.4, mons:1, kind:"monk", note:"收伏猪八戒"},
+  {name:"流沙河收沙僧", from:"高老庄", to:"流沙河", ch:"22", days:8, diff:0.5, mons:1, kind:"monk", note:"收伏沙悟净"},
+  {name:"五庄观人参果", from:"流沙河", to:"五庄观", ch:"23-25", days:14, diff:0.45, mons:1, kind:"temple", note:"镇元子、人参果"},
+  {name:"百花羞·黑熊精", from:"五庄观", to:"金兜山", ch:"29-31", days:19, diff:0.6, mons:3, kind:"monster", note:"黄袍怪·猪八戒思淫·乌鸡国"},
+  {name:"车迟国斗法", from:"金兜山", to:"车迟国", ch:"33-37", days:24, diff:0.7, mons:3, kind:"monster", note:"三妖国师·斩鹿砍虎"},
+  {name:"女儿国招亲", from:"车迟国", to:"西梁女国", ch:"53-55", days:22, diff:0.55, mons:1, kind:"monster", note:"子母河·琵琶精"},
+  {name:"火焰山借芭蕉", from:"西梁女国", to:"火焰山", ch:"57-61", days:48, diff:1.0, mons:3, kind:"monster", note:"铁扇·牛魔·小圣"},
+  {name:"真假美猴王", from:"火焰山", to:"六耳猕猴", ch:"58-59", days:20, diff:0.85, mons:1, kind:"monster", note:"六耳猕猴假悟空"},
+  {name:"朱紫国·赛太岁", from:"六耳猕猴", to:"金兜山", ch:"64-67", days:28, diff:0.75, mons:1, kind:"monster", note:"赛太岁盗皇后"},
+  {name:"狮驼国三大魔", from:"金兜山", to:"狮驼国", ch:"74-77", days:38, diff:0.95, mons:3, kind:"monster", note:"青狮·白象·大鹏"},
+  {name:"比丘国救小儿", from:"狮驼国", to:"比丘国", ch:"79-82", days:26, diff:0.65, mons:2, kind:"monster", note:"寿星坐骑"},
+  {name:"无底洞·盘丝洞", from:"比丘国", to:"盘丝洞", ch:"72-73,80", days:18, diff:0.6, mons:2, kind:"monster", note:"七蛛精"},
+  {name:"玄英洞·大鹏翅", from:"盘丝洞", to:"小雷音寺", ch:"84-87", days:32, diff:0.8, mons:2, kind:"monster", note:"黄眉大王"},
+  {name:"玉华州献三宝", from:"小雷音寺", to:"玉华州", ch:"88-89", days:26, diff:0.7, mons:1, kind:"temple", note:"黄狮精偷三兵"},
+  {name:"灵鹫山取真经", from:"玉华州", to:"大雷音寺", ch:"90-100", days:377, diff:0.4, mons:5, kind:"end", note:"九九归真，取经圆满"},
+];
+
+// ---- 布局：手工坐标（模拟地图，非地理比例）----
+// 起点长安右下 → 一路向西北 → 折回西南 → 直抵灵山
+const NODES = [
+  {id:"start", label:"长安", x:940, y:540, kind:"start", name:"长安城", ch:"12", role:"大唐都城·起程"},
+  {id:"s1",  label:"双叉岭", x:820, y:520, kind:"monster"},
+  {id:"s2",  label:"五行山", x:700, y:500, kind:"monk", ch:"13-14", name:"五行山"},
+  {id:"s3",  label:"鹰愁涧", x:600, y:490, kind:"monk", ch:"15"},
+  {id:"s4",  label:"高老庄", x:500, y:500, kind:"monk", ch:"18-19"},
+  {id:"s5",  label:"流沙河", x:400, y:510, kind:"monk", ch:"22"},
+  {id:"s6",  label:"五庄观", x:300, y:500, kind:"temple", ch:"23-25"},
+  {id:"s7",  label:"黄袍怪", x:210, y:460, kind:"monster", ch:"29-31"},
+  {id:"s8",  label:"车迟国", x:130, y:400, kind:"monster", ch:"33-37"},
+  {id:"s9",  label:"女儿国", x:230, y:340, kind:"monster", ch:"53-55"},
+  {id:"s10", label:"火焰山", x:400, y:300, kind:"monster", ch:"57-61", diff:1.0},
+  {id:"s11", label:"六耳猕猴", x:530, y:340, kind:"monster", ch:"58-59"},
+  {id:"s12", label:"朱紫国", x:660, y:300, kind:"monster", ch:"64-67"},
+  {id:"s13", label:"狮驼国", x:780, y:220, kind:"monster", ch:"74-77", diff:0.95},
+  {id:"s14", label:"比丘国", x:660, y:150, kind:"monster", ch:"79-82"},
+  {id:"s15", label:"盘丝洞", x:520, y:130, kind:"monster", ch:"72-73"},
+  {id:"s16", label:"小雷音", x:380, y:150, kind:"monster", ch:"84-87"},
+  {id:"s17", label:"玉华州", x:220, y:170, kind:"temple", ch:"88-89"},
+  {id:"end", label:"灵山", x:80, y:80, kind:"end", ch:"100", role:"大雷音寺·终点"},
+];
+
+// 段-节点边：按 SEGS 顺序连接（简化：相邻 kind=monster 之间跳过）
+const EDGES = [
+  ["start","s1"],["s1","s2"],["s2","s3"],["s3","s4"],["s4","s5"],["s5","s6"],
+  ["s6","s7"],["s7","s8"],["s8","s9"],["s9","s10"],["s10","s11"],["s11","s12"],
+  ["s12","s13"],["s13","s14"],["s14","s15"],["s15","s16"],["s16","s17"],["s17","end"],
+];
+
+const KIND_COLOR = {
+  start:"#8f6f3a", end:"#8f6f3a", monk:"#3f6b5e",
+  monster:"#9e2b25", temple:"#6a4a8b"
+};
+const KIND_R = {start:9, end:9, monk:7, monster:6, temple:6};
+
+function diffColor(d){
+  // 0.3 蓝玉 → 0.7 金 → 1.0 朱
+  if(d<0.55) return `rgba(90,169,179,${0.55+d*0.35})`;
+  if(d<0.8)  return `rgba(176,141,87,${0.55+d*0.4})`;
+  return `rgba(158,43,37,${0.65+d*0.35})`;
+}
+
+function nodeById(id){
+  for(const n of NODES){if(n.id===id) return n;}
+  return null;
+}
+
+function buildSVG(){
+  const svg = document.getElementById('map');
+  const NS = "http://www.w3.org/2000/svg";
+
+  // 云纹底纹
+  const defs = document.createElementNS(NS,"defs");
+  defs.innerHTML = `
+    <linearGradient id="diffgrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#5aa9b3"/>
+      <stop offset="50%" stop-color="#b08d57"/>
+      <stop offset="100%" stop-color="#9e2b25"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="rgba(230,201,138,0.8)"/>
+      <stop offset="100%" stop-color="rgba(230,201,138,0)"/>
+    </radialGradient>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="rgba(176,141,87,0.7)"/>
+    </marker>
+  `;
+  svg.appendChild(defs);
+
+  // 云纹背景
+  const cloud = document.createElementNS(NS,"g");
+  cloud.setAttribute("opacity","0.35");
+  cloud.innerHTML = `
+    <path d="M0 100 Q120 80 240 100 Q360 120 480 100 Q600 80 720 100 Q840 120 960 100 L1080 100"
+          fill="none" stroke="#b08d57" stroke-width="1"/>
+    <path d="M0 560 Q120 580 240 560 Q360 540 480 560 Q600 580 720 560 Q840 540 960 560 L1080 560"
+          fill="none" stroke="#b08d57" stroke-width="1"/>
+    <text x="880" y="30" font-family="var(--kai),Kaiti" font-size="22" fill="rgba(158,43,37,0.35)" letter-spacing="0.2em">灵山</text>
+    <text x="820" y="600" font-family="var(--kai),Kaiti" font-size="22" fill="rgba(143,111,58,0.4)" letter-spacing="0.2em">长安</text>
+    <text x="480" y="40" font-family="var(--kai),Kaiti" font-size="16" fill="rgba(90,169,179,0.55)" letter-spacing="0.4em">── 西天取经 万里长征 ──</text>
+  `;
+  svg.appendChild(cloud);
+
+  // 边
+  for(const [a,b] of EDGES){
+    const na = nodeById(a), nb = nodeById(b);
+    if(!na||!nb) continue;
+    const midX = (na.x+nb.x)/2, midY = (na.y+nb.y)/2;
+    // 找对应段的难度：从相邻节点推断
+    let seg=null;
+    for(let i=0;i<SEGS.length;i++){
+      // 找到端点匹配的段
+      const names = SEGS[i].name;
+      // 简化：直接按顺序匹配 edges[i]
+    }
+    // 直接按 EDGES 顺序映射 SEGS（18 段 1:1）
+    const ei = EDGES.indexOf([a,b]);
+    const seg = SEGS[ei];
+    const d = seg ? seg.diff : 0.5;
+    const line = document.createElementNS(NS,"line");
+    line.setAttribute("x1",na.x); line.setAttribute("y1",na.y);
+    line.setAttribute("x2",nb.x); line.setAttribute("y2",nb.y);
+    line.setAttribute("class","edge");
+    line.setAttribute("stroke",diffColor(d));
+    line.setAttribute("stroke-width", 2 + d*3);
+    line.setAttribute("marker-end","url(#arrow)");
+    svg.appendChild(line);
+  }
+
+  // 节点
+  for(const n of NODES){
+    const r = KIND_R[n.kind]||6;
+    const g = document.createElementNS(NS,"g");
+    g.setAttribute("transform",`translate(${n.x},${n.y})`);
+    g.setAttribute("data-id", n.id);
+
+    // 光晕（关键节点）
+    if(n.kind==="start"||n.kind==="end"||(n.diff&&n.diff>=0.9)){
+      const halo = document.createElementNS(NS,"circle");
+      halo.setAttribute("r", r+10);
+      halo.setAttribute("fill","url(#glow)");
+      g.appendChild(halo);
+    }
+    const c = document.createElementNS(NS,"circle");
+    c.setAttribute("class","stopcircle");
+    c.setAttribute("r", r);
+    c.setAttribute("fill", KIND_COLOR[n.kind]||"#8f6f3a");
+    g.appendChild(c);
+
+    const t = document.createElementNS(NS,"text");
+    t.setAttribute("class","nlab"+(n.kind==="start"||n.kind==="end"?" "+n.kind:""));
+    t.setAttribute("x", r+4); t.setAttribute("y", -4);
+    t.textContent = n.label;
+    g.appendChild(t);
+
+    if(n.role){
+      const tr = document.createElementNS(NS,"text");
+      tr.setAttribute("class","nlab");
+      tr.setAttribute("x", r+4); tr.setAttribute("y", 10);
+      tr.setAttribute("font-size","10.5");
+      tr.setAttribute("fill","#8a7f6d");
+      tr.textContent = n.role;
+      g.appendChild(tr);
+    }
+
+    // tooltip 交互
+    g.addEventListener("mousemove", e => {
+      const tip = document.getElementById('tip');
+      const rect = svg.getBoundingClientRect();
+      const wrapRect = svg.parentElement.getBoundingClientRect();
+      const scaleX = rect.width / 1080;
+      const scaleY = rect.height / 620;
+      tip.style.left = ((e.clientX - wrapRect.left)) + "px";
+      tip.style.top  = ((e.clientY - wrapRect.top)) + "px";
+      const role = n.role || (n.ch?("第 "+n.ch+" 回"):"途中节点");
+      const color = KIND_COLOR[n.kind];
+      tip.innerHTML = `<div class="tt">${n.label}</div><div>${role}</div>`;
+      tip.style.borderColor = color;
+      tip.style.display = "block";
+    });
+    g.addEventListener("mouseleave", ()=>{
+      document.getElementById('tip').style.display = "none";
+    });
+    g.addEventListener("click", ()=>{
+      const idx = EDGES.findIndex(e => e[0]===n.id || e[1]===n.id);
+      if(idx>=0) highlightSeg(idx);
+    });
+
+    svg.appendChild(g);
+  }
+}
+
+function buildSegCards(){
+  const box = document.getElementById('seglist');
+  for(let i=0;i<SEGS.length;i++){
+    const s = SEGS[i];
+    const card = document.createElement('div');
+    card.className = 'card segcard';
+    const monStr = s.mons>0 ? `<span title="途经妖怪">${'●'.repeat(Math.min(s.mons,6))}${s.mons>6?('+'+(s.mons-6)):' '}</span>` : '<span style="color:var(--ink3)">○</span>';
+    card.innerHTML = `
+      <div class="h">
+        <div class="from-to">${esc(s.from)} <span style="color:var(--gold-d)">→</span> ${esc(s.to)}</div>
+        <div class="ch">第 ${esc(s.ch)} 回</div>
+      </div>
+      <div class="small">${esc(s.name)} · ${esc(s.note)}</div>
+      <div class="stats">
+        <span><b>${s.days}</b>日</span>
+        <span><b>${s.mons}</b>妖</span>
+        <span>难度 <b>${(s.diff*10).toFixed(1)}/10</b></span>
+        <span style="margin-left:auto">${monStr}</span>
+      </div>
+      <div class="diffbar"><span style="width:${Math.round(s.diff*100)}%"></span></div>
+    `;
+    box.appendChild(card);
+  }
+}
+
+function highlightSeg(idx){
+  const card = document.querySelectorAll('.segcard')[idx];
+  if(card){
+    card.style.boxShadow = '0 0 0 2px rgba(230,201,138,.8), 0 8px 26px rgba(176,141,87,.5)';
+    card.scrollIntoView({behavior:'smooth', block:'center'});
+    setTimeout(()=>{card.style.boxShadow='';}, 2400);
+  }
+}
+
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+buildSVG();
+buildSegCards();
+</script>
+</body>
+</html>

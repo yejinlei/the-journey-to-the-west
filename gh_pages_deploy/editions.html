@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>版本图鉴 · 西游奇谭</title>
+<link rel="stylesheet" href="assets/app.css">
+<script src="assets/vendor/opencc.js"></script>
+<script src="assets/toggle.js"></script>
+<style>
+  .vcard{position:relative;padding:14px 16px}
+  .vcard .vhead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+  .vcard .name{font-family:var(--kai);font-size:19px;color:#332c25;letter-spacing:.06em}
+  .vcard .year{font-family:var(--kai);color:var(--cinnabar);font-size:16px}
+  .vcard .pub{color:var(--ink3);font-size:13px}
+  .vcard .desc{margin-top:8px;font-size:14px;color:var(--ink2);line-height:1.85}
+  .vcard .badge{position:absolute;right:12px;top:12px;font-family:var(--kai);font-size:12px;color:var(--cinnabar);
+    border:1px solid rgba(158,43,37,.35);padding:1px 7px;border-radius:2px;background:rgba(158,43,37,.04)}
+  .bar-row{display:grid;grid-template-columns:120px 1fr 52px;align-items:center;gap:8px;padding:3px 0}
+  .bar-row .lbl{font-family:var(--kai);font-size:13px;color:#332c25}
+  .bar-row .bar{height:12px;border-radius:2px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.35)}
+  .bar-row .n{text-align:right;font-family:var(--kai);color:var(--cinnabar);font-size:13px}
+  .tend-tag{display:inline-block;font-family:var(--kai);font-size:11px;padding:1px 7px;border-radius:2px;margin:1px 2px}
+  .semidot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:1px}
+  .cover td{font-family:var(--kai);padding:5px 8px;font-size:13px;text-align:center}
+  .cover td:first-child{text-align:left}
+  .cover .hit{color:var(--cinnabar);font-weight:700}
+  .scholar{display:flex;gap:12px;padding:12px 16px}
+  .scholar .who{flex:0 0 168px}
+  .scholar .who .nm{font-family:var(--kai);font-size:16px;color:#332c25}
+  .scholar .who .wk{font-family:var(--kai);font-size:13px;color:var(--cinnabar)}
+  .scholar .who .sc{display:inline-block;font-family:var(--kai);font-size:11px;color:var(--ink3);
+    border:1px solid rgba(63,107,94,.35);padding:0 6px;border-radius:2px;margin-top:4px}
+  .scholar .arg{font-size:14px;color:var(--ink2);line-height:1.8}
+  .loadbox{padding:80px 20px;text-align:center;color:var(--ink3);font-family:var(--kai);font-size:16px}
+  .tree-svg{width:100%;height:auto;display:block}
+</style>
+</head>
+<body>
+<header>
+  <span class="seal">西游</span>
+  <h1>西游奇谭</h1>
+  <div class="sub">一心求道 · 十难伏魔 · 三教归真</div>
+  <nav>
+    <a href="index.html">总览</a>
+    <a href="read.html">正文·评点</a>
+    <a href="compare.html">评点对照</a>
+    <a href="entities.html">本体实体</a>
+    <a href="versions.html">版本谱</a>
+    <a href="editions.html" class="on">版本图鉴</a>
+    <a href="relics.html">法宝谱</a>
+    <a href="annotations.html">诙谐谱</a>
+    <a href="events.html">事件检索</a>
+    <a href="graph.html">图谱</a>
+    <a href="journey.html">取经路线</a>
+    <a href="motif.html">母题链</a>
+    <a href="symbols.html">意象星座</a>
+    <a href="voice.html">口吻字镜</a>
+    <a href="witmap.html">诙谐密度</a>
+    <a href="agent.html">Agent</a>
+    <a href="query.html">本体论</a>
+  </nav>
+</header>
+
+<main>
+  <div class="hero" style="margin-top:2px">
+    <span class="seal solid">图鉴</span>
+    <div class="verse">世德為源　批评為體<br>三教歸真　谱系分明</div>
+    <div class="rule"></div>
+    <p class="lead">诸本之<b>版本图鉴</b>：从明万历金陵<b>世德堂本</b>（1592）为一源，
+      明清批评本、证道本、真诠本、大奇书本、典藏简本依次派生。展示<b>版本谱系边</b>（V 层）、
+      每本的<b>儒释道三教倾向</b>（Z 层，0-1 三维），以及明清评点家之<b>学术论点</b>（W 层）。
+      正文覆盖：古本 100 回 · 百回详注 100 回 · 典藏(朱鼎臣)简本 66 回 · 新刻批评本实存 4 回。</p>
+  </div>
+
+  <h2>版本谱系 · V 层</h2>
+  <div id="loading" class="loadbox">正在装载版本数据……</div>
+  <div id="content" style="display:none"></div>
+</main>
+
+<footer>
+  <span class="seal">版本</span>
+  <div>版本谱系 · 三教倾向 · 评点家论点，由本工程本体论规范 V/Z/W 层导出。</div>
+  <div>倾向评分与谱系为研究判断，仅供玩索，非定本。</div>
+</footer>
+
+<script type="module">
+import { loadPageData } from './js/page.js';
+
+const elLoading = document.getElementById('loading');
+const elContent = document.getElementById('content');
+
+function esc(s) {
+  if (s === null || s === undefined) return '';
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// 版本短名 + 正文覆盖（回数 / 页数 / 行数）
+const COVER = {
+  shidetang:      ['世德堂',  '',   '',  ''],
+  li_ping:        ['李评本',  '',   '',  ''],
+  daqishi:        ['大奇书',  '',   '',  ''],
+  xinke_pingbi:   ['批评本',  '4',  '72', ''],
+  zhenquan:       ['真诠本',  '',   '',  ''],
+  yangminzhai:    ['杨闽斋',  '',   '',  ''],
+  minzhaitang:    ['闽斋堂',  '',   '',  ''],
+  zhengdao:       ['证道本',  '',   '',  ''],
+  gubao:          ['古本',    '100','100',''],
+  baihui_xiangzhu:['百回详注','100','100',''],
+  zhu_ping:       ['朱鼎臣',  '66', '66', ''],
+};
+
+// 三教倾向条形配色
+const TEND_COLOR = {
+  confucian: 'linear-gradient(90deg,rgba(92,116,140,.8),rgba(92,116,140,.5))',
+  buddhist:  'linear-gradient(90deg,rgba(178,106,36,.8),rgba(178,106,36,.5))',
+  daoist:    'linear-gradient(90deg,rgba(63,107,94,.8),rgba(63,107,94,.5))',
+};
+
+// 谱系图布局：BFS 分层，x=层数*间距，y 层内错开
+function layoutLineage(lineage, editions) {
+  const names = editions.map(e => e.edition_id);
+  const idx = name => names.indexOf(name);
+  const fromSet = new Set(lineage.map(l => l.from_edition));
+  const roots = names.filter(n => !fromSet.has(n));
+  const root = roots.length ? roots[0] : 'shidetang';
+  const depth = {}; depth[root] = 0;
+  const children = {};
+  for (const n of names) children[n] = children[n] || [];
+  for (const l of lineage) (children[l.from_edition] = children[l.from_edition] || []).push(l.to_edition);
+  // BFS
+  const q = [root];
+  while (q.length) {
+    const cur = q.shift();
+    for (const c of (children[cur]||[])) {
+      if (depth[c] === undefined) { depth[c] = depth[cur] + 1; q.push(c); }
+    }
+  }
+  return { root, depth, children };
+}
+
+function buildTreeSvg(lineage, editions) {
+  const W = 980, ROW = 64, COL = 250;
+  const { root, depth, children } = layoutLineage(lineage, editions);
+  const byDepth = {};
+  for (const [n, d] of Object.entries(depth)) (byDepth[d] = byDepth[d] || []).push(n);
+  const pos = {};
+  let maxW = 0;
+  for (const d of Object.keys(byDepth).sort((a,b)=>a-b)) {
+    const col = +d * COL + 40;
+    maxW = Math.max(maxW, col);
+    const list = byDepth[d];
+    list.forEach((n,i) => { pos[n] = { x: col, y: 26 + i * ROW }; });
+  }
+  const H = Math.max(...Object.values(pos).map(p=>p.y)) + 30;
+  let svg = `<svg class="tree-svg" viewBox="0 0 ${maxW+240} ${H}" xmlns="http://www.w3.org/2000/svg" style="max-width:${maxW+240}px">`;
+  // edges
+  for (const l of lineage) {
+    const a = pos[l.from_edition], b = pos[l.to_edition];
+    if (!a || !b) continue;
+    const mx = a.x + (b.x - a.x) * 0.5;
+    const d = `M${a.x+150} ${a.y} C${mx+150} ${a.y},${b.x-90} ${b.y},${b.x-90} ${b.y}`;
+    svg += `<path d="${d}" fill="none" stroke="rgba(158,43,37,.45)" stroke-width="1.4"
+      marker-end="url(#arrow)"/>`;
+  }
+  // nodes
+  for (const e of editions) {
+    const p = pos[e.edition_id]; if (!p) continue;
+    const short = (COVER[e.edition_id]||[])[0] || e.edition_id;
+    const isRoot = e.edition_id === root;
+    svg += `<g transform="translate(${p.x} ${p.y})">
+      <rect x="0" y="-14" width="150" height="34" rx="4"
+        fill="${isRoot ? 'rgba(178,106,36,.16)' : 'rgba(158,43,37,.05)'}"
+        stroke="${isRoot ? 'rgba(178,106,36,.5)' : 'rgba(158,43,37,.28)'}"/>
+      <text x="10" y="6" font-size="15" font-family="Kaiti SC, STKaiti, serif"
+        fill="#332c25">${esc(short)}</text>
+      <text x="140" y="6" font-size="11" fill="#9a8f83" text-anchor="end">${esc(depth[e.edition_id])}</text>
+    </g>`;
+  }
+  svg += `<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M0,0L10,5L0,10z" fill="rgba(158,43,37,.5)"/></marker></defs>`;
+  svg += `</svg>`;
+  return svg;
+}
+
+async function main() {
+  try {
+    elLoading.textContent = '正在加载版本数据…';
+    const d = await loadPageData('editions');
+    const editions = d.editions || [];
+    const tendency = d.tendency || [];
+    const lineage = d.lineage || [];
+    const scholars = d.scholars || [];
+
+    elLoading.style.display = 'none';
+    elContent.style.display = 'block';
+
+    // 谱系 SVG
+    const h1 = document.createElement('h3');
+    h1.innerHTML = `世系图（${lineage.length} 条派生边）`;
+    elContent.appendChild(h1);
+    const box1 = document.createElement('div');
+    box1.className = 'card';
+    box1.innerHTML = buildTreeSvg(lineage, editions);
+    elContent.appendChild(box1);
+
+    // 诸本覆盖表
+    const h2 = document.createElement('h3');
+    h2.innerHTML = '诸本覆盖';
+    elContent.appendChild(h2);
+    let coverHtml = '<table class="cover"><thead><tr><th>版本</th><th>卷数</th><th>正文</th>';
+    for (const e of editions) {
+      const c = COVER[e.edition_id] || [];
+      coverHtml += `<tr><td>${esc(e.display_name)}</td>`;
+      coverHtml += `<td>${esc(c[1] || '—')}</td><td class="${c[2] ? 'hit' : ''}">${esc(c[2] || '无正文')}</td></tr>`;
+    }
+    coverHtml += '</table>';
+    const box2 = document.createElement('div');
+    box2.className = 'card';
+    box2.innerHTML = coverHtml;
+    elContent.appendChild(box2);
+
+    // 三教倾向（Z 层）
+    const h3 = document.createElement('h3');
+    h3.innerHTML = '三教倾向 · Z 层（儒 / 释 / 道，0-1）';
+    elContent.appendChild(h3);
+    for (const t of tendency) {
+      const short = (COVER[t.edition_id]||[])[0] || t.edition_id;
+      const card = document.createElement('div');
+      card.className = 'card';
+      let html = `<div class="vhead"><div class="name">${esc(short)} · ${esc(t.note||'')}</div></div>`;
+      for (const [k, lbl] of [['confucian','儒'], ['buddhist','释'], ['daoist','道']]) {
+        const v = t[k] || 0;
+        const w = Math.round(v * 100);
+        html += `<div class="bar-row">
+          <div class="lbl"><span class="semidot" style="background:${TEND_COLOR[k].includes('140')?'#5c748c':TEND_COLOR[k].includes('106')?'#b26a24':'#3f6b5e'}"></span>${lbl}</div>
+          <div class="bar" style="width:${w}%;background:${TEND_COLOR[k]}"></div>
+          <div class="n">${v.toFixed(2)}</div>
+        </div>`;
+      }
+      card.innerHTML = html;
+      elContent.appendChild(card);
+    }
+
+    // 评点家论点（W 层）
+    const h4 = document.createElement('h3');
+    h4.innerHTML = '评点家论点 · W 层（' + scholars.length + ' 条）';
+    elContent.appendChild(h4);
+    let scholarHtml = '';
+    for (const s of scholars) {
+      scholarHtml += `<div class="card scholar">
+        <div class="who">
+          <div class="nm">${esc(s.scholar_id)}</div>
+          <div class="wk">${esc(s.work_title||'')}</div>
+          <span class="sc">${esc(s.school||'')}</span>
+        </div>
+        <div class="arg"><b>论：</b>${esc(s.argues_about||'')} — ${esc(s.stance||'')}</div>
+      </div>`;
+    }
+    const box4 = document.createElement('div');
+    box4.innerHTML = scholarHtml;
+    elContent.appendChild(box4);
+  } catch (e) {
+    elLoading.textContent = '加载失败：' + (e && e.message ? e.message : String(e));
+    console.error(e);
+  }
+}
+
+main();
+</script>
+</body>
+</html>

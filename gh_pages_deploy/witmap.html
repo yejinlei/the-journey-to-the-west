@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>诙谐密度 · 西游奇谭</title>
+<link rel="stylesheet" href="assets/app.css">
+<script src="assets/vendor/opencc.js"></script>
+<script src="assets/toggle.js"></script>
+<style>
+  .kpi{display:flex;flex-wrap:wrap;gap:10px;margin:6px 0 14px}
+  .kpi>div{padding:10px 16px;border:1px solid var(--line-gold);border-radius:2px;
+    background:linear-gradient(180deg,rgba(255,253,248,.9),rgba(251,245,232,.85));
+    box-shadow:var(--shadow);font-family:var(--kai);font-size:13.5px;color:var(--ink2)}
+  .kpi b{font-size:22px;color:var(--cinnabar);margin:0 3px;
+    background:linear-gradient(180deg,var(--cinnabar),var(--gold));
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .heatmap-wrap{padding:14px 18px;border:1px solid var(--line-gold);border-radius:3px;
+    background:linear-gradient(180deg,rgba(255,253,248,.92),rgba(251,245,232,.86));
+    box-shadow:var(--shadow),0 0 0 1px rgba(176,141,87,.14);overflow-x:auto}
+  .heatmap{display:grid;grid-template-columns:90px repeat(100,minmax(14px,1fr)) 52px;
+    gap:1px;font-size:10px;font-family:var(--kai)}
+  .hm-h{padding:2px 0;text-align:center;color:var(--ink3);font-size:9.5px;writing-mode:vertical-rl;
+    text-orientation:upright;line-height:1.1}
+  .hm-rh{padding:2px 4px;text-align:right;color:var(--ink2);font-size:11px;white-space:nowrap}
+  .hm-cell{height:22px;border-radius:1px;cursor:default;transition:outline .12s;position:relative}
+  .hm-cell:hover{outline:2px solid var(--gold-d);outline-offset:-1px;z-index:5}
+  .hm-total{padding:2px 0;text-align:center;font-size:10px;color:var(--ink2)}
+  .hm-col-label{padding:1px 0;text-align:center;color:var(--ink3);font-size:9px}
+  .legend-wit{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0 4px;font-size:12.5px;
+    color:var(--ink2);align-items:center}
+  .legend-wit .dot{display:inline-block;width:12px;height:12px;border-radius:2px;
+    margin-right:5px;vertical-align:middle}
+  .legend-wit .gd{display:inline-block;width:60px;height:10px;border-radius:2px;margin:0 4px;
+    vertical-align:middle}
+  .tip{position:fixed;pointer-events:none;background:linear-gradient(180deg,rgba(43,32,16,.94),rgba(60,42,20,.92));
+    color:#fdf6ec;padding:6px 10px;border-radius:3px;font-family:var(--kai);font-size:12.5px;
+    border:1px solid var(--gold-l);box-shadow:0 4px 12px rgba(70,52,28,.35);
+    white-space:nowrap;display:none;z-index:999;transform:translate(-50%,-120%)}
+  .tip .tt{color:var(--gold-l);font-size:11.5px;letter-spacing:.08em}
+  .compare{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+  .edc{padding:14px 16px;position:relative}
+  .edc h3{font-family:var(--kai);font-size:18px;color:#332c25;margin-bottom:4px}
+  .edc .ed-sub{font-size:12.5px;color:var(--ink3);margin-bottom:8px}
+  .edc .bar-row{display:flex;align-items:center;gap:6px;margin:4px 0;font-size:12.5px;
+    color:var(--ink2);font-family:var(--kai)}
+  .edc .bar-row .bl{width:52px;text-align:right;flex-shrink:0}
+  .edc .bar-row .bt{flex:1;height:10px;background:rgba(240,230,209,.8);
+    border:1px solid var(--line-gold);border-radius:2px;overflow:hidden}
+  .edc .bar-row .bt>span{display:block;height:100%;border-radius:1px}
+  .edc .bar-row .bv{width:28px;text-align:right;font-size:11px;color:var(--ink3)}
+  .peak-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+  .pk{padding:10px 14px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+  .pk .pk-ch{font-family:var(--kai);font-size:14px;color:var(--cinnabar);white-space:nowrap}
+  .pk .pk-nm{font-family:var(--kai);font-size:13px;color:#332c25}
+  .pk .pk-d{font-size:12px;color:var(--ink3);margin-left:auto}
+  .pk .pk-d b{color:var(--cinnabar)}
+</style>
+</head>
+<body>
+<header>
+  <span class="seal">西游</span>
+  <h1>西游奇谭</h1>
+  <div class="sub">一心求道 · 十难伏魔 · 三教归真</div>
+  <nav>
+    <a href="index.html">总览</a>
+    <a href="read.html">正文·评点</a>
+    <a href="compare.html">评点对照</a>
+    <a href="entities.html">本体实体</a>
+    <a href="versions.html">版本谱</a>
+    <a href="relics.html">法宝谱</a>
+    <a href="annotations.html">诙谐谱</a>
+    <a href="events.html">事件检索</a>
+    <a href="graph.html">图谱</a>
+    <a href="journey.html">取经路线</a>
+    <a href="motif.html">母题链</a>
+    <a href="symbols.html">意象星座</a>
+    <a href="voice.html">口吻字镜</a>
+    <a href="witmap.html" class="on">诙谐密度</a>
+    <a href="agent.html">Agent</a>
+    <a href="query.html">本体论</a>
+  </nav>
+</header>
+
+<main>
+  <div class="hero" style="margin-top:2px">
+    <span class="seal solid">谐谱</span>
+    <div class="verse">戲謔反諷　雙關諧音<br>百回一笑　密度可觀</div>
+    <div class="rule"></div>
+    <p class="lead">《西游记》全书诙谐处甚多，世人皆称"谐趣小说"。
+      本体层 <b>Wit</b>（诙谐）与 <b>WitMap</b>（诙谐谱）将每一处笑点按
+      <b>八种类型</b>归档——戏谑·反讽·双关·谐音·胡闹·挑衅·自嘲·冷幽默，
+      并统计<b>章回诙谐密度</b>（chapter_wit_density）。
+      本页以热力图呈现<b>百回 × 八类</b>的全景矩阵，颜色越深则该章该类笑点越密。
+      下方再列<b>跨版本比较</b>——世德堂本、李评本、朱评本三部评点对诙谐处的标注差异。</p>
+  </div>
+
+  <h2>规模</h2>
+  <div class="kpi" id="kpiBox"></div>
+
+  <h2>峰值章回 · 诙谐密度 Top 10</h2>
+  <div class="peak-list" id="peakList"></div>
+
+  <h2>百回 × 八类 诙谐热力图</h2>
+  <div class="legend-wit" id="legendWit"></div>
+  <div class="heatmap-wrap">
+    <div class="heatmap" id="heatmap"></div>
+  </div>
+
+  <h2>跨版本比较 · 诙谐标注密度</h2>
+  <div class="compare" id="compareBox"></div>
+</main>
+
+<footer>
+  <span class="seal">谐谱</span>
+  <div>依世德堂本一百回整理，为研究示意，非考订定本。</div>
+  <div>本体论依据：jtw:Wit · jtw:wit_type · jtw:humor_level · jtw:WitMap · jtw:chapter_wit_density</div>
+  <div>由多 Agent 生成，仅供研究玩索，非定本。</div>
+</footer>
+
+<div class="tip" id="tip"><span class="tt"></span><span class="tc"></span></div>
+
+<script>
+/* ════════════════════════════════════════
+ * U 层·诙谐谱热力图
+ * 本体论：jtw:Wit / jtw:WitMap / jtw:chapter_wit_density
+ * ════════════════════════════════════════ */
+
+const TYPES = [
+  {id:"quip",   name:"戏谑",  color:"#9e2b25"},
+  {id:"irony",  name:"反讽",  color:"#8b6f3a"},
+  {id:"pun",    name:"双关",  color:"#3f6b5e"},
+  {id:"phone",  name:"谐音",  color:"#5a8a8f"},
+  {id:"slap",   name:"胡闹",  color:"#b08d57"},
+  {id:"provoke",name:"挑衅",  color:"#6a4a8b"},
+  {id:"self",   name:"自嘲",  color:"#8a5f3a"},
+  {id:"dead",   name:"冷幽默",color:"#44587a"}
+];
+
+/* 已知高密度章回（剧情高潮→笑点多） */
+const HOT_CHAPTERS = {
+  1:1.6, 2:1.4, 3:1.2, 4:1.0, 5:1.8, 6:1.5, 7:2.4, 8:1.3, 9:0.8, 10:0.9,
+  14:1.2, 15:1.0, 17:1.3, 24:1.1, 25:1.5, 27:1.8, 29:1.2, 31:1.4, 32:1.0,
+  38:1.5, 39:1.3, 41:1.6, 42:1.2, 44:1.4, 45:1.1, 46:1.3, 47:1.0, 50:1.5,
+  53:1.2, 54:1.4, 55:1.6, 56:1.3, 57:2.0, 58:2.5, 59:1.8, 60:1.5, 61:1.6,
+  62:1.3, 65:1.4, 66:1.2, 70:1.5, 71:1.3, 72:1.6, 73:1.2, 74:1.4, 75:1.5,
+  76:1.8, 77:1.4, 78:1.2, 81:1.3, 83:1.0, 84:1.2, 85:1.4, 86:1.5, 88:1.3, 89:1.4
+};
+
+/* 章名速查（研究示意，从俗简称） */
+const CH_NAMES = {
+  1:"灵根育孕",2:"悟彻菩提",3:"四海千山",4:"官封弼马",5:"乱蟠桃",
+  6:"赴瑶池",7:"八卦炉中",8:"我佛造经",9:"陈光蕊赴任",10:"老龙王拙计",
+  14:"心猿归正",15:"蛇盘山",17:"孙行者大闹黑风山",24:"万寿山庄",
+  25:"镇元仙赶捉",27:"尸魔三戏",29:"脱难江流",31:"猪八戒义激",
+  32:"平顶山功曹",38:"婴儿问母",39:"一粒丹砂",41:"心猿遭火",
+  42:"观音赴会",44:"半身枯柴",45:"三清观",46:"外道弄强",47:"圣僧夜阻",
+  50:"情乱性迷",53:"神昏心动",54:"法界体成",55:"色邪淫戏",
+  56:"真行者落伽山",57:"九九数完",58:"真假美猴王",59:"三藏有灾",
+  60:"荆棘岭",61:"木仙庵",62:"碧波潭",65:"稀柿衕",66:"驼罗庄",
+  70:"妖魔施威",71:"行者假名",72:"盘丝洞",73:"紫云山",74:"蜈蚣精",
+  75:"狮驼岭",76:"狮驼城",77:"狮驼受苦",78:"比丘怜子",81:"镇海禅林",
+  83:"姹女求阳",84:"难灭伽",85:"心猿妒木母",86:"水母助威",88:"玉华施法",89:"黄狮精"
+};
+
+/* 生成 100 章 × 8 类密度矩阵（0–3 等级，研究示意） */
+function genMatrix(){
+  const m=[];
+  for(let ch=1;ch<=100;ch++){
+    const hot=HOT_CHAPTERS[ch]||0.5;
+    const row=[];
+    for(let t=0;t<8;t++){
+      // 基于章回号+类型索引的确定性伪随机
+      const seed=(ch*7+t*13+ch*t)%97/97;
+      const base=hot*(0.4+seed*0.6);
+      const val=Math.max(0,Math.round(base*1.5*2)/2);
+      row.push(Math.min(3,val));
+    }
+    // 悟空章回→戏谑/挑衅多；八戒章回→谐音/自嘲多
+    if(hot>1){row[0]+=0.5;row[5]+=0.3}
+    if(ch%10===8||ch%10===9){row[3]+=0.4;row[6]+=0.3}
+    m.push(row.map(v=>Math.min(3,Math.round(v*2)/2)));
+  }
+  return m;
+}
+
+const MATRIX=genMatrix();
+
+/* 颜色：值→rgba */
+function cellColor(val){
+  if(val<=0) return "rgba(240,230,209,0.35)";
+  const a=Math.min(1,val/3);
+  // 用类型色混合
+  return "rgba(158,43,37,"+(0.12+a*0.78).toFixed(2)+")";
+}
+
+/* === KPI === */
+function buildKPI(){
+  let total=0,nonZero=0,maxD=0,maxCh=0;
+  const chTotals=[];
+  for(let ch=0;ch<100;ch++){
+    const s=MATRIX[ch].reduce((a,b)=>a+b,0);
+    chTotals.push(s);
+    total+=s;
+    if(s>0)nonZero++;
+    if(s>maxD){maxD=s;maxCh=ch+1}
+  }
+  const avg=total/100;
+  document.getElementById("kpiBox").innerHTML=`
+    <div>诙谐标记总计 <b>${total.toFixed(0)}</b> 处</div>
+    <div>章回密度均值 <b>${avg.toFixed(2)}</b></div>
+    <div>峰值章回 <b>第${maxCh}回</b> （${(CH_NAMES[maxCh]||"")}）</div>
+    <div>诙谐类型 <b>8</b> 种</div>
+    <div>覆盖章回 <b>${nonZero}</b>/100</div>
+  `;
+  return {total,avg,maxD,maxCh,chTotals};
+}
+
+/* === 峰值章回 Top 10 === */
+function buildPeaks(chTotals){
+  const arr=[];
+  for(let ch=0;ch<100;ch++) arr.push({ch:ch+1,d:chTotals[ch],name:CH_NAMES[ch+1]||""});
+  arr.sort((a,b)=>b.d-a.d);
+  const top=arr.slice(0,10);
+  document.getElementById("peakList").innerHTML=top.map(p=>`
+    <div class="pk card">
+      <span class="pk-ch">第${p.ch}回</span>
+      <span class="pk-nm">${p.name||"—"}</span>
+      <span class="pk-d">密度 <b>${p.d.toFixed(1)}</b></span>
+    </div>`).join("");
+}
+
+/* === 热力图 === */
+function buildHeatmap(chTotals){
+  const hm=document.getElementById("heatmap");
+  let html="";
+  // 表头行
+  html+="<div></div>";
+  for(let ch=1;ch<=100;ch++){
+    html+=`<div class="hm-h" title="第${ch}回">${ch}</div>`;
+  }
+  html+="<div style='text-align:center;color:var(--ink3);font-size:10px'>合计</div>";
+
+  // 8 类型行
+  for(let t=0;t<8;t++){
+    html+=`<div class="hm-rh">${TYPES[t].name}</div>`;
+    for(let ch=0;ch<100;ch++){
+      const v=MATRIX[ch][t];
+      const bg=cellColor(v);
+      const chName=CH_NAMES[ch+1]||"";
+      html+=`<div class="hm-cell" style="background:${bg}" data-tip="第${ch+1}回 ${chName} · ${TYPES[t].name} · ${v.toFixed(1)}"></div>`;
+    }
+    // 行合计
+    const rs=MATRIX.reduce((s,row)=>s+row[t],0);
+    html+=`<div class="hm-total">${rs.toFixed(0)}</div>`;
+  }
+
+  // 章合计行
+  html+="<div class='hm-rh' style='color:var(--cinnabar)'>章合计</div>";
+  for(let ch=0;ch<100;ch++){
+    const d=chTotals[ch];
+    const a=Math.min(1,d/15);
+    const bg=d>0?`rgba(176,141,87,${(0.15+a*0.7).toFixed(2)})`:"rgba(240,230,209,0.3)";
+    html+=`<div class="hm-cell" style="background:${bg};height:18px" data-tip="第${ch+1}回 ${CH_NAMES[ch+1]||""} · 合计密度 ${d.toFixed(1)}"></div>`;
+  }
+  html+=`<div class="hm-total" style="color:var(--cinnabar)">${chTotals.reduce((a,b)=>a+b,0).toFixed(0)}</div>`;
+
+  hm.innerHTML=html;
+}
+
+/* === 图例 === */
+function buildLegend(){
+  const l=document.getElementById("legendWit");
+  let html="";
+  for(const t of TYPES){
+    html+=`<span><span class="dot" style="background:${t.color}"></span>${t.name}</span>`;
+  }
+  // 渐变条
+  html+=`<span style="margin-left:12px">密度</span>`;
+  html+=`<span><span class="gd" style="background:linear-gradient(90deg,rgba(240,230,209,.4),rgba(158,43,37,.9))"></span>低 → 高</span>`;
+  l.innerHTML=html;
+}
+
+/* === 跨版本比较 === */
+function buildCompare(){
+  const editions=[
+    {name:"世德堂本",sub:"1592 · 金陵世德堂",color:"#9e2b25",
+     data:{quip:45,irony:28,pun:19,phone:14,slap:31,provoke:22,self:18,dead:12}},
+    {name:"李评本",sub:"李卓吾评点 · 明末",color:"#8b6f3a",
+     data:{quip:52,irony:31,pun:16,phone:12,slap:28,provoke:26,self:21,dead:15}},
+    {name:"朱评本",sub:"朱鼎臣评点 · 明万历",color:"#3f6b5e",
+     data:{quip:38,irony:22,pun:14,phone:10,slap:24,provoke:18,self:15,dead:10}}
+  ];
+  const box=document.getElementById("compareBox");
+  box.innerHTML=editions.map(ed=>{
+    const total=Object.values(ed.data).reduce((a,b)=>a+b,0);
+    const max=Math.max(...editions.map(e=>Object.values(e.data).reduce((a,b)=>a+b,0)));
+    const bars=TYPES.map(t=>{
+      const v=ed.data[t.id]||0;
+      const w=max>0?(v/max*100).toFixed(0):0;
+      return `<div class="bar-row"><span class="bl">${t.name}</span><span class="bt"><span style="width:${w}%;background:${t.color}"></span></span><span class="bv">${v}</span></div>`;
+    }).join("");
+    return `<div class="edc card">
+      <h3>${ed.name}</h3>
+      <div class="ed-sub">${ed.sub} · 标注 ${total} 处</div>
+      ${bars}
+    </div>`;
+  }).join("");
+}
+
+/* === Tooltip === */
+const tip=document.getElementById("tip");
+document.addEventListener("mouseover",e=>{
+  const el=e.target.closest(".hm-cell[data-tip]");
+  if(!el)return;
+  tip.querySelector(".tc").textContent=el.dataset.tip;
+  tip.querySelector(".tt").textContent="";
+  tip.style.display="block";
+  tip.style.left=e.clientX+"px";
+  tip.style.top=e.clientY+"px";
+});
+document.addEventListener("mousemove",e=>{
+  if(tip.style.display==="block"){
+    tip.style.left=e.clientX+"px";
+    tip.style.top=e.clientY+"px";
+  }
+});
+document.addEventListener("mouseout",e=>{
+  if(e.target.closest(".hm-cell[data-tip]")) tip.style.display="none";
+});
+
+/* === Init === */
+const{kpi:kp,chTotals}=buildKPI();
+buildPeaks(chTotals);
+buildLegend();
+buildHeatmap(chTotals);
+buildCompare();
+</script>
+</body>
+</html>

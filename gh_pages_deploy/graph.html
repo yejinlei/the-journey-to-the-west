@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>图谱 · 西游奇谭</title>
+<link rel="stylesheet" href="assets/app.css">
+<script src="assets/vendor/opencc.js"></script>
+<script src="assets/toggle.js"></script>
+<style>
+  .tabs{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0 10px;padding:6px;
+    background:linear-gradient(180deg,rgba(255,253,248,.85),rgba(253,248,238,.7));
+    border:1px solid var(--line);border-radius:3px;box-shadow:var(--shadow)}
+  .tabs button{letter-spacing:.1em;padding:5px 12px;font-size:13.5px;color:var(--ink2);
+    border:1px solid transparent;background:none;border-radius:2px;cursor:pointer;font-family:inherit}
+  .tabs button:hover{color:var(--cinnabar);border-color:rgba(158,43,37,.3);background:rgba(255,255,255,.55)}
+  .tabs button.on{color:var(--cinnabar);border-color:rgba(158,43,37,.35);
+    background:linear-gradient(180deg,#fffdf8,#f6ecd9);font-weight:600}
+  .loadbox{padding:80px 20px;text-align:center;color:var(--ink3);font-family:var(--kai);font-size:16px}
+  .gwrap{display:grid;grid-template-columns:1fr 340px;gap:14px;align-items:start}
+  @media (max-width:960px){.gwrap{grid-template-columns:1fr}}
+  .gcanvas{padding:10px;margin:0;border:1px solid var(--line);border-radius:2px;
+    background:linear-gradient(180deg,rgba(255,253,248,.92),rgba(253,248,238,.85));box-shadow:var(--shadow)}
+  .gcanvas svg{display:block;width:100%;height:auto;touch-action:none}
+  .gtools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 8px}
+  .gtools input,.gtools select{padding:5px 8px;font-size:13px;font-family:inherit;
+    background:rgba(255,253,248,.9);border:1px solid var(--line);border-radius:2px}
+  .gside{position:sticky;top:14px;max-height:84vh;overflow:auto;margin:0;font-size:13.5px;padding:15px 17px;
+    background:linear-gradient(180deg,rgba(255,253,248,.97),rgba(253,248,238,.96));
+    border:1px solid var(--line);border-radius:3px;box-shadow:var(--shadow)}
+  .gside h3{margin:0 0 4px;font-size:17px}
+  .gside .kv{border:0;background:none;box-shadow:none;border-radius:0;margin:8px 0 0;width:100%}
+  .gside .kv td{border-bottom:1px dotted #e9ddc7;padding:3px 5px 3px 0;font-size:13px}
+  .gside .kv td:first-child{color:var(--ink3);white-space:nowrap;width:6em}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--ink3);margin-top:6px}
+  .legend .sw{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:5px;vertical-align:middle}
+  .node-label{font-family:var(--kai);font-size:12px;fill:#332c25;pointer-events:none}
+  .link-label{font-size:10px;fill:#8a7f6d}
+</style>
+</head>
+<body>
+<header>
+  <span class="seal">西游</span>
+  <h1>西游奇谭</h1>
+  <div class="sub">一心求道 · 十难伏魔 · 三教归真</div>
+  <nav>
+    <a href="index.html">总览</a>
+    <a href="read.html">正文·评点</a>
+    <a href="compare.html">评点对照</a>
+    <a href="entities.html">本体实体</a>
+    <a href="versions.html">版本谱</a>
+    <a href="relics.html">法宝谱</a>
+    <a href="annotations.html">诙谐谱</a>
+    <a href="events.html">事件检索</a>
+    <a href="graph.html" class="on">图谱</a>
+    <a href="agent.html">Agent</a>
+    <a href="query.html">本体论</a>
+  </nav>
+</header>
+
+<main>
+  <div class="hero" style="margin-top:2px">
+    <span class="seal solid">圖譜</span>
+    <div class="verse">師徒寶器　妖神王臣<br>四重視圖　點即見本</div>
+    <div class="rule"></div>
+    <p class="lead">西游图谱四重视图：<b>关系图</b>（349 条，按谓词着色）、<b>实体度分布</b>
+      （按类型分组）、<b>事件时序</b>（按页码泳道）、<b>关系谱前八</b>（谓词计数）。
+      数据源：本地 DuckDB-WASM 装载的 <b>relationships</b>、<b>entities</b>、<b>events</b>、<b>annotations</b> 表。</p>
+  </div>
+
+  <div class="tabs" id="tabs">
+    <button data-view="rel" class="on">关系图</button>
+    <button data-view="ents">实体度</button>
+    <button data-view="events">事件时序</button>
+    <button data-view="pred">关系谱</button>
+  </div>
+
+  <div id="loading" class="loadbox">正在装载数据库与数据表……</div>
+  <div id="content" style="display:none"></div>
+</main>
+
+<footer>
+  <span class="seal">评本</span>
+  <div>底本：<b>新刻全像批評西遊記</b>（清，含评点）第七十六叶至八十七叶。</div>
+  <div>由多 Agent 生成，仅供研究玩索，非定本。</div>
+</footer>
+
+<script type="module">
+import { loadPageData } from './js/page.js';
+
+const elLoading = document.getElementById('loading');
+const elContent = document.getElementById('content');
+const elTabs = document.getElementById('tabs');
+
+function esc(s) {
+  if (s === null || s === undefined) return '';
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+const PRED_COLORS = {
+  'jtw:isMasterOf': '#9e2b25',
+  'jtw:isDiscipleOf': '#b08d57',
+  'jtw:commands': '#3b4a6b',
+  'jtw:travelsTo': '#3f6b5e',
+  'jtw:hasWeapon': '#7d1f1b',
+  'jtw:residesIn': '#5d5449',
+  'jtw:defeats': '#c2504a',
+  'jtw:fightsAgainst': '#8a7f6d',
+  'jtw:rescues': '#2f5a50',
+  'jtw:worships': '#8b5f8b',
+  'jtw:transformsTo': '#b45a7a',
+  'jtw:isKingOf': '#b08d57',
+  'jtw:isSiblingOf': '#6b7f9e',
+  'jtw:alliedWith': '#3f6b5e',
+};
+
+const PRED_LABEL = {
+  'jtw:isMasterOf': '师徒',
+  'jtw:isDiscipleOf': '拜师',
+  'jtw:commands': '役使',
+  'jtw:travelsTo': '行旅',
+  'jtw:hasWeapon': '兵器',
+  'jtw:residesIn': '居所',
+  'jtw:defeats': '降伏',
+  'jtw:fightsAgainst': '斗战',
+  'jtw:rescues': '救难',
+  'jtw:worships': '礼拜',
+  'jtw:transformsTo': '变身',
+  'jtw:isKingOf': '称王',
+  'jtw:isSiblingOf': '兄弟',
+  'jtw:alliedWith': '盟交',
+};
+
+let STATE = null;
+let VIEW = 'rel';
+
+async function main() {
+  try {
+    elLoading.textContent = '正在加载页面数据…';
+    const d = await loadPageData('graph');
+    const rels = { rows: d.rels || [] };
+    const ents = { rows: d.ents || [] };
+    const events = { rows: d.events || [] };
+    const annos = { rows: d.annos || [] };
+    STATE = {
+      rels: rels.rows,
+      ents: ents.rows,
+      events: events.rows,
+      annos: annos.rows,
+      id2Label: new Map(),
+      id2Type: new Map(),
+      id2Mention: new Map(),
+    };
+    for (const e of ents.rows) {
+      const lbl = e.canonical_name || e.label || e.entity_id;
+      if (!STATE.id2Label.has(e.entity_id) || (e.canonical_name && e.canonical_name !== e.label)) {
+        STATE.id2Label.set(e.entity_id, lbl);
+      }
+      STATE.id2Type.set(e.entity_id, e.type);
+      STATE.id2Mention.set(e.entity_id, e.mention_count || 0);
+    }
+    elLoading.style.display = 'none';
+    elContent.style.display = 'block';
+    render();
+  } catch (e) {
+    elLoading.textContent = '加载失败：' + (e && e.message ? e.message : String(e));
+    console.error(e);
+  }
+}
+
+elTabs.addEventListener('click', (ev) => {
+  const b = ev.target.closest('button');
+  if (!b) return;
+  VIEW = b.dataset.view;
+  elTabs.querySelectorAll('button').forEach(x => x.classList.remove('on'));
+  b.classList.add('on');
+  render();
+});
+
+function render() {
+  elContent.innerHTML = '';
+  if (VIEW === 'rel') renderRel();
+  else if (VIEW === 'ents') renderEnts();
+  else if (VIEW === 'events') renderEvents();
+  else renderPred();
+}
+
+// ============== 关系图 ==============
+function renderRel() {
+  const wrap = document.createElement('div');
+  wrap.className = 'gwrap';
+
+  const left = document.createElement('div');
+  const right = document.createElement('div');
+  right.className = 'gside';
+
+  // 统计
+  const predCount = {};
+  for (const r of STATE.rels) predCount[r.predicate] = (predCount[r.predicate] || 0) + 1;
+  const sortedPreds = Object.entries(predCount).sort((a, b) => b[1] - a[1]);
+
+  // 过滤条
+  const tools = document.createElement('div');
+  tools.className = 'gtools';
+  tools.innerHTML = `<span class="small muted">显示：</span>
+    <select id="selPred"><option value="">全部谓词</option></select>
+    <select id="selType"><option value="">全部类型</option></select>`;
+  left.appendChild(tools);
+
+  const canvas = document.createElement('div');
+  canvas.className = 'gcanvas';
+  left.appendChild(canvas);
+
+  right.innerHTML = '<h3>关系统计</h3><div id="legendBox"></div>';
+
+  wrap.appendChild(left);
+  wrap.appendChild(right);
+  elContent.appendChild(wrap);
+
+  // 填充谓词下拉
+  const selPred = tools.querySelector('#selPred');
+  for (const [p, n] of sortedPreds) {
+    const opt = document.createElement('option');
+    opt.value = p;
+    opt.textContent = `${PRED_LABEL[p] || p.split(':').pop()} (${n})`;
+    selPred.appendChild(opt);
+  }
+  const selType = tools.querySelector('#selType');
+  const typeSet = [...new Set(STATE.ents.map(e => e.type))].sort();
+  for (const t of typeSet) {
+    const opt = document.createElement('option');
+    opt.value = t; opt.textContent = t;
+    selType.appendChild(opt);
+  }
+
+  const legendBox = right.querySelector('#legendBox');
+  function buildLegend() {
+    let h = '<table class="kv">';
+    for (const [p, n] of sortedPreds) {
+      h += `<tr><td>${esc(PRED_LABEL[p] || p.split(':').pop())}</td><td><span style="display:inline-block;width:12px;height:12px;background:${PRED_COLORS[p] || '#888'};border-radius:2px;vertical-align:middle;margin-right:5px"></span><b>${n}</b></td></tr>`;
+    }
+    h += '</table>';
+    legendBox.innerHTML = h;
+  }
+
+  function draw() {
+    const p = selPred.value;
+    const t = selType.value;
+    let rels = STATE.rels;
+    if (p) rels = rels.filter(r => r.predicate === p);
+    const seenPred = new Set(rels.map(r => r.predicate));
+    // 取谓词中出现次数最多的前 12 条
+    rels = rels.slice(0, 400);
+    // 节点集
+    const nodeSet = new Map();
+    for (const r of rels) {
+      for (const id of [r.subject_id, r.object_id]) {
+        if (!nodeSet.has(id)) {
+          const type = STATE.id2Type.get(id) || 'other';
+          if (t && type !== t) continue;
+          nodeSet.set(id, { id, label: STATE.id2Label.get(id) || id, type });
+        }
+      }
+    }
+    const nodes = [...nodeSet.values()];
+    const edges = rels.filter(r => nodeSet.has(r.subject_id) && nodeSet.has(r.object_id));
+
+    // 布局：按谓词角度分组，节点在环形上
+    const W = 900, H = 620, cx = W / 2, cy = H / 2, R = Math.min(W, H) * 0.42;
+    const uniquePreds = [...new Set(edges.map(e => e.predicate))];
+    const predAngle = new Map();
+    uniquePreds.forEach((p, i) => predAngle.set(p, (i / uniquePreds.length) * Math.PI * 2 - Math.PI / 2));
+
+    // 给每个节点分配一个位置（按类型聚类）
+    const typeAngles = {};
+    const types = [...new Set(nodes.map(n => n.type))];
+    types.forEach((tt, i) => typeAngles[tt] = (i / types.length) * Math.PI * 2 - Math.PI / 2);
+
+    const placed = [];
+    const perType = {};
+    for (const n of nodes) {
+      if (!perType[n.type]) perType[n.type] = [];
+      perType[n.type].push(n);
+    }
+    for (const [tt, arr] of Object.entries(perType)) {
+      const baseA = typeAngles[tt];
+      const spread = Math.min(0.5, Math.PI / 4);
+      arr.forEach((n, i) => {
+        const a = baseA + (arr.length === 1 ? 0 : (i / Math.max(1, arr.length - 1) - 0.5) * spread);
+        const jitter = (Math.sin(n.id.length * 1.7 + i) * 0.05);
+        const rr = R * (0.75 + (n.type === 'monster' ? -0.15 : n.type === 'person' ? 0.15 : 0) + jitter);
+        placed.push({ node: n, x: cx + Math.cos(a) * rr, y: cy + Math.sin(a) * rr });
+      });
+    }
+    const pos = new Map(placed.map(p => [p.node.id, p]));
+
+    // 生成 SVG
+    let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+    // 边框圆
+    svg += `<circle cx="${cx}" cy="${cy}" r="${R+10}" fill="none" stroke="rgba(158,43,37,.15)" stroke-dasharray="3 4"/>`;
+    // 边
+    for (const e of edges) {
+      const a = pos.get(e.subject_id);
+      const b = pos.get(e.object_id);
+      if (!a || !b) continue;
+      const col = PRED_COLORS[e.predicate] || '#888';
+      svg += `<line x1="${a.x.toFixed(1)}" y1="${a.y.toFixed(1)}" x2="${b.x.toFixed(1)}" y2="${b.y.toFixed(1)}" stroke="${col}" stroke-opacity="0.42" stroke-width="1.2"/>`;
+    }
+    // 节点
+    const TYPE_COLOR = { person:'#9e2b25', place:'#3f6b5e', artifact:'#b08d57', monster:'#7d1f1b', official_title:'#3b4a6b', quote:'#8b5f8b', religion:'#2f5a50' };
+    for (const p of placed) {
+      const r = 6 + Math.min(10, (STATE.id2Mention.get(p.node.id) || 0) * 0.6);
+      const c = TYPE_COLOR[p.node.type] || '#888';
+      svg += `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${r.toFixed(1)}" fill="${c}" fill-opacity="0.85" stroke="rgba(255,255,255,.8)" stroke-width="1"/>`;
+      svg += `<text class="node-label" x="${(p.x + r + 4).toFixed(1)}" y="${(p.y + 3).toFixed(1)}">${esc(p.node.label.slice(0, 6))}</text>`;
+    }
+    svg += '</svg>';
+    canvas.innerHTML = svg;
+
+    // 侧栏详情：显示谓词计数
+    const detail = document.createElement('div');
+    detail.style.marginTop = '12px';
+    detail.innerHTML = `<table class="kv">
+      <tr><td>边</td><td>${edges.length}</td></tr>
+      <tr><td>节点</td><td>${placed.length}</td></tr>
+      <tr><td>涉及谓词</td><td>${uniquePreds.length}</td></tr>
+    </table>`;
+    right.appendChild(detail);
+
+    buildLegend();
+  }
+
+  selPred.addEventListener('change', draw);
+  selType.addEventListener('change', draw);
+  draw();
+}
+
+// ============== 实体度 ==============
+function renderEnts() {
+  const wrap = document.createElement('div');
+  wrap.className = 'card';
+
+  // 类型分布
+  const typeCount = {};
+  for (const e of STATE.ents) typeCount[e.type] = (typeCount[e.type] || 0) + 1;
+  const maxN = Math.max(...Object.values(typeCount));
+
+  let html = '<h3>类型分布</h3>';
+  html += '<div style="display:grid;grid-template-columns:130px 1fr 60px;gap:8px;padding:6px 0">';
+  const order = ['person','place','artifact','monster','official_title','quote','religion','event'];
+  const LABEL = { person:'人物', place:'地点', artifact:'器物', monster:'妖神', official_title:'官职', quote:'引诗', religion:'经文', event:'事件' };
+  for (const t of order) {
+    const n = typeCount[t] || 0;
+    const w = Math.round((n / maxN) * 100);
+    html += `<div class="lbl">${LABEL[t] || t}</div>
+      <div class="bar" style="height:14px;background:linear-gradient(90deg,rgba(158,43,37,.7),rgba(158,43,37,.4));width:${w}%;border-radius:2px"></div>
+      <div class="n" style="text-align:right;font-family:var(--kai);color:var(--cinnabar)">${n}</div>`;
+  }
+  html += '</div>';
+
+  // 前 20 提及实体
+  html += '<h3 style="margin-top:16px">提及前 20</h3>';
+  html += '<table><thead><tr><th>类型</th><th>标签</th><th>canonical</th><th>提及</th></tr></thead><tbody>';
+  const top20 = [...STATE.ents].sort((a, b) => (b.mention_count || 0) - (a.mention_count || 0)).slice(0, 20);
+  for (const e of top20) {
+    html += `<tr><td>${esc(LABEL[e.type] || e.type)}</td><td><b>${esc(e.label)}</b></td><td>${esc(e.canonical_name || '')}</td><td><b>${e.mention_count || 0}</b></td></tr>`;
+  }
+  html += '</tbody></table>';
+
+  wrap.innerHTML = html;
+  elContent.appendChild(wrap);
+}
+
+// ============== 事件时序 ==============
+function renderEvents() {
+  const wrap = document.createElement('div');
+  wrap.className = 'card';
+
+  const chOrder = [
+    { label: '第八十六回', first: 4, last: 17 },
+    { label: '第八十七回', first: 18, last: 29 },
+    { label: '第八十八回', first: 30, last: 41 },
+    { label: '第八十九回', first: 42, last: 87 },
+  ];
+  function chapterOf(pn) {
+    for (const c of chOrder) if (pn >= c.first && pn <= c.last) return c.label;
+    return '';
+  }
+
+  // 按页汇总
+  const perPage = new Map();
+  for (const e of STATE.events) {
+    if (!perPage.has(e.page_no)) perPage.set(e.page_no, []);
+    perPage.get(e.page_no).push(e);
+  }
+  const allPages = [...perPage.keys()].sort((a, b) => a - b);
+  const W = 900, rowH = 22, H = Math.max(180, allPages.length * rowH + 40);
+
+  let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+  svg += `<text x="10" y="18" class="node-label" style="font-size:13px">事件时序 · 页 ${allPages[0]} — ${allPages[allPages.length-1]}</text>`;
+
+  let y = 40;
+  for (const pn of allPages) {
+    const ch = chapterOf(pn);
+    const evs = perPage.get(pn);
+    svg += `<text x="10" y="${y + 14}" class="node-label">页 ${pn} <span style="fill:#8a7f6d">${esc(ch)}</span> · ${evs.length} 桩</text>`;
+    let x = 130;
+    for (const e of evs) {
+      const w = Math.min(180, 60 + (e.summary || '').length * 3);
+      const col = '#9e2b25';
+      svg += `<rect x="${x}" y="${y}" width="${w}" height="16" fill="rgba(158,43,37,.15)" stroke="${col}" stroke-width="0.8" rx="2"/>`;
+      svg += `<text x="${x + 4}" y="${y + 12}" font-size="11" fill="#332c25">${esc((e.name || '').slice(0, 10))}</text>`;
+      x += w + 4;
+      if (x > W - 20) { x = 130; y += 18; }
+    }
+    y += rowH;
+  }
+  svg += '</svg>';
+
+  wrap.innerHTML = `<h3>事件时序</h3>${svg}`;
+  elContent.appendChild(wrap);
+
+  // 事件分类计数
+  const stat = document.createElement('div');
+  stat.className = 'card';
+  const byCh = {};
+  for (const e of STATE.events) {
+    const c = chapterOf(e.page_no) || '未归';
+    byCh[c] = (byCh[c] || 0) + 1;
+  }
+  stat.innerHTML = '<h3>按回统计</h3><table><thead><tr><th>回</th><th>桩</th></tr></thead><tbody>' +
+    Object.entries(byCh).map(([k, v]) => `<tr><td>${esc(k)}</td><td><b>${v}</b></td></tr>`).join('') +
+    '</tbody></table>';
+  elContent.appendChild(stat);
+}
+
+// ============== 关系谱前八 ==============
+function renderPred() {
+  const wrap = document.createElement('div');
+  wrap.className = 'card';
+
+  const count = {};
+  for (const r of STATE.rels) count[r.predicate] = (count[r.predicate] || 0) + 1;
+  const sorted = Object.entries(count).sort((a, b) => b[1] - a[1]);
+  const maxN = sorted[0][1];
+
+  let html = '<h3>关系谱（14 谓词，共 349 条）</h3>';
+  html += '<div style="display:grid;grid-template-columns:150px 1fr 70px;gap:8px;padding:6px 0">';
+  for (const [p, n] of sorted) {
+    const w = Math.round((n / maxN) * 100);
+    const col = PRED_COLORS[p] || '#888';
+    html += `<div class="lbl" style="font-family:var(--kai);font-size:14px">${esc(PRED_LABEL[p] || p.split(':').pop())}</div>
+      <div class="bar" style="height:16px;background:linear-gradient(90deg,${col},${col}80);width:${w}%;border-radius:2px"></div>
+      <div class="n" style="text-align:right;font-family:var(--kai);color:var(--cinnabar)">${n}</div>`;
+  }
+  html += '</div>';
+
+  // 各谓词示例
+  html += '<h3 style="margin-top:16px">各谓词示例</h3>';
+  html += '<table><thead><tr><th>谓词</th><th>主</th><th>客</th><th>页</th><th>证据</th></tr></thead><tbody>';
+  for (const [p] of sorted) {
+    const sample = STATE.rels.filter(r => r.predicate === p).slice(0, 2);
+    for (const s of sample) {
+      html += `<tr><td>${esc(PRED_LABEL[s.predicate] || s.predicate)}</td>
+        <td><b>${esc(STATE.id2Label.get(s.subject_id) || s.subject_id)}</b></td>
+        <td><b>${esc(STATE.id2Label.get(s.object_id) || s.object_id)}</b></td>
+        <td>${s.page_no || ''}</td>
+        <td>${esc((s.evidence || '').slice(0, 60))}</td></tr>`;
+    }
+  }
+  html += '</tbody></table>';
+
+  wrap.innerHTML = html;
+  elContent.appendChild(wrap);
+}
+
+main();
+</script>
+</body>
+</html>
