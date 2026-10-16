@@ -52,8 +52,8 @@
       return;
     }
     try {
-      state.cn2t = window.OpenCC.Converter('cn2t');
-      state.t2cn = window.OpenCC.Converter('t2cn');
+      state.cn2t = window.OpenCC.Converter({ from: 'cn', to: 't' });
+      state.t2cn = window.OpenCC.Converter({ from: 't', to: 'cn' });
       state.ready = true;
     } catch (e) {
       console.error('[JTW toggle] OpenCC 初始化失败', e);
