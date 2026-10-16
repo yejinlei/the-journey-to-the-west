@@ -100,37 +100,38 @@
     return false;
   }
 
+  // 以"文本节点"为最小转换单元：
+  //   原实现只递归 Element children，会跳过 <p>甲<b>乙</b>丙</p> 中"甲""丙"这类
+  //   直接挂在混合内容元素下的文本节点，导致繁简切换只转内嵌标签里的文字。
+  //   现改为递归 childNodes（含文本节点）；原始文本记录在文本节点自身的
+  //   _jtwOrig 属性上（文本节点无法挂 data-* 属性）。
   function walk(el) {
     if (!el || !el.nodeType) return;
 
-    // 文本节点：找到祖先 Element，由其负责转换（避免直接改叶子后重复计算）
-    if (el.nodeType === 3) return;
-    if (el.nodeType !== 1) return;
+    // 文本节点：就地转换
+    if (el.nodeType === 3) {
+      var txt = el.textContent;
+      if (!txt || !hasCJK(txt)) return;
+      var parent = el.parentElement;
+      if (!parent || shouldSkipEl(parent)) return;
+      if (typeof el._jtwOrig === 'undefined') el._jtwOrig = txt;
+      var converted = convert(el._jtwOrig, state.mode);
+      if (converted !== txt) el.textContent = converted;
+      return;
+    }
 
+    if (el.nodeType !== 1) return;
     var tag = el.tagName;
     if (tag === 'BR') return;
     if (SKIP_TAGS.has(tag)) return;
     if (shouldSkipEl(el)) return;
 
-    // 若含 Element 子节点：不转换自身 textContent（否则会抹掉子元素），递归子节点
-    if (el.children && el.children.length > 0) {
-      for (var i = 0; i < el.children.length; i++) walk(el.children[i]);
-      return;
+    // 递归全部子节点（元素 + 文本），覆盖混合内容
+    var child = el.firstChild;
+    while (child) {
+      walk(child);
+      child = child.nextSibling;
     }
-
-    // 叶元素：只含文本节点
-    var orig = el.getAttribute('data-jtw-orig');
-    if (orig === null) {
-      orig = el.textContent;
-      if (orig && hasCJK(orig)) {
-        el.setAttribute('data-jtw-orig', orig);
-      } else {
-        // 纯 ASCII/空白，直接跳过（不再设置属性，避免缓存污染）
-        return;
-      }
-    }
-    var converted = convert(orig, state.mode);
-    if (converted !== el.textContent) el.textContent = converted;
   }
 
   function applyToRoot(root) {
@@ -270,6 +271,11 @@
             if (m.type !== 'childList' || !m.addedNodes) continue;
             for (var j = 0; j < m.addedNodes.length; j++) {
               var n = m.addedNodes[j];
+              if (n.nodeType === 3) {
+                // 新增文本节点：直接就地转换（walk 内部含跳过判断）
+                walk(n);
+                continue;
+              }
               if (n.nodeType !== 1) continue;
               // 跳过工具条自身
               if (n.id === 'jtw-toggle' || (n.querySelector && n.querySelector('#jtw-toggle'))) continue;
