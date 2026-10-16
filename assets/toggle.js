@@ -59,8 +59,9 @@
       return;
     }
     try {
-      state.cn2t = window.OpenCC.Converter({ from: 'cn', to: 't' });
-      state.t2cn = window.OpenCC.Converter({ from: 't', to: 'cn' });
+      // 直接使用 ConverterFactory + Locale，避免 Converter 的参数检查在某些环境下异常
+      state.cn2t = window.OpenCC.ConverterFactory(window.OpenCC.Locale.from.cn);
+      state.t2cn = window.OpenCC.ConverterFactory(window.OpenCC.Locale.to.cn);
       state.ready = true;
     } catch (e) {
       console.error('[JTW toggle] OpenCC 初始化失败', e);
