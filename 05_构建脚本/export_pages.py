@@ -97,6 +97,46 @@ PAGE_QUERIES: dict[str, dict[str, str]] = {
             "ORDER BY page_no, line_span"
         ),
     },
+    "editions": {
+        "editions": (
+            "SELECT edition_id, display_name, year, publisher, \"desc\" FROM editions "
+            "ORDER BY CASE WHEN year > 0 THEN 0 ELSE 1 END, year, display_name"
+        ),
+        "tendency": (
+            "SELECT edition_id, confucian, buddhist, daoist, note FROM edition_tendency "
+            "ORDER BY edition_id"
+        ),
+        "lineage": (
+            "SELECT lineage_id, from_edition, to_edition, lineage_type, note "
+            "FROM edition_lineage ORDER BY from_edition"
+        ),
+        "scholars": (
+            "SELECT argument_id, scholar_id, work_title, school, argues_about, stance "
+            "FROM scholar_arguments ORDER BY scholar_id"
+        ),
+    },
+    "semantics": {
+        "registerDist": (
+            "SELECT register_id, count(*) c FROM line_semantics "
+            "GROUP BY 1 ORDER BY c DESC"
+        ),
+        "voiceDist": (
+            "SELECT voice_id, count(*) c FROM line_semantics "
+            "WHERE voice_id IS NOT NULL GROUP BY 1 ORDER BY c DESC"
+        ),
+        "witDist": (
+            "SELECT wit_type, count(*) c FROM line_semantics "
+            "WHERE wit_type IS NOT NULL GROUP BY 1 ORDER BY c DESC"
+        ),
+        "doctrineDist": (
+            "SELECT doctrine, count(*) c FROM doctrine_mentions GROUP BY 1 ORDER BY c DESC"
+        ),
+        "doctrineByEdition": (
+            "SELECT ls.edition, dm.doctrine, count(*) c FROM doctrine_mentions dm "
+            "JOIN line_semantics ls ON dm.line_id = ls.line_id "
+            "GROUP BY 1, 2 ORDER BY 3 DESC"
+        ),
+    },
     "graph": {
         "rels": (
             "SELECT relation_id, subject_id, predicate, object_id, evidence, page_no "

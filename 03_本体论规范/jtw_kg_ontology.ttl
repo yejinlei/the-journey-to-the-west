@@ -599,6 +599,32 @@ jtw:edition_doctrine_tendency
   rdfs:comment "每个版本对儒/释/道三教的相对倾向（数值向量：儒/释/道 三维评分 0.0-1.0）"@zh ;
   rdfs:range xsd:string .
 
+# ── 三维倾向标量（对应 edition_tendency 表）──
+jtw:confucian_tendency
+  rdfs:domain jtw:Edition ;
+  rdfs:range  xsd:float ;
+  rdfs:label  "儒倾向"@zh ;
+  rdfs:comment "该版本三教倾向之儒家维度评分 0.0-1.0"@zh .
+
+jtw:buddhist_tendency
+  rdfs:domain jtw:Edition ;
+  rdfs:range  xsd:float ;
+  rdfs:label  "释倾向"@zh ;
+  rdfs:comment "该版本三教倾向之佛家维度评分 0.0-1.0"@zh .
+
+jtw:daoist_tendency
+  rdfs:domain jtw:Edition ;
+  rdfs:range  xsd:float ;
+  rdfs:label  "道倾向"@zh ;
+  rdfs:comment "该版本三教倾向之道家维度评分 0.0-1.0"@zh .
+
+# ── 谱系边（对应 edition_lineage 表）──
+jtw:lineage_type
+  rdfs:domain jtw:EditionLineage ;
+  rdfs:range  xsd:string ;
+  rdfs:label  "衍生态"@zh ;
+  rdfs:comment "取值：重刻/加评/简本/改写/缩略，描述两版本的派生关系"@zh .
+
 # ──────────────────────────────────────────────
 # 形态层 ↔ 主题层映射（TextLine → Person/Event...）
 # ──────────────────────────────────────────────

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-16T10:49:00",
+  "generated_at": "2026-10-16T21:27:16",
   "source_dir": "F:\\src\\The-Journey-to-the-West\\04_knowledge_data",
   "files": [
     "read",
@@ -8,6 +8,8 @@
     "relics",
     "annotations",
     "events",
+    "editions",
+    "semantics",
     "graph"
   ]
 }

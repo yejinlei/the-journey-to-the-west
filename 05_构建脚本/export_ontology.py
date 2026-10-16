@@ -109,18 +109,19 @@ def load_vocab(path: Path) -> dict:
 # 3. 数据表统计 + 样例
 # ──────────────────────────────────────────────
 LAYER_TABLES = {
-    "form": ["pages", "lines", "annotations"],
+    "form": ["pages", "lines", "annotations", "line_semantics"],
     "thematic": ["entities", "relationships", "events", "artifacts",
                  "discipleship", "kinship", "antagonism", "possession",
                  "membership", "involvement", "mentions"],
     "ideological": ["scholar_arguments", "doctrine_mentions"],
-    "textual": ["editions", "chapters"],
+    "textual": ["editions", "chapters", "edition_tendency", "edition_lineage"],
 }
 
 TABLE_DESC = {
     "pages": "页面（含 OCR 与形态统计）",
     "lines": "文本段（形态层，form_type 区分正文/评点/诗词）",
     "annotations": "评点行（眉批/夹批/旁批/回前/回后/图注/题署/序跋）",
+    "line_semantics": "文本行语义标注（register/voice/wit/motif 四维隐性约束实例）",
     "entities": "实体（人物/妖魔/法宝/地点/官职/引文/宗教）",
     "relationships": "关系（subject→predicate→object，含证据与核实状态）",
     "events": "事件（含主演、地点、摘要、事件类别）",
@@ -136,6 +137,8 @@ TABLE_DESC = {
     "doctrine_mentions": "义理提及（佛/道/儒）",
     "editions": "版本名录（源流/年份/刊刻机构）",
     "chapters": "章回（回号/回目/所属版本）",
+    "edition_tendency": "版本三教倾向（儒/释/道三维评分，Z 层）",
+    "edition_lineage": "版本谱系（派生关系与衍生态，V 层）",
 }
 
 

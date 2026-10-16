@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-10-16T02:45:26+00:00",
+    "generated_at": "2026-10-16T13:27:29+00:00",
     "project": "西游记多版本古籍知识图谱本体",
     "layers": [
       {
@@ -1154,6 +1154,39 @@
         "_kind": "property",
         "_first_token": "jtw"
       },
+      "confucian_tendency": {
+        "name": "confucian_tendency",
+        "label_zh": "儒倾向",
+        "domain": "Edition",
+        "range": "float",
+        "_kind": "property",
+        "_first_token": "jtw"
+      },
+      "buddhist_tendency": {
+        "name": "buddhist_tendency",
+        "label_zh": "释倾向",
+        "domain": "Edition",
+        "range": "float",
+        "_kind": "property",
+        "_first_token": "jtw"
+      },
+      "daoist_tendency": {
+        "name": "daoist_tendency",
+        "label_zh": "道倾向",
+        "domain": "Edition",
+        "range": "float",
+        "_kind": "property",
+        "_first_token": "jtw"
+      },
+      "lineage_type": {
+        "name": "lineage_type",
+        "label_zh": "衍生态",
+        "comment_zh": "取值：重刻/加评/简本/改写/缩略，描述两版本的派生关系",
+        "domain": "EditionLineage",
+        "range": "string",
+        "_kind": "property",
+        "_first_token": "jtw"
+      },
       "mentions": {
         "name": "mentions",
         "label_zh": "提及人物",
@@ -1937,10 +1970,75 @@
               "chapter_ref": "第27回"
             }
           ]
+        },
+        "line_semantics": {
+          "name": "line_semantics",
+          "desc": "文本行语义标注（register/voice/wit/motif 四维隐性约束实例）",
+          "columns": [
+            "line_id",
+            "edition",
+            "page_no",
+            "register_id",
+            "voice_id",
+            "wit_type",
+            "humor_level",
+            "motif_id"
+          ],
+          "stats": {
+            "rows": 5787,
+            "edition": {
+              "gubao": 2538,
+              "baihui_xiangzhu": 1379,
+              "xinke_pingbi": 1105,
+              "zhu_ping": 765
+            }
+          },
+          "samples": [
+            {
+              "line_id": "xinke_pingbi#p00004#L000",
+              "edition": "xinke_pingbi",
+              "page_no": 4,
+              "register_id": "narrator_voice",
+              "voice_id": null,
+              "wit_type": null,
+              "humor_level": 0.0,
+              "motif_id": null
+            },
+            {
+              "line_id": "xinke_pingbi#p00004#L001",
+              "edition": "xinke_pingbi",
+              "page_no": 4,
+              "register_id": "monster_battle",
+              "voice_id": null,
+              "wit_type": null,
+              "humor_level": 0.0,
+              "motif_id": null
+            },
+            {
+              "line_id": "xinke_pingbi#p00004#L002",
+              "edition": "xinke_pingbi",
+              "page_no": 4,
+              "register_id": "market_colloquial",
+              "voice_id": "shajiej_steady",
+              "wit_type": null,
+              "humor_level": 0.0,
+              "motif_id": null
+            },
+            {
+              "line_id": "xinke_pingbi#p00004#L003",
+              "edition": "xinke_pingbi",
+              "page_no": 4,
+              "register_id": "market_colloquial",
+              "voice_id": null,
+              "wit_type": null,
+              "humor_level": 0.0,
+              "motif_id": null
+            }
+          ]
         }
       },
       "totals": {
-        "rows": 6238
+        "rows": 12025
       }
     },
     "thematic": {
@@ -2369,9 +2467,66 @@
             "evidence_line_id"
           ],
           "stats": {
-            "rows": 0
+            "rows": 11,
+            "school": {
+              "丹道": 3,
+              "考证": 3,
+              "理学": 2,
+              "佛学": 2,
+              "文学": 1
+            },
+            "stance": {
+              "三教归儒，西游实为阐发纲常伦理之书，非谈空谈玄": 1,
+              "心猿归正即修身养性、去欲存理之功，喻儒家克己复礼": 1,
+              "殆《华严》之外篇也，以佛家因果轮回、心性解脱论西游": 1,
+              "唐僧即金蝉子转世，取经乃佛门度化之旅，证佛法无边": 1,
+              "证道之书，其中金丹炉鼎、阴阳五行之说隐于妖怪斗法之中": 1,
+              "师徒五众配金木水火土五行，沿途妖魔鬼怪皆外魔内因之象": 1,
+              "车迟三怪喻外丹符箓之妄，悟空破之彰内丹心性之正": 1,
+              "以趣胜，嬉笑怒骂皆成文章，神魔游戏之中含讽世之旨": 1,
+              "世德堂本为现存最早刻本，神魔小说尤以明世德堂本为宗": 1,
+              "游戏之作，虽极诞妄，然非作者别含深意，实为神魔小说集大成": 1,
+              "嬉笑怒骂的滑稽小说，非道书非佛书，须作游戏文字读": 1
+            }
           },
-          "samples": []
+          "samples": [
+            {
+              "argument_id": "sch-arg-000",
+              "scholar_id": "zhang-shushen",
+              "work_title": "新说西游记",
+              "school": "理学",
+              "argues_about": "《西游》旨归",
+              "stance": "三教归儒，西游实为阐发纲常伦理之书，非谈空谈玄",
+              "evidence_line_id": null
+            },
+            {
+              "argument_id": "sch-arg-001",
+              "scholar_id": "zhang-shushen",
+              "work_title": "新说西游记",
+              "school": "理学",
+              "argues_about": "悟空成佛",
+              "stance": "心猿归正即修身养性、去欲存理之功，喻儒家克己复礼",
+              "evidence_line_id": null
+            },
+            {
+              "argument_id": "sch-arg-002",
+              "scholar_id": "you-dong",
+              "work_title": "西游真诠序",
+              "school": "佛学",
+              "argues_about": "《西游》义理",
+              "stance": "殆《华严》之外篇也，以佛家因果轮回、心性解脱论西游",
+              "evidence_line_id": null
+            },
+            {
+              "argument_id": "sch-arg-003",
+              "scholar_id": "you-dong",
+              "work_title": "西游真诠序",
+              "school": "佛学",
+              "argues_about": "金蝉转世",
+              "stance": "唐僧即金蝉子转世，取经乃佛门度化之旅，证佛法无边",
+              "evidence_line_id": null
+            }
+          ]
         },
         "doctrine_mentions": {
           "name": "doctrine_mentions",
@@ -2384,13 +2539,52 @@
             "stance_attitude"
           ],
           "stats": {
-            "rows": 0
+            "rows": 9006,
+            "school": {
+              "道": 3876,
+              "儒": 3840,
+              "释": 1290
+            },
+            "doctrine": {
+              "道": 3876,
+              "儒": 3840,
+              "释": 1290
+            }
           },
-          "samples": []
+          "samples": [
+            {
+              "line_id": "xinke_pingbi#p00004#L002",
+              "doctrine": "儒",
+              "school": "儒",
+              "sub": "父",
+              "stance_attitude": "陈述"
+            },
+            {
+              "line_id": "xinke_pingbi#p00004#L003",
+              "doctrine": "儒",
+              "school": "儒",
+              "sub": "父",
+              "stance_attitude": "陈述"
+            },
+            {
+              "line_id": "xinke_pingbi#p00004#L003",
+              "doctrine": "道",
+              "school": "道",
+              "sub": "道",
+              "stance_attitude": "陈述"
+            },
+            {
+              "line_id": "xinke_pingbi#p00004#L004",
+              "doctrine": "道",
+              "school": "道",
+              "sub": "道",
+              "stance_attitude": "陈述"
+            }
+          ]
         }
       },
       "totals": {
-        "rows": 0
+        "rows": 9017
       }
     },
     "textual": {
@@ -2498,10 +2692,103 @@
               "first_line_id": "xinke_pingbi#p00042#L024"
             }
           ]
+        },
+        "edition_tendency": {
+          "name": "edition_tendency",
+          "desc": "版本三教倾向（儒/释/道三维评分，Z 层）",
+          "columns": [
+            "tendency_id",
+            "edition_id",
+            "confucian",
+            "buddhist",
+            "daoist",
+            "note"
+          ],
+          "stats": {
+            "rows": 11
+          },
+          "samples": [
+            {
+              "tendency_id": "tend-000",
+              "edition_id": "shidetang",
+              "confucian": 0.3,
+              "buddhist": 0.4,
+              "daoist": 0.55,
+              "note": "世德堂本（1592），儒释道合流而未偏锋"
+            },
+            {
+              "tendency_id": "tend-001",
+              "edition_id": "li_ping",
+              "confucian": 0.35,
+              "buddhist": 0.35,
+              "daoist": 0.5,
+              "note": "李卓吾评本，重人物与文趣，三教并观"
+            },
+            {
+              "tendency_id": "tend-002",
+              "edition_id": "daqishi",
+              "confucian": 0.3,
+              "buddhist": 0.35,
+              "daoist": 0.55,
+              "note": "大奇书本，承世德堂系统"
+            },
+            {
+              "tendency_id": "tend-003",
+              "edition_id": "xinke_pingbi",
+              "confucian": 0.3,
+              "buddhist": 0.45,
+              "daoist": 0.45,
+              "note": "新刻全像批评本，评点重文理与佛道源流"
+            }
+          ]
+        },
+        "edition_lineage": {
+          "name": "edition_lineage",
+          "desc": "版本谱系（派生关系与衍生态，V 层）",
+          "columns": [
+            "lineage_id",
+            "from_edition",
+            "to_edition",
+            "lineage_type",
+            "note"
+          ],
+          "stats": {
+            "rows": 10
+          },
+          "samples": [
+            {
+              "lineage_id": "lineage-000",
+              "from_edition": "shidetang",
+              "to_edition": "gubao",
+              "lineage_type": "重刻",
+              "note": "世德堂原文系统直承，维基《西游》古本"
+            },
+            {
+              "lineage_id": "lineage-001",
+              "from_edition": "shidetang",
+              "to_edition": "daqishi",
+              "lineage_type": "重刻",
+              "note": "大奇书堂重刻世德堂本"
+            },
+            {
+              "lineage_id": "lineage-002",
+              "from_edition": "daqishi",
+              "to_edition": "yangminzhai",
+              "lineage_type": "简本",
+              "note": "杨闽斋本依大奇书系统缩略"
+            },
+            {
+              "lineage_id": "lineage-003",
+              "from_edition": "yangminzhai",
+              "to_edition": "minzhaitang",
+              "lineage_type": "重刻",
+              "note": "闽斋堂承杨闽斋"
+            }
+          ]
         }
       },
       "totals": {
-        "rows": 281
+        "rows": 302
       }
     }
   }
