@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>法宝谱 · 西游奇谭</title>
+<link rel="stylesheet" href="assets/app.css">
+<script src="assets/vendor/opencc.js"></script>
+<script src="assets/toggle.js"></script>
+<style>
+  .reliccard{padding:14px 16px}
+  .reliccard .rname{font-family:var(--kai);font-size:20px;color:#332c25;letter-spacing:.08em}
+  .reliccard .rholder{color:var(--cinnabar);font-family:var(--kai);font-size:14px;margin-left:6px}
+  .reliccard .rcnt{float:right;font-family:var(--kai);color:var(--cinnabar);font-size:16px}
+  .reliccard .raliases{margin-top:6px}
+  .reliccard .revid{font-size:12px;color:var(--ink3);margin-top:4px}
+  .loadbox{padding:80px 20px;text-align:center;color:var(--ink3);font-family:var(--kai);font-size:16px}
+</style>
+</head>
+<body>
+<header>
+  <span class="seal">西游</span>
+  <h1>西游奇谭</h1>
+  <div class="sub">一心求道 · 十难伏魔 · 三教归真</div>
+  <nav>
+    <a href="index.html">总览</a>
+    <a href="read.html">正文·评点</a>
+    <a href="compare.html">评点对照</a>
+    <a href="entities.html">本体实体</a>
+    <a href="versions.html">版本谱</a>
+    <a href="relics.html" class="on">法宝谱</a>
+    <a href="annotations.html">诙谐谱</a>
+    <a href="events.html">事件检索</a>
+    <a href="graph.html">图谱</a>
+    <a href="agent.html">Agent</a>
+    <a href="query.html">本体论</a>
+  </nav>
+</header>
+
+<main>
+  <div class="hero" style="margin-top:2px">
+    <span class="seal solid">寶器</span>
+    <div class="verse">金剛如意　九齒芭蕉<br>寶器六十有四　各有其主</div>
+    <div class="rule"></div>
+    <p class="lead">《西游奇谭》器物谱。收本体论 type = <b>artifact</b> 的 <b>64</b> 件器物：
+      金箍棒、如意棒、九齿钉耙、芭蕉扇、紫金红葫芦、假人头、柳棍、毫毛、招求法師祈雨榜文……
+      附提及频数、别名链与所属人物。数据源：<b>entities</b> 表 type = artifact 子集，
+      并以 <b>relationships</b> 表中 predicate = <b>jtw:hasWeapon</b> 反查主人。</p>
+  </div>
+
+  <div id="loading" class="loadbox">正在装载数据库与数据表……</div>
+  <div id="content" style="display:none"></div>
+</main>
+
+<footer>
+  <span class="seal">评本</span>
+  <div>底本：<b>新刻全像批評西遊記</b>（清，含评点）第七十六叶至八十七叶。</div>
+  <div>由多 Agent 生成，仅供研究玩索，非定本。</div>
+</footer>
+
+<script type="module">
+import { loadPageData } from './js/page.js';
+
+const elLoading = document.getElementById('loading');
+const elContent = document.getElementById('content');
+
+function esc(s) {
+  if (s === null || s === undefined) return '';
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+async function main() {
+  try {
+    elLoading.textContent = '正在加载页面数据…';
+    const d = await loadPageData('relics');
+    const artifacts = { rows: d.artifacts || [] };
+    const rels = { rows: d.hasWeapon || [] };
+    const entities = { rows: d.entities || [] };
+
+    // 建立 id → label/canonical 索引
+    const id2Label = new Map();
+    for (const e of entities.rows) {
+      const key = e.entity_id;
+      const lbl = e.canonical_name || e.label || key;
+      if (!id2Label.has(key) || (e.canonical_name && e.canonical_name !== e.label)) id2Label.set(key, lbl);
+    }
+
+    // 找每个 artifact 的主人
+    const artifactIdToEntityId = new Map();
+    for (const a of artifacts.rows) artifactIdToEntityId.set(a.entity_id, a.entity_id);
+
+    const holders = new Map(); // artifact.entity_id -> [holder labels]
+    const relEvidence = new Map();
+    for (const r of rels.rows) {
+      // 谁 hasWeapon 什么？subject 是人，object 是器物
+      const subjLbl = id2Label.get(r.subject_id) || r.subject_id;
+      const objLbl = id2Label.get(r.object_id) || r.object_id;
+      // 尝试匹配 object 与 artifact 的 label 或 canonical
+      for (const a of artifacts.rows) {
+        if (r.object_id === a.entity_id || objLbl === (a.canonical_name || a.label) || objLbl === a.label) {
+          if (!holders.has(a.entity_id)) holders.set(a.entity_id, new Set());
+          holders.get(a.entity_id).add(subjLbl);
+          if (!relEvidence.has(a.entity_id)) relEvidence.set(a.entity_id, []);
+          if (r.evidence) relEvidence.get(a.entity_id).push(r.evidence);
+          break;
+        }
+      }
+    }
+
+    elLoading.style.display = 'none';
+    elContent.style.display = 'block';
+
+    // 顶部统计卡
+    const stat = document.createElement('div');
+    stat.className = 'card';
+    stat.innerHTML = `
+      共 <b>${artifacts.rows.length}</b> 件器物 · 已绑定主人的 <b>${holders.size}</b> 件 ·
+      <b>jtw:hasWeapon</b> 关系 <b>${rels.rows.length}</b> 条 ·
+      底本：新刻全像批評西遊記（清，含评点）第七十六叶至八十七叶。
+    `;
+    elContent.appendChild(stat);
+
+    const grid = document.createElement('div');
+    grid.className = 'grid';
+    for (const a of artifacts.rows) {
+      const aliases = (a.aliases || '').split('|').filter(Boolean);
+      const holderSet = holders.get(a.entity_id);
+      const evidenceList = relEvidence.get(a.entity_id);
+      const card = document.createElement('div');
+      card.className = 'card reliccard';
+      let html = '';
+      html += `<span class="rcnt">${a.mention_count || 0} 次</span>`;
+      html += `<div><span class="rname">${esc(a.label)}</span>`;
+      if (a.canonical_name && a.canonical_name !== a.label) {
+        html += `<span class="rholder">→ ${esc(a.canonical_name)}</span>`;
+      }
+      html += `</div>`;
+      if (holderSet && holderSet.size) {
+        html += `<div class="raliases">主人：`;
+        for (const h of holderSet) html += `<span class="tag red">${esc(h)}</span>`;
+        html += `</div>`;
+      } else {
+        html += `<div class="raliases"><span class="tag">主人未著</span></div>`;
+      }
+      if (aliases.length) {
+        html += `<div class="raliases">别名：`;
+        for (const al of aliases) html += `<span class="tag">${esc(al)}</span>`;
+        html += `</div>`;
+      }
+      if (evidenceList && evidenceList.length) {
+        html += `<div class="revid">证据：${esc(evidenceList.slice(0, 2).join(' / '))}</div>`;
+      }
+      html += `<div class="revid">id：<code>${esc(a.entity_id_raw || a.entity_id)}</code></div>`;
+      card.innerHTML = html;
+      grid.appendChild(card);
+    }
+    elContent.appendChild(grid);
+  } catch (e) {
+    elLoading.textContent = '加载失败：' + (e && e.message ? e.message : String(e));
+    console.error(e);
+  }
+}
+
+main();
+</script>
+</body>
+</html>

@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>口吻字镜 · 西游奇谭</title>
+<link rel="stylesheet" href="assets/app.css">
+<script src="assets/vendor/opencc.js"></script>
+<script src="assets/toggle.js"></script>
+<style>
+  .persongrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+  .pcard{position:relative;padding:14px 18px}
+  .pcard .phead{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+  .pcard .pname{font-family:var(--kai);font-size:22px;color:#332c25;letter-spacing:.06em}
+  .pcard .ptitle{font-family:var(--kai);font-size:12.5px;color:var(--cinnabar);
+    border:1px solid rgba(158,43,37,0.4);padding:1px 7px;border-radius:2px;background:rgba(158,43,37,0.05)}
+  .pcard .pdesc{font-size:13.5px;color:var(--ink2);line-height:1.85;margin-bottom:10px}
+  .pcard .radar{width:100%;height:200px;display:block;background:
+    radial-gradient(200px 200px at 50% 50%, rgba(255,255,255,0.5), rgba(255,255,255,0) 70%);
+    border-radius:3px;margin:4px 0}
+  .pcard .voice-tabs{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0 6px}
+  .pcard .vt{display:inline-block;padding:3px 10px;border-radius:11px;
+    border:1px solid var(--line-gold);background:rgba(255,253,248,0.9);
+    font-family:var(--kai);font-size:12.5px;color:var(--ink2);cursor:pointer;transition:all .2s}
+  .pcard .vt.on{color:#fdf6ec;border-color:var(--gold-d);
+    box-shadow:0 0 0 1px rgba(230,201,138,0.5)}
+  .pcard .vt.howl.on{background:linear-gradient(180deg,var(--cinnabar),var(--cinnabar-d))}
+  .pcard .vt.wit.on{background:linear-gradient(180deg,var(--gold-d),var(--gold))}
+  .pcard .vt.script.on{background:linear-gradient(180deg,var(--jade),#2b4a41)}
+  .pcard .vt.mourn.on{background:linear-gradient(180deg,var(--nebula),#53336e)}
+  .pcard .vt.stern.on{background:linear-gradient(180deg,var(--indigo),#2a344d)}
+  .pcard .vt.play.on{background:linear-gradient(180deg,var(--aurora),#3b7b85)}
+  .pcard .vt.shame.on{background:linear-gradient(180deg,#8a5f3a,#5d3f20)}
+  .pcard .vpill{font-family:var(--kai);font-size:12.5px;color:var(--ink3);margin-top:6px}
+  .pcard .vpill b{color:var(--cinnabar);margin:0 3px}
+  .pcard .vpill .bar{display:inline-block;height:6px;width:80px;vertical-align:middle;
+    background:linear-gradient(90deg,rgba(90,169,179,0.85),rgba(176,141,87,0.85),rgba(158,43,37,0.85));
+    border-radius:3px;margin:0 6px}
+  .pcard .fp{margin-top:8px;padding:8px 10px;font-size:12.5px;
+    background:rgba(255,253,248,0.75);border:1px dashed rgba(176,141,87,0.4);border-radius:2px;
+    color:var(--ink2);font-family:var(--kai);line-height:1.75}
+  .pcard .fp b{color:var(--cinnabar)}
+  .legend-voice{display:flex;flex-wrap:wrap;gap:14px;font-size:12.5px;color:var(--ink2);margin:6px 0 4px;align-items:center}
+  .legend-voice .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle}
+  .kpi{display:flex;flex-wrap:wrap;gap:10px;margin:6px 0 14px}
+  .kpi>div{padding:10px 16px;border:1px solid var(--line-gold);border-radius:2px;
+    background:linear-gradient(180deg,rgba(255,253,248,0.9),rgba(251,245,232,0.85));
+    box-shadow:var(--shadow);font-family:var(--kai);font-size:13.5px;color:var(--ink2)}
+  .kpi b{font-size:22px;color:var(--cinnabar);margin:0 3px;
+    background:linear-gradient(180deg,var(--cinnabar),var(--gold));
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .consist{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+  .conc{padding:14px 16px}
+  .conc .chead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+  .conc .cname{font-family:var(--kai);font-size:17px;color:#332c25}
+  .conc .cscore{font-family:var(--kai);font-size:22px}
+  .conc .cscore.high{color:var(--jade)}
+  .conc .cscore.mid{color:var(--gold-d)}
+  .conc .cscore.low{color:var(--cinnabar)}
+  .conc .ctrend{margin:6px 0 4px;font-family:var(--kai);font-size:12.5px;color:var(--ink2)}
+  .conc svg{width:100%;height:80px;display:block}
+  .conc .cnote{font-size:12.5px;color:var(--ink3);margin-top:6px;line-height:1.7}
+</style>
+</head>
+<body>
+<header>
+  <span class="seal">西游</span>
+  <h1>西游奇谭</h1>
+  <div class="sub">一心求道 · 十难伏魔 · 三教归真</div>
+  <nav>
+    <a href="index.html">总览</a>
+    <a href="read.html">正文·评点</a>
+    <a href="compare.html">评点对照</a>
+    <a href="entities.html">本体实体</a>
+    <a href="versions.html">版本谱</a>
+    <a href="relics.html">法宝谱</a>
+    <a href="annotations.html">诙谐谱</a>
+    <a href="events.html">事件检索</a>
+    <a href="graph.html">图谱</a>
+    <a href="journey.html">取经路线</a>
+    <a href="motif.html">母题链</a>
+    <a href="symbols.html">意象星座</a>
+    <a href="voice.html" class="on">口吻字镜</a>
+    <a href="witmap.html">诙谐密度</a>
+    <a href="agent.html">Agent</a>
+    <a href="query.html">本体论</a>
+  </nav>
+</header>
+
+<main>
+  <div class="hero" style="margin-top:2px">
+    <span class="seal solid">口吻</span>
+    <div class="verse">泼猴經卷　戲謔感傷<br>一口一境　千人千面</div>
+    <div class="rule"></div>
+    <p class="lead">同一个人物在不同情境下的说话模式，是本体层 <b>Voice</b>（口吻）所承载的内容。
+      对应《红楼未完》的「字镜」——每个角色的语言有若干指纹：n-gram 分布、高频词、情绪字密度、困惑度。
+      本页以静态雷达图示意为各角色画出<b>七维口吻空间</b>：
+      <b>泼猴语·戏谑语·经卷语·感伤语·庄严语·市井语·自嘲语</b>，各维度 0.0–1.0。
+      下方再给出<b>口吻一致性</b>（voice_consistency）——检验长文本中角色口吻是否漂移，
+      作为生成式推演的质量指标。</p>
+  </div>
+
+  <div class="kpi">
+    <div>主要角色 <b>5</b></div>
+    <div>口吻维度 <b>7</b></div>
+    <div>采样章回 <b>100</b></div>
+    <div>口吻一致性均值 <b>0.71</b></div>
+    <div>最稳定 · 唐僧</div>
+    <div>最漂移 · 八戒</div>
+  </div>
+
+  <div class="legend-voice">
+    <span><span class="dot" style="background:var(--cinnabar)"></span>泼猴语</span>
+    <span><span class="dot" style="background:var(--gold-d)"></span>戏谑语</span>
+    <span><span class="dot" style="background:var(--jade)"></span>经卷语</span>
+    <span><span class="dot" style="background:var(--nebula)"></span>感伤语</span>
+    <span><span class="dot" style="background:var(--indigo)"></span>庄严语</span>
+    <span><span class="dot" style="background:var(--aurora)"></span>市井语</span>
+    <span><span class="dot" style="background:#8a5f3a"></span>自嘲语</span>
+  </div>
+
+  <h2>五主角色口吻字镜</h2>
+  <div class="persongrid" id="persongrid"></div>
+
+  <h2>口吻一致性（Voice Consistency）</h2>
+  <div class="small muted" style="margin:-4px 0 8px">
+    逐章回跟踪各角色主口吻强度，若某章回与全书均值偏差 &gt; 0.20 视为「漂移点」，用于生成式推演的质量控制。
+  </div>
+  <div class="consist" id="consist"></div>
+</main>
+
+<footer>
+  <span class="seal">评本</span>
+  <div>本体论依据：<code>jtw:Voice / jtw:voice_name / jtw:owner_person / jtw:trigger_context / jtw:fingerprint / jtw:voice_consistency</code></div>
+  <div>口吻分布依世德堂本一百回整理，为研究示意，非考订定本。</div>
+</footer>
+
+<script>
+// ---- 七维口吻空间 ----
+// 维度顺序：泼猴 / 戏谑 / 经卷 / 感伤 / 庄严 / 市井 / 自嘲
+const DIMS = ["泼猴语","戏谑语","经卷语","感伤语","庄严语","市井语","自嘲语"];
+const DIM_COLOR = ["#9e2b25","#b08d57","#3f6b5e","#6a4a8b","#3b4a6b","#5aa9b3","#8a5f3a"];
+
+// 五主角口吻分布
+const PERSONS = [
+  {
+    id:"wukong", name:"孙悟空", title:"齐天大圣", color:"#9e2b25",
+    desc:"泼猴语与戏谑语两峰，庄严语偶现于斗战之前，自嘲语见于受挫之时。",
+    vals:[0.92, 0.78, 0.20, 0.15, 0.55, 0.35, 0.42],
+    voiceTabs:[
+      {cls:"howl", name:"泼猴语", desc:"「俺老孙」「老孙教你」等自称句", score:0.92},
+      {cls:"wit",  name:"戏谑语", desc:"反讽玉帝、观音、八戒等", score:0.78},
+      {cls:"script",name:"经卷语",desc:"偶引禅理，用于斗战前", score:0.20},
+      {cls:"shame",name:"自嘲语", desc:"被唐僧念咒时", score:0.42},
+    ],
+    fingerprint:"n-gram 头部：「俺老孙」×88「教与你」×42「老孙」×76 · 情绪字密度 0.34 · 困惑度 12.8",
+    consistency:0.82,
+  },
+  {
+    id:"tang", name:"唐三藏", title:"奉旨取经", color:"#3f6b5e",
+    desc:"经卷语与感伤语两峰，庄严语恒定高值——取经路上未尝改色。",
+    vals:[0.05, 0.12, 0.88, 0.72, 0.80, 0.10, 0.10],
+    voiceTabs:[
+      {cls:"script",name:"经卷语",desc:"「阿弥陀佛」「善哉善哉」", score:0.88},
+      {cls:"mourn", name:"感伤语", desc:"逢难时泣", score:0.72},
+      {cls:"stern", name:"庄严语", desc:"始终如一", score:0.80},
+      {cls:"shame", name:"自嘲语", desc:"「贫僧」自称", score:0.10},
+    ],
+    fingerprint:"n-gram 头部：「阿弥陀佛」×264「善哉」×58「贫僧」×186 · 情绪字密度 0.28 · 困惑度 9.4",
+    consistency:0.91,
+  },
+  {
+    id:"zhu", name:"猪八戒", title:"天蓬元帅", color:"#b08d57",
+    desc:"市井语主导，戏谑语与自嘲语交织；受挫时最「飘」——口吻漂移最甚。",
+    vals:[0.10, 0.68, 0.08, 0.35, 0.15, 0.82, 0.65],
+    voiceTabs:[
+      {cls:"play", name:"市井语", desc:"讨价还价、抱怨偷懒", score:0.82},
+      {cls:"wit",  name:"戏谑语", desc:"取笑唐僧、抢功推责", score:0.68},
+      {cls:"shame",name:"自嘲语", desc:"「呆子」「二哥」", score:0.65},
+      {cls:"mourn", name:"感伤语", desc:"偶为高翠兰落泪", score:0.35},
+    ],
+    fingerprint:"n-gram 头部：「二哥」×48「呆子」×72「讨」×64「走」×112 · 情绪字密度 0.26 · 困惑度 15.6",
+    consistency:0.55,
+  },
+  {
+    id:"sha", name:"沙悟净", title:"卷帘大将", color:"#3b4a6b",
+    desc:"庄严语与经卷语持平，口吻最「平」——取经路上的和事佬。",
+    vals:[0.08, 0.10, 0.55, 0.30, 0.65, 0.28, 0.15],
+    voiceTabs:[
+      {cls:"stern",name:"庄严语",desc:"调停悟空八戒争执", score:0.65},
+      {cls:"script",name:"经卷语",desc:"随唐僧称诵", score:0.55},
+      {cls:"play", name:"市井语",desc:"日常对话", score:0.28},
+    ],
+    fingerprint:"n-gram 头部：「师父」×88「大师兄」×42「师弟」×36 · 情绪字密度 0.18 · 困惑度 11.2",
+    consistency:0.76,
+  },
+  {
+    id:"yueli", name:"观世音", title:"灵感菩萨", color:"#6a4a8b",
+    desc:"庄严语最高，经卷语次之；受悟空戏谑时仍能保持佛家口吻——「慈悲」为指纹。",
+    vals:[0.02, 0.20, 0.72, 0.18, 0.90, 0.05, 0.05],
+    voiceTabs:[
+      {cls:"stern", name:"庄严语",desc:"佛家口吻", score:0.90},
+      {cls:"script",name:"经卷语",desc:"引佛经", score:0.72},
+      {cls:"mourn", name:"感伤语",desc:"「慈悲」底色", score:0.18},
+    ],
+    fingerprint:"n-gram 头部：「阿弥陀佛」×184「慈悲」×68「善哉」×32 · 情绪字密度 0.22 · 困惑度 10.1",
+    consistency:0.88,
+  }
+];
+
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+// ---- 雷达图 ----
+function radarSVG(vals, color){
+  const size=200, cx=size/2, cy=size/2, r=size/2-30;
+  const N=vals.length;
+  const ang = (i)=>-Math.PI/2 + i*2*Math.PI/N;
+  const pt = (i,rad)=>[cx+Math.cos(ang(i))*rad, cy+Math.sin(ang(i))*rad];
+
+  const NS="http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(NS,"svg");
+  svg.setAttribute("viewBox",`0 0 ${size} ${size}`);
+  svg.setAttribute("width","100%");
+  svg.setAttribute("height","100%");
+
+  // 网格
+  for(let k=1;k<=4;k++){
+    const rr = r*k/4;
+    const poly = document.createElementNS(NS,"polygon");
+    let s="";
+    for(let i=0;i<N;i++){const [x,y]=pt(i,rr); s += x+","+y+" ";}
+    poly.setAttribute("points",s);
+    poly.setAttribute("fill","none");
+    poly.setAttribute("stroke","rgba(176,141,87,0.25)");
+    poly.setAttribute("stroke-width","0.6");
+    poly.setAttribute("stroke-dasharray", k===4?"":"2 3");
+    svg.appendChild(poly);
+  }
+  // 轴
+  for(let i=0;i<N;i++){
+    const [x,y]=pt(i,r);
+    const l=document.createElementNS(NS,"line");
+    l.setAttribute("x1",cx);l.setAttribute("y1",cy);
+    l.setAttribute("x2",x);l.setAttribute("y2",y);
+    l.setAttribute("stroke","rgba(176,141,87,0.18)");
+    l.setAttribute("stroke-width","0.5");
+    svg.appendChild(l);
+    // 标签
+    const [lx,ly] = pt(i,r+16);
+    const t=document.createElementNS(NS,"text");
+    t.setAttribute("x",lx);t.setAttribute("y",ly);
+    t.setAttribute("text-anchor","middle");
+    t.setAttribute("dominant-baseline","middle");
+    t.setAttribute("fill","rgba(58,44,32,0.75)");
+    t.setAttribute("font-family","var(--kai),Kaiti");
+    t.setAttribute("font-size","10.5");
+    t.textContent = DIMS[i];
+    svg.appendChild(t);
+  }
+  // 数据多边形
+  const poly = document.createElementNS(NS,"polygon");
+  let s="";
+  for(let i=0;i<N;i++){const [x,y]=pt(i,r*vals[i]); s += x+","+y+" ";}
+  poly.setAttribute("points",s);
+  poly.setAttribute("fill",color);
+  poly.setAttribute("fill-opacity","0.22");
+  poly.setAttribute("stroke",color);
+  poly.setAttribute("stroke-width","1.8");
+  svg.appendChild(poly);
+  // 数据点
+  for(let i=0;i<N;i++){
+    const [x,y]=pt(i,r*vals[i]);
+    const c=document.createElementNS(NS,"circle");
+    c.setAttribute("cx",x);c.setAttribute("cy",y);c.setAttribute("r",2.6);
+    c.setAttribute("fill",color);c.setAttribute("stroke","#fdf6ec");c.setAttribute("stroke-width","1");
+    svg.appendChild(c);
+  }
+  return svg;
+}
+
+function buildCards(){
+  const box = document.getElementById('persongrid');
+  for(const p of PERSONS){
+    const card = document.createElement('div');
+    card.className = 'card pcard';
+    const tabs = p.voiceTabs.map((t,i)=>`
+      <span class="vt ${t.cls}${i===0?' on':''}" data-vt="${esc(t.name)}">${esc(t.name)} ${t.score.toFixed(2)}</span>
+    `).join('');
+    card.innerHTML = `
+      <div class="phead">
+        <div class="pname" style="color:${p.color}">${esc(p.name)}</div>
+        <div class="ptitle" style="color:${p.color};border-color:${p.color}55">${esc(p.title)}</div>
+      </div>
+      <div class="pdesc">${esc(p.desc)}</div>
+      <div id="radar-${p.id}"></div>
+      <div class="voice-tabs">${tabs}</div>
+      <div class="vpill">主口吻 · <b>${esc(p.voiceTabs[0].name)}</b><span class="bar"></span>强度 <b>${p.voiceTabs[0].score.toFixed(2)}</b> · 一致性 <b>${p.consistency.toFixed(2)}</b></div>
+      <div class="fp">指纹 fingerprint：<br>${esc(p.fingerprint)}</div>
+    `;
+    box.appendChild(card);
+    // 雷达
+    document.getElementById('radar-'+p.id).appendChild(radarSVG(p.vals, p.color));
+    // 交互：点 tab 切换雷达（重新绘制强调维度）
+    const rbox = document.getElementById('radar-'+p.id);
+    card.querySelectorAll('.vt').forEach((vt,i)=>{
+      vt.addEventListener('click',()=>{
+        card.querySelectorAll('.vt').forEach(x=>x.classList.remove('on'));
+        vt.classList.add('on');
+        const t = p.voiceTabs[i];
+        const pill = card.querySelector('.vpill');
+        pill.innerHTML = `主口吻 · <b>${esc(t.name)}</b><span class="bar"></span>强度 <b>${t.score.toFixed(2)}</b> · 一致性 <b>${p.consistency.toFixed(2)}</b>`;
+        // 重绘雷达（把该维度的分量强化）
+        rbox.innerHTML = '';
+        const boost = p.vals.map((v,di)=>{
+          const targetDim = DIMS.indexOf(t.name);
+          if(di===targetDim) return Math.min(1, v+0.05);
+          return v*(1-0.15);
+        });
+        rbox.appendChild(radarSVG(boost, p.color));
+      });
+    });
+  }
+}
+
+// ---- 口吻一致性时序 ----
+function consistencySVG(series, color, w, h){
+  const NS="http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(NS,"svg");
+  svg.setAttribute("viewBox",`0 0 ${w} ${h}`);
+  svg.setAttribute("preserveAspectRatio","none");
+  // 均值线
+  const mean = series.reduce((a,b)=>a+b,0)/series.length;
+  const yMean = h - mean*h*0.85 - h*0.08;
+  const gl = document.createElementNS(NS,"line");
+  gl.setAttribute("x1",0);gl.setAttribute("x2",w);
+  gl.setAttribute("y1",yMean);gl.setAttribute("y2",yMean);
+  gl.setAttribute("stroke","rgba(176,141,87,0.35)");
+  gl.setAttribute("stroke-width","1");gl.setAttribute("stroke-dasharray","3 3");
+  svg.appendChild(gl);
+  // 折线
+  const stepX = w/(series.length-1);
+  const pts = series.map((v,i)=>{
+    const x = i*stepX;
+    const y = h - v*h*0.85 - h*0.08;
+    return [x,y,v];
+  });
+  let d = "M "+pts[0][0]+","+pts[0][1];
+  for(let i=1;i<pts.length;i++) d += " L "+pts[i][0]+","+pts[i][1];
+  const path = document.createElementNS(NS,"path");
+  path.setAttribute("d",d);
+  path.setAttribute("fill","none");
+  path.setAttribute("stroke",color);
+  path.setAttribute("stroke-width","1.8");
+  path.setAttribute("stroke-linecap","round");
+  path.setAttribute("stroke-linejoin","round");
+  svg.appendChild(path);
+  // 漂移点
+  for(const [x,y,v] of pts){
+    if(Math.abs(v-mean)>0.20){
+      const c = document.createElementNS(NS,"circle");
+      c.setAttribute("cx",x);c.setAttribute("cy",y);c.setAttribute("r",3);
+      c.setAttribute("fill","#9e2b25");c.setAttribute("stroke","#fdf6ec");c.setAttribute("stroke-width","1");
+      const title=document.createElementNS(NS,"title");
+      title.textContent = "偏离均值 "+(v-mean>0?"+":"")+((v-mean)*100).toFixed(1)+"%";
+      c.appendChild(title);
+      svg.appendChild(c);
+    }
+  }
+  // 均值标注
+  const t = document.createElementNS(NS,"text");
+  t.setAttribute("x",4);t.setAttribute("y",yMean-3);
+  t.setAttribute("font-size","9.5");
+  t.setAttribute("fill","rgba(138,127,109,0.7)");
+  t.setAttribute("font-family","var(--kai),Kaiti");
+  t.textContent = "均值 "+mean.toFixed(2);
+  svg.appendChild(t);
+  return svg;
+}
+
+// 每角色的 20 段章回口吻强度（示意）
+function genSeries(base, drift, seed){
+  const arr=[];let v=base;
+  for(let i=0;i<20;i++){
+    const noise = (Math.sin(seed*7 + i*1.3)*0.5 + Math.cos(seed*3 + i*0.7)*0.3) * drift;
+    v = base + noise + (i%5===0?(Math.sin(seed+i)*0.08):0);
+    arr.push(Math.max(0.05, Math.min(0.99, v)));
+  }
+  return arr;
+}
+
+function buildConsist(){
+  const box = document.getElementById('consist');
+  // 每角色的均值序列（模拟：base 用主口吻强度）
+  const seriesMap = {
+    wukong:  genSeries(0.78, 0.12, 1),
+    tang:    genSeries(0.88, 0.06, 2),
+    zhu:     genSeries(0.65, 0.22, 3),
+    sha:     genSeries(0.68, 0.10, 4),
+    yueli:   genSeries(0.82, 0.08, 5),
+  };
+  for(const p of PERSONS){
+    const series = seriesMap[p.id];
+    const mean = series.reduce((a,b)=>a+b,0)/series.length;
+    const cls = mean>=0.8?"high":(mean>=0.65?"mid":"low");
+    const trendText = mean>=0.8?"稳定·长文本可靠":(mean>=0.65?"轻微漂移·注意个别回":"漂移明显·慎用于推演");
+    const card = document.createElement('div');
+    card.className = 'card conc';
+    card.innerHTML = `
+      <div class="chead">
+        <div class="cname" style="color:${p.color}">${esc(p.name)}</div>
+        <div class="cscore ${cls}">${mean.toFixed(2)}</div>
+      </div>
+      <div class="ctrend">${esc(trendText)}</div>
+      <div id="consist-${p.id}"></div>
+      <div class="cnote">20 段章回（每 5 回一段）主口吻强度曲线，红点标记漂移。</div>
+    `;
+    box.appendChild(card);
+    document.getElementById('consist-'+p.id).appendChild(consistencySVG(series, p.color, 300, 80));
+  }
+}
+
+buildCards();
+buildConsist();
+</script>
+</body>
+</html>
