@@ -17,25 +17,22 @@
   .tabs button.on{color:var(--cinnabar);border-color:rgba(158,43,37,.35);
     background:linear-gradient(180deg,#fffdf8,#f6ecd9);font-weight:600}
   .loadbox{padding:80px 20px;text-align:center;color:var(--ink3);font-family:var(--kai);font-size:16px}
-  .gwrap{display:grid;grid-template-columns:1fr 340px;gap:14px;align-items:start}
+  .gwrap{display:grid;grid-template-columns:1fr 300px;gap:20px;align-items:start}
   @media (max-width:960px){.gwrap{grid-template-columns:1fr}}
-  .gcanvas{padding:10px;margin:0;border:1px solid var(--line);border-radius:2px;
-    background:linear-gradient(180deg,rgba(255,253,248,.92),rgba(253,248,238,.85));box-shadow:var(--shadow)}
-  .gcanvas svg{display:block;width:100%;height:auto;touch-action:none}
-  .gtools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 8px}
-  .gtools input,.gtools select{padding:5px 8px;font-size:13px;font-family:inherit;
+  .gtools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 10px}
+  .gtools input,.gtools select{padding:5px 10px;font-size:13.5px;font-family:inherit;
     background:rgba(255,253,248,.9);border:1px solid var(--line);border-radius:2px}
-  .gside{position:sticky;top:14px;max-height:84vh;overflow:auto;margin:0;font-size:13.5px;padding:15px 17px;
+  .gside{position:sticky;top:14px;max-height:84vh;overflow:auto;margin:0;font-size:13.5px;padding:18px 20px;
     background:linear-gradient(180deg,rgba(255,253,248,.97),rgba(253,248,238,.96));
     border:1px solid var(--line);border-radius:3px;box-shadow:var(--shadow)}
-  .gside h3{margin:0 0 4px;font-size:17px}
-  .gside .kv{border:0;background:none;box-shadow:none;border-radius:0;margin:8px 0 0;width:100%}
-  .gside .kv td{border-bottom:1px dotted #e9ddc7;padding:3px 5px 3px 0;font-size:13px}
-  .gside .kv td:first-child{color:var(--ink3);white-space:nowrap;width:6em}
-  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--ink3);margin-top:6px}
+  .gside h3{margin:0 0 6px;font-size:17px}
+  .gside .kv{border:0;background:none;box-shadow:none;border-radius:0;margin:10px 0 0;width:100%}
+  .gside .kv td{border-bottom:1px dotted #e9ddc7;padding:4px 5px 4px 0;font-size:13px}
+  .gside .kv td:first-child{color:var(--ink3);white-space:nowrap;width:5.5em}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--ink3);margin-top:8px}
   .legend .sw{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:5px;vertical-align:middle}
-  .node-label{font-family:var(--kai);font-size:12px;fill:#332c25;pointer-events:none}
-  .link-label{font-size:10px;fill:#8a7f6d}
+  .gcanvas{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:3px;
+    background:linear-gradient(180deg,rgba(255,253,248,.92),rgba(253,248,238,.85));box-shadow:var(--shadow)}
 </style>
 </head>
 <body>
@@ -185,7 +182,7 @@ function render() {
   else renderPred();
 }
 
-// ============== 关系图 ==============
+// ============== 关系图（力导向布局版） ==============
 function renderRel() {
   const wrap = document.createElement('div');
   wrap.className = 'gwrap';
@@ -204,7 +201,8 @@ function renderRel() {
   tools.className = 'gtools';
   tools.innerHTML = `<span class="small muted">显示：</span>
     <select id="selPred"><option value="">全部谓词</option></select>
-    <select id="selType"><option value="">全部类型</option></select>`;
+    <select id="selType"><option value="">全部类型</option></select>
+    <span class="small muted" style="margin-left:auto" id="zoomTip">滚轮缩放 · 拖拽平移 · 悬停高亮</span>`;
   left.appendChild(tools);
 
   const canvas = document.createElement('div');
@@ -243,89 +241,251 @@ function renderRel() {
     legendBox.innerHTML = h;
   }
 
+  // 力导向布局算法
+  function forceLayout(nodes, edges, W, H) {
+    const cx = W / 2, cy = H / 2;
+    // 初始化位置：按类型分组放置
+    const typeGroups = {};
+    for (const n of nodes) {
+      if (!typeGroups[n.type]) typeGroups[n.type] = [];
+      typeGroups[n.type].push(n);
+    }
+    const types = Object.keys(typeGroups);
+    const angleStep = (Math.PI * 2) / types.length;
+    types.forEach((t, i) => {
+      const baseA = i * angleStep - Math.PI / 2;
+      const arr = typeGroups[t];
+      const spread = Math.min(0.8, Math.PI / 3);
+      arr.forEach((n, j) => {
+        const a = baseA + (arr.length === 1 ? 0 : (j / (arr.length - 1) - 0.5) * spread);
+        const r = Math.min(W, H) * 0.32;
+        n.x = cx + Math.cos(a) * r;
+        n.y = cy + Math.sin(a) * r;
+        n.vx = 0; n.vy = 0;
+      });
+    });
+
+    // 力模拟
+    const ITER = 120;
+    const alpha0 = 0.3;
+    for (let iter = 0; iter < ITER; iter++) {
+      const alpha = alpha0 * (1 - iter / ITER);
+      // 斥力
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+          const a = nodes[i], b = nodes[j];
+          let dx = b.x - a.x, dy = b.y - a.y;
+          let dist = Math.sqrt(dx * dx + dy * dy) || 1;
+          const minDist = 55;
+          if (dist < minDist) {
+            const force = (minDist - dist) / dist * alpha * 3;
+            dx *= force; dy *= force;
+            a.vx -= dx; a.vy -= dy;
+            b.vx += dx; b.vy += dy;
+          }
+        }
+      }
+      // 引力（连线）
+      const nodeMap = new Map(nodes.map(n => [n.id, n]));
+      for (const e of edges) {
+        const a = nodeMap.get(e.subject_id), b = nodeMap.get(e.object_id);
+        if (!a || !b) continue;
+        let dx = b.x - a.x, dy = b.y - a.y;
+        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+        const target = 100;
+        const force = (dist - target) / dist * alpha * 0.15;
+        dx *= force; dy *= force;
+        a.vx += dx; a.vy += dy;
+        b.vx -= dx; b.vy -= dy;
+      }
+      // 中心引力
+      for (const n of nodes) {
+        n.vx += (cx - n.x) * alpha * 0.02;
+        n.vy += (cy - n.y) * alpha * 0.02;
+      }
+      // 更新位置
+      for (const n of nodes) {
+        n.x += n.vx * 0.5;
+        n.y += n.vy * 0.5;
+        n.vx *= 0.6; n.vy *= 0.6;
+        // 边界约束
+        n.x = Math.max(60, Math.min(W - 60, n.x));
+        n.y = Math.max(40, Math.min(H - 40, n.y));
+      }
+    }
+    return nodes;
+  }
+
   function draw() {
     const p = selPred.value;
     const t = selType.value;
     let rels = STATE.rels;
     if (p) rels = rels.filter(r => r.predicate === p);
-    const seenPred = new Set(rels.map(r => r.predicate));
-    // 取谓词中出现次数最多的前 12 条
     rels = rels.slice(0, 400);
-    // 节点集
     const nodeSet = new Map();
     for (const r of rels) {
       for (const id of [r.subject_id, r.object_id]) {
         if (!nodeSet.has(id)) {
           const type = STATE.id2Type.get(id) || 'other';
           if (t && type !== t) continue;
-          nodeSet.set(id, { id, label: STATE.id2Label.get(id) || id, type });
+          nodeSet.set(id, { id, label: STATE.id2Label.get(id) || id, type,
+            mention: STATE.id2Mention.get(id) || 0 });
         }
       }
     }
-    const nodes = [...nodeSet.values()];
+    let nodes = [...nodeSet.values()];
     const edges = rels.filter(r => nodeSet.has(r.subject_id) && nodeSet.has(r.object_id));
 
-    // 布局：按谓词角度分组，节点在环形上
-    const W = 900, H = 620, cx = W / 2, cy = H / 2, R = Math.min(W, H) * 0.42;
-    const uniquePreds = [...new Set(edges.map(e => e.predicate))];
-    const predAngle = new Map();
-    uniquePreds.forEach((p, i) => predAngle.set(p, (i / uniquePreds.length) * Math.PI * 2 - Math.PI / 2));
+    const W = 960, H = 560;
+    nodes = forceLayout(nodes, edges, W, H);
+    const pos = new Map(nodes.map(n => [n.id, n]));
 
-    // 给每个节点分配一个位置（按类型聚类）
-    const typeAngles = {};
-    const types = [...new Set(nodes.map(n => n.type))];
-    types.forEach((tt, i) => typeAngles[tt] = (i / types.length) * Math.PI * 2 - Math.PI / 2);
+    // 构建邻接表用于高亮
+    const adj = new Map();
+    for (const e of edges) {
+      if (!adj.has(e.subject_id)) adj.set(e.subject_id, new Set());
+      if (!adj.has(e.object_id)) adj.set(e.object_id, new Set());
+      adj.get(e.subject_id).add(e.object_id);
+      adj.get(e.object_id).add(e.subject_id);
+    }
 
-    const placed = [];
-    const perType = {};
-    for (const n of nodes) {
-      if (!perType[n.type]) perType[n.type] = [];
-      perType[n.type].push(n);
-    }
-    for (const [tt, arr] of Object.entries(perType)) {
-      const baseA = typeAngles[tt];
-      const spread = Math.min(0.5, Math.PI / 4);
-      arr.forEach((n, i) => {
-        const a = baseA + (arr.length === 1 ? 0 : (i / Math.max(1, arr.length - 1) - 0.5) * spread);
-        const jitter = (Math.sin(n.id.length * 1.7 + i) * 0.05);
-        const rr = R * (0.75 + (n.type === 'monster' ? -0.15 : n.type === 'person' ? 0.15 : 0) + jitter);
-        placed.push({ node: n, x: cx + Math.cos(a) * rr, y: cy + Math.sin(a) * rr });
-      });
-    }
-    const pos = new Map(placed.map(p => [p.node.id, p]));
+    const TYPE_COLOR = { person:'#9e2b25', place:'#3f6b5e', artifact:'#b08d57', monster:'#7d1f1b', official_title:'#3b4a6b', quote:'#8b5f8b', religion:'#2f5a50' };
 
     // 生成 SVG
-    let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
-    // 边框圆
-    svg += `<circle cx="${cx}" cy="${cy}" r="${R+10}" fill="none" stroke="rgba(158,43,37,.15)" stroke-dasharray="3 4"/>`;
+    let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" id="graphSvg">`;
+    svg += `<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0L10,5L0,10z" fill="rgba(138,127,109,.5)"/></marker></defs>`;
     // 边
     for (const e of edges) {
-      const a = pos.get(e.subject_id);
-      const b = pos.get(e.object_id);
+      const a = pos.get(e.subject_id), b = pos.get(e.object_id);
       if (!a || !b) continue;
       const col = PRED_COLORS[e.predicate] || '#888';
-      svg += `<line x1="${a.x.toFixed(1)}" y1="${a.y.toFixed(1)}" x2="${b.x.toFixed(1)}" y2="${b.y.toFixed(1)}" stroke="${col}" stroke-opacity="0.42" stroke-width="1.2"/>`;
+      const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+      svg += `<line class="glink" data-s="${e.subject_id}" data-o="${e.object_id}" x1="${a.x.toFixed(1)}" y1="${a.y.toFixed(1)}" x2="${b.x.toFixed(1)}" y2="${b.y.toFixed(1)}" stroke="${col}" marker-end="url(#arrow)"/>`;
+      svg += `<text class="glink-label" data-s="${e.subject_id}" data-o="${e.object_id}" x="${mx.toFixed(1)}" y="${my.toFixed(1)}" text-anchor="middle">${esc(PRED_LABEL[e.predicate] || '')}</text>`;
     }
     // 节点
-    const TYPE_COLOR = { person:'#9e2b25', place:'#3f6b5e', artifact:'#b08d57', monster:'#7d1f1b', official_title:'#3b4a6b', quote:'#8b5f8b', religion:'#2f5a50' };
-    for (const p of placed) {
-      const r = 6 + Math.min(10, (STATE.id2Mention.get(p.node.id) || 0) * 0.6);
-      const c = TYPE_COLOR[p.node.type] || '#888';
-      svg += `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${r.toFixed(1)}" fill="${c}" fill-opacity="0.85" stroke="rgba(255,255,255,.8)" stroke-width="1"/>`;
-      svg += `<text class="node-label" x="${(p.x + r + 4).toFixed(1)}" y="${(p.y + 3).toFixed(1)}">${esc(p.node.label.slice(0, 6))}</text>`;
+    for (const n of nodes) {
+      const r = 8 + Math.min(14, n.mention * 0.5);
+      const c = TYPE_COLOR[n.type] || '#888';
+      svg += `<g class="gnode" data-id="${n.id}" transform="translate(${n.x.toFixed(1)},${n.y.toFixed(1)})">`;
+      svg += `<circle r="${r.toFixed(1)}" fill="${c}" fill-opacity="0.88" stroke="rgba(255,255,255,.9)"/>`;
+      svg += `<text class="node-label" x="${(r + 5).toFixed(1)}" y="4" font-size="13" fill="#332c25">${esc(n.label.slice(0, 8))}</text>`;
+      svg += `</g>`;
     }
     svg += '</svg>';
     canvas.innerHTML = svg;
 
-    // 侧栏详情：显示谓词计数
+    // ===== 缩放与平移 =====
+    const svgEl = canvas.querySelector('#graphSvg');
+    let viewBox = { x: 0, y: 0, w: W, h: H };
+    let isPanning = false, panStart = null;
+
+    function updateViewBox() {
+      svgEl.setAttribute('viewBox', `${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`);
+    }
+    svgEl.addEventListener('wheel', (ev) => {
+      ev.preventDefault();
+      const rect = svgEl.getBoundingClientRect();
+      const mx = (ev.clientX - rect.left) / rect.width * viewBox.w + viewBox.x;
+      const my = (ev.clientY - rect.top) / rect.height * viewBox.h + viewBox.y;
+      const factor = ev.deltaY > 0 ? 1.12 : 0.88;
+      const nw = Math.max(200, Math.min(2000, viewBox.w * factor));
+      const nh = Math.max(120, Math.min(1200, viewBox.h * factor));
+      viewBox.x = mx - (mx - viewBox.x) * (nw / viewBox.w);
+      viewBox.y = my - (my - viewBox.y) * (nh / viewBox.h);
+      viewBox.w = nw; viewBox.h = nh;
+      updateViewBox();
+    }, { passive: false });
+    svgEl.addEventListener('mousedown', (ev) => {
+      if (ev.target.closest('.gnode')) return;
+      isPanning = true;
+      panStart = { x: ev.clientX, y: ev.clientY, vx: viewBox.x, vy: viewBox.y };
+      svgEl.style.cursor = 'grabbing';
+    });
+    window.addEventListener('mousemove', (ev) => {
+      if (!isPanning || !panStart) return;
+      const rect = svgEl.getBoundingClientRect();
+      const dx = (ev.clientX - panStart.x) / rect.width * viewBox.w;
+      const dy = (ev.clientY - panStart.y) / rect.height * viewBox.h;
+      viewBox.x = panStart.vx - dx;
+      viewBox.y = panStart.vy - dy;
+      updateViewBox();
+    });
+    window.addEventListener('mouseup', () => {
+      isPanning = false;
+      svgEl.style.cursor = 'grab';
+    });
+
+    // ===== 节点高亮与详情 =====
     const detail = document.createElement('div');
-    detail.style.marginTop = '12px';
-    detail.innerHTML = `<table class="kv">
+    detail.className = 'gdetail';
+    canvas.appendChild(detail);
+
+    let hlId = null;
+    function setHighlight(id) {
+      hlId = id;
+      const nodesEl = canvas.querySelectorAll('.gnode');
+      const linksEl = canvas.querySelectorAll('.glink');
+      const labelsEl = canvas.querySelectorAll('.glink-label');
+      if (!id) {
+        nodesEl.forEach(el => el.classList.remove('dim', 'hl'));
+        linksEl.forEach(el => el.classList.remove('dim', 'hl'));
+        labelsEl.forEach(el => el.classList.remove('hl'));
+        detail.classList.remove('on');
+        return;
+      }
+      const nb = adj.get(id) || new Set();
+      nodesEl.forEach(el => {
+        const nid = el.dataset.id;
+        el.classList.remove('dim', 'hl');
+        if (nid === id) el.classList.add('hl');
+        else if (nb.has(nid)) el.classList.add('hl');
+        else el.classList.add('dim');
+      });
+      linksEl.forEach(el => {
+        const s = el.dataset.s, o = el.dataset.o;
+        el.classList.remove('dim', 'hl');
+        if (s === id || o === id) el.classList.add('hl');
+        else if (nb.has(s) && nb.has(o)) el.classList.add('hl');
+        else el.classList.add('dim');
+      });
+      labelsEl.forEach(el => {
+        const s = el.dataset.s, o = el.dataset.o;
+        el.classList.remove('hl');
+        if (s === id || o === id) el.classList.add('hl');
+      });
+      // 详情卡片
+      const n = pos.get(id);
+      if (n) {
+        const conn = nb.size;
+        detail.innerHTML = `<div class="ttl">${esc(n.label)}</div>
+          <span class="typ">${esc(n.type)}</span>
+          <div class="row"><span class="lbl">提及</span><b>${n.mention}</b></div>
+          <div class="row"><span class="lbl">关联</span><b>${conn} 节点</b></div>`;
+        detail.classList.add('on');
+      }
+    }
+
+    canvas.querySelectorAll('.gnode').forEach(el => {
+      const id = el.dataset.id;
+      el.addEventListener('mouseenter', () => setHighlight(id));
+      el.addEventListener('mouseleave', () => setHighlight(null));
+      el.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        setHighlight(id);
+      });
+    });
+    svgEl.addEventListener('click', () => setHighlight(null));
+
+    // 侧栏详情
+    const detailTbl = document.createElement('div');
+    detailTbl.style.marginTop = '14px';
+    detailTbl.innerHTML = `<table class="kv">
       <tr><td>边</td><td>${edges.length}</td></tr>
-      <tr><td>节点</td><td>${placed.length}</td></tr>
-      <tr><td>涉及谓词</td><td>${uniquePreds.length}</td></tr>
+      <tr><td>节点</td><td>${nodes.length}</td></tr>
+      <tr><td>涉及谓词</td><td>${[...new Set(edges.map(e=>e.predicate))].length}</td></tr>
     </table>`;
-    right.appendChild(detail);
+    right.appendChild(detailTbl);
 
     buildLegend();
   }

@@ -172,13 +172,19 @@
 import { loadPageData } from './js/page.js';
 
 // 评点类型元数据（用于 anno 表；百回详注的评点走 line.form_type='commentary'）
+// 前端展示收敛为 3 组：朱批（5 种批语合并）、墨批（引诗）、全部
 const TYPE_META = {
-  colophon: { label: '底端', color: '朱批', desc: '每回末页收语或批评总纲' },
-  side:     { label: '侧批', color: '朱批', desc: '边栏批语' },
-  inline:   { label: '夹批', color: '朱批', desc: '夹在行间' },
-  top:      { label: '眉批', color: '朱批', desc: '页眉批语' },
-  caption:  { label: '引诗', color: '墨批', desc: '插图的题画诗或回目诗' },
-  bottom:   { label: '底批', color: '朱批', desc: '页脚批语' },
+  colophon: { label: '底端', color: '朱批', group: '朱批', desc: '每回末页收语' },
+  side:     { label: '侧批', color: '朱批', group: '朱批', desc: '边栏批语' },
+  inline:   { label: '夹批', color: '朱批', group: '朱批', desc: '夹在行间' },
+  top:      { label: '眉批', color: '朱批', group: '朱批', desc: '页眉批语' },
+  bottom:   { label: '底批', color: '朱批', group: '朱批', desc: '页脚批语' },
+  caption:  { label: '引诗', color: '墨批', group: '墨批', desc: '插图题画诗' },
+};
+// 展示组定义
+const TYPE_GROUPS = {
+  '朱批': ['colophon', 'side', 'inline', 'top', 'bottom'],
+  '墨批': ['caption'],
 };
 
 // 版本说明（渲染到 #editionNote）
@@ -268,17 +274,45 @@ const elFootnote = document.getElementById('footnote');
 
 function buildChips() {
   elChips.innerHTML = '';
-  for (const [k, v] of Object.entries(TYPE_META)) {
+  // 收敛为 3 个 chips：朱批、墨批、全部
+  const groups = [
+    { key: '朱批', label: '朱批', types: TYPE_GROUPS['朱批'], desc: '眉批/侧批/夹批/底端/底批' },
+    { key: '墨批', label: '墨批', types: TYPE_GROUPS['墨批'], desc: '引诗题画' },
+    { key: '全部', label: '全部', types: Object.keys(TYPE_META), desc: '显示所有类型' },
+  ];
+  for (const g of groups) {
     const box = document.createElement('label');
-    box.className = 'chip on';
-    box.dataset.key = k;
-    box.innerHTML = `<input type="checkbox" checked> ${v.label} <span class="small">(${v.desc.slice(0, 4)})</span>`;
+    const allOn = g.types.every(t => state.activeTypes.has(t));
+    box.className = 'chip' + (allOn ? ' on' : '');
+    box.dataset.key = g.key;
+    box.innerHTML = `<input type="checkbox" ${allOn ? 'checked' : ''}> ${g.label} <span class="small">(${g.desc})</span>`;
     box.addEventListener('click', (e) => {
       e.preventDefault();
-      if (state.activeTypes.has(k)) state.activeTypes.delete(k);
-      else state.activeTypes.add(k);
-      box.classList.toggle('on');
-      box.querySelector('input').checked = state.activeTypes.has(k);
+      const turnOn = !g.types.every(t => state.activeTypes.has(t));
+      if (turnOn) {
+        for (const t of g.types) state.activeTypes.add(t);
+      } else {
+        for (const t of g.types) state.activeTypes.delete(t);
+      }
+      box.classList.toggle('on', turnOn);
+      box.querySelector('input').checked = turnOn;
+      // 同步其他 chip 状态
+      elChips.querySelectorAll('.chip').forEach(c => {
+        const k = c.dataset.key;
+        if (k === '全部') return;
+        const gk = groups.find(x => x.key === k);
+        if (!gk) return;
+        const on = gk.types.every(t => state.activeTypes.has(t));
+        c.classList.toggle('on', on);
+        c.querySelector('input').checked = on;
+      });
+      // 全部 chip 状态
+      const allChip = elChips.querySelector('.chip[data-key="全部"]');
+      if (allChip) {
+        const allOnNow = Object.keys(TYPE_META).every(t => state.activeTypes.has(t));
+        allChip.classList.toggle('on', allOnNow);
+        allChip.querySelector('input').checked = allOnNow;
+      }
       render();
     });
     elChips.appendChild(box);
