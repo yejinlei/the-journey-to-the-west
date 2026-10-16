@@ -1,6 +1,9 @@
 # === 扫描书页（体积过大，不入版本库） ===
 book/
 
+# === gh-pages 部署 worktree（临时挂载点，不入版本库） ===
+gh_pages_deploy/
+
 # === 构建缓存 & 运行时产物 ===
 __pycache__/
 *.pyc
