@@ -168,7 +168,9 @@
     '.jtw-toggle button.on{color:#9e2b25;background:linear-gradient(180deg,#fdf1ee,#f8e6e2);' +
     'border-color:rgba(158,43,37,.35)}' +
     '.jtw-toggle button[disabled]{opacity:.42;cursor:not-allowed}' +
-    '.jtw-toggle .w-tag{font-size:9.5px;color:#a8937a;margin-left:2px;letter-spacing:.02em}';
+    '.jtw-toggle .w-tag{font-size:9.5px;color:#a8937a;margin-left:2px;letter-spacing:.02em}' +
+    '@media (max-width:640px){.jtw-toggle{top:auto;bottom:10px;right:10px;padding:2px;gap:1px;box-shadow:0 2px 10px rgba(60,40,30,.18)}' +
+    '.jtw-toggle .tip{display:none}.jtw-toggle button{padding:2px 8px;font-size:12.5px}}';
 
   function mountToolbar() {
     if (state.mounted) return;

@@ -34,7 +34,7 @@
     background:linear-gradient(180deg,rgba(255,253,248,.92),rgba(253,248,238,.85));box-shadow:var(--shadow)}
 
   /* ---- D3 力导向关系图 ---- */
-  .gcanvas svg{display:block;cursor:grab}
+  .gcanvas svg{display:block;cursor:grab;touch-action:none}
   .gcanvas svg:active{cursor:grabbing}
   .gnode{cursor:pointer}
   .gnode circle{stroke:rgba(255,255,255,.9);stroke-width:1.2px;
@@ -72,8 +72,8 @@
   /* ---- D3 事件泳道 ---- */
   .lanebox{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:3px;
     background:linear-gradient(180deg,rgba(255,253,248,.92),rgba(253,248,238,.85))}
-  .lanebox svg{display:block;cursor:grab}
-  .lanebox svg:active{cursor:grabbing}
+  .lanebox svg{display:block;cursor:grab;touch-action:none}
+  .gcanvas svg:active{cursor:grabbing}
   .evblock{cursor:pointer}
   .evblock rect{transition:fill .2s}
   .evblock:hover rect{fill:rgba(158,43,37,.32)}
@@ -83,6 +83,22 @@
     font-size:12.5px;line-height:1.7;color:var(--ink2);opacity:0;transition:opacity .2s}
   .evtip.on{opacity:1}
   .evtip .t{font-family:var(--kai);font-size:14px;color:var(--cinnabar);letter-spacing:.06em}
+
+  /* ---- 移动端 ---- */
+  @media (max-width:640px){
+    .tabs{gap:2px;padding:5px}
+    .tabs button{padding:5px 8px;font-size:12.5px;letter-spacing:.06em}
+    .gwrap{gap:12px}
+    .gside{padding:13px 14px;max-height:none;position:static}
+    .gtools{gap:6px}
+    .gtools input,.gtools select{flex:1 1 auto;min-width:0}
+    .dbar-row{grid-template-columns:96px 1fr 52px;gap:6px}
+    .dbar-row .lbl{font-size:12.5px}
+    .dbar-row .n{font-size:12.5px}
+    .gdetail{left:8px;bottom:8px;right:8px;max-width:none}
+    .evtip{max-width:70vw}
+    .gnode text{font-size:11px}
+  }
 </style>
 </head>
 <body>

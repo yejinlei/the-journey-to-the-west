@@ -371,15 +371,46 @@ footer .seal{position:static;margin-bottom:12px}
 main>*{animation:rise .55s ease both}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 @media (max-width:640px){
-  header h1{font-size:26px;letter-spacing:.30em;text-indent:.30em}
+  body{font-size:14.5px;line-height:1.9}
+  header{padding:16px 12px 12px}
+  header h1{font-size:24px;line-height:1.3;letter-spacing:.24em;text-indent:.24em}
+  header .sub{font-size:12px;line-height:1.4;margin-top:5px;letter-spacing:.18em}
   header .seal{display:none}
-  main{padding:16px 13px 60px}
-  .hero{padding:32px 16px 28px}
-  .hero .verse{font-size:18px}
+  nav{gap:0;margin-top:8px;padding-top:8px}
+  nav a{padding:3px 8px;margin:0;line-height:1.5;font-size:13.5px;letter-spacing:.08em}
+  main{padding:14px 11px 54px}
+  h2{font-size:19px;margin:30px 0 16px}
+  h3{font-size:16px}
+  .hero{padding:28px 14px 24px;margin-bottom:18px}
+  .hero .verse{font-size:17px;line-height:2;letter-spacing:.14em}
+  .hero .lead{font-size:13.5px}
+  .card{padding:12px 13px}
+  .grid{gap:14px}
+  .grid>.card{padding:16px 15px}
   .manuscript{padding:16px 14px;line-height:32px}
-  table{font-size:13px}
+  /* 数据表格允许横向滚动而不挤破版面 */
   .card{overflow-x:auto}
-  table{min-width:560px}
+  table{min-width:520px;font-size:13px}
+  th,td{padding:5px 7px}
   .gcanvas{overflow-x:auto}
+  .gcanvas svg{height:420px}
+  .gdetail{max-width:calc(100vw - 48px);min-width:0}
+  .gzoom-tip{display:none}
+  .gtools input{width:100%}
+  .gtools{gap:6px}
+  button{padding:5px 11px;font-size:13px}
+  input,select,textarea{font-size:13.5px}
+  /* 各页自定义多列网格在窄屏统一单列（auto-fill 类 grid 的 minmax 最小值大于屏宽时兜底） */
+  .grid,.persongrid,.consist,.constgrid,.compare,.peak-list,
+  .voc-grid,.cls-grid,.table-grid,.tlbars{grid-template-columns:1fr}
+  .tlnames{position:static;border-right:0}
+  .tlbars{gap:4px}
+  footer{padding:22px 14px 32px;font-size:12px}
   body::after{background:rgba(247,242,231,.92),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.055'/%3E%3C/svg%3E")}
+}
+/* 超窄屏（≤380px，老旧小屏手机） */
+@media (max-width:380px){
+  nav a{padding:3px 7px;font-size:13px}
+  header h1{font-size:21px;letter-spacing:.18em;text-indent:.18em}
+  table{min-width:460px}
 }
