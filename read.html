@@ -84,6 +84,29 @@
     font-family:var(--kai);font-size:calc(16.5px * var(--read-scale,1));
     line-height:2.3;letter-spacing:.12em;color:#5a4a2a;padding:6px 0;margin:4px 0 16px}
   .poem::before,.poem::after{display:none}
+
+  /* ---- 移动端适配（须置于本样式块末尾，确保覆盖上方规则） ---- */
+  @media (max-width:640px){
+    .ch-controls{gap:8px 6px;padding:9px 10px}
+    .ch-controls label{font-size:12.5px;white-space:nowrap}
+    .ch-controls select{flex:1 1 calc(100% - 40px);min-width:0;font-size:13px}
+    .ch-controls>span[style*="line"]{display:none}
+    #fontVal{min-width:30px}
+    .chap{margin:22px 0 16px;padding:16px 13px 14px}
+    .chap+.chap{margin-top:28px}
+    .ch-head{margin-bottom:14px;padding-bottom:12px}
+    .ch-title{font-size:18px;letter-spacing:.08em}
+    .ch-no{font-size:13px;letter-spacing:.16em}
+    .main-p{font-size:calc(15.5px * var(--read-scale,1));line-height:1.95}
+    .commentary{font-size:calc(14px * var(--read-scale,1));padding:5px 8px}
+    .poem{font-size:calc(15px * var(--read-scale,1));padding:12px 14px;line-height:2}
+    .ch-navigator{flex-wrap:wrap;gap:5px;font-size:12.5px}
+    .ch-navigator button{font-size:12.5px;padding:3px 9px}
+    .ch-navigator input{width:48px;font-size:12.5px}
+    .edition-note{font-size:12.5px;padding:7px 10px}
+    .page-tag{font-size:11px}
+    #footnote{font-size:12px;line-height:1.7}
+  }
 </style>
 </head>
 <body>
