@@ -490,6 +490,27 @@ function updateEditionChrome() {
     + ` · <b>${state.allChapters.filter(c => c.edition === state.edition).length}</b> 回`;
 }
 
+// 当前是否为白话模式（读 JTW_TOGGLE 状态源，兜底 localStorage）
+function baiMode() {
+  if (window.JTW_TOGGLE && typeof window.JTW_TOGGLE.get === 'function') {
+    return window.JTW_TOGGLE.get() === 'w';
+  }
+  return localStorage.getItem('jtw.toggle') === 'w';
+}
+
+// 白话译文覆盖统计（仅统计正文 main 行）
+function baiStat(lines) {
+  if (!baiMode()) return '';
+  let total = 0, done = 0;
+  for (const l of lines) {
+    if (l.form_type !== 'main') continue;
+    total++;
+    if (l.text_zh) done++;
+  }
+  if (!total || !done) return '';
+  return `　·　白話已譯 <b>${done}</b>/${total} 行（未譯行顯示原文）`;
+}
+
 function render() {
   updateEditionChrome();
   const { chapters, lines, annos } = filteredData();
@@ -579,7 +600,8 @@ function render() {
     const bannerMain = bannerLines.filter(x => x.form_type === 'main').length;
     banner.innerHTML = `<b>底本</b>：${esc(currentEditionMeta().title)}　·　`
       + `共 <b>${chs.length}</b> 回，當前顯示 <b>${visible.length}</b> 回　·　`
-      + `<b>${bannerLines.length}</b> 行（正文 ${bannerMain}）`;
+      + `<b>${bannerLines.length}</b> 行（正文 ${bannerMain}）`
+      + baiStat(lines);
     elContent.appendChild(banner);
 
     renderChapters(visible, lines, annos, singlePage, chs);
@@ -598,7 +620,8 @@ function render() {
     banner.innerHTML = `<b>底本</b>：${esc(currentEditionMeta().title)}　·　`
       + `共 <b>${chs.length}</b> 回，當前顯示 <b>${visible.length}</b> 回　·　`
       + `<b>${visibleLines.length}</b> 行（正文 ${mainCount}）　·　`
-      + `<b>${annos.length}</b> 条評點`;
+      + `<b>${annos.length}</b> 条評點`
+      + baiStat(lines);
     elContent.appendChild(banner);
 
     renderChapters(visible, lines, annos, singlePage, chs);
@@ -661,9 +684,11 @@ function renderChapters(chs, lines, annos, singlePage, allChs) {
       for (const n of list) {
         if (n.kind === 'line') {
           const ft = n.data.form_type;
-          const text = n.data.text || '';
+          // 白话模式：正文行优先用预译 text_zh，缺失则回退原文
+          const useBai = baiMode() && n.data.text_zh;
+          const text = useBai ? n.data.text_zh : (n.data.text || '');
           if (ft === 'main') {
-            html += `<div class="main-p">${esc(text)}</div>`;
+            html += `<div class="main-p"${useBai ? ' data-bai="1"' : ''}>${esc(text)}</div>`;
           } else if (ft === 'title' || ft === 'poem') {
             html += `<div class="poem">${esc(text)}</div>`;
           } else if (ft === 'verse') {
@@ -704,6 +729,9 @@ async function main() {
     state.editions = d.editions || [];
     elLoading.style.display = 'none';
     elContent.style.display = 'block';
+
+    // 事件：繁简白切换（toggle.js 广播）→ 按新模式重渲染正文行
+    window.addEventListener('jtw:toggle', () => render());
 
     // 事件：版本切換
     elEdition.addEventListener('change', (e) => {
