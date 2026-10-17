@@ -142,6 +142,9 @@
       </optgroup>
     </select>
     <span style="margin:0 6px;color:var(--line)">│</span>
+    <label>回目</label>
+    <select id="chapter" title="按回目篩選"></select>
+    <span style="margin:0 6px;color:var(--line)">│</span>
     <label>字體</label>
     <button type="button" class="chip" id="fontMin" title="縮小正文字號">縮</button>
     <button type="button" class="chip" id="fontPlus" title="放大正文字號">放</button>
@@ -271,8 +274,71 @@ const elLoading = document.getElementById('loading');
 const elContent = document.getElementById('content');
 const elChips = document.getElementById('typeChips');
 const elEdition = document.getElementById('edition');
+const elChapter = document.getElementById('chapter');
 const elEditionNote = document.getElementById('editionNote');
 const elFootnote = document.getElementById('footnote');
+
+// 回目下拉：唯一权威状态源仍是 state.rangeFrom/rangeTo，与范围导航共享
+let _chSelectSig = '';   // 已构建选项的版本签名（版本或回数变化时才重建）
+
+// 清洗回目标题：去控制字符/标记，截断
+function cleanChapTitle(t, max = 20) {
+  if (!t) return '';
+  let s = String(t).replace(/[\x00-\x1f]/g, '').replace(/^#+\s*/, '').trim();
+  if (!s || s === '##') return '';
+  return s.length > max ? s.slice(0, max) + '…' : s;
+}
+
+function chapOptionText(c) {
+  const t = cleanChapTitle(c.chapter_title);
+  return (c.chapter_label || '') + (t ? ' · ' + t : '');
+}
+
+// 版本切换（或回数变化）时重建回目选项
+function rebuildChapterSelect(chs) {
+  elChapter.innerHTML = '';
+  if (!chs.length) {
+    elChapter.disabled = true;
+    elChapter.innerHTML = '<option value="all">（無回目數據）</option>';
+    return;
+  }
+  elChapter.disabled = false;
+  const all = document.createElement('option');
+  all.value = 'all';
+  all.textContent = `全部回目（共 ${chs.length}）`;
+  elChapter.appendChild(all);
+  // 多回范围占位项：由范围导航/数字框产生，用户不能手选
+  const rng = document.createElement('option');
+  rng.value = 'range';
+  rng.disabled = true;
+  rng.textContent = '（多回範圍）';
+  elChapter.appendChild(rng);
+  chs.forEach((c, i) => {
+    const o = document.createElement('option');
+    o.value = String(i);
+    o.textContent = chapOptionText(c);
+    elChapter.appendChild(o);
+  });
+}
+
+// render 后把下拉选中态同步回 rangeFrom/rangeTo（单一状态源 → UI 回填）
+function syncChapterSelect(chs) {
+  if (!chs.length) return;
+  if (state.rangeTo === -1 || state.rangeTo === Infinity) {
+    elChapter.value = 'all';
+    return;
+  }
+  if (state.rangeFrom === state.rangeTo) {
+    elChapter.value = String(state.rangeFrom);
+    return;
+  }
+  // 多回范围：更新占位项文案
+  const a = chs[state.rangeFrom];
+  const b = chs[state.rangeTo];
+  const rngOpt = elChapter.querySelector('option[value="range"]');
+  if (rngOpt && a && b) rngOpt.textContent = `（範圍：${a.chapter_label} — ${b.chapter_label}）`;
+  elChapter.value = 'range';
+}
 
 function buildChips() {
   elChips.innerHTML = '';
@@ -401,6 +467,13 @@ function render() {
   const chs = buildChs(chapters);
   elContent.innerHTML = '';
 
+  // 回目下拉：版本或回数变化时重建选项
+  const sig = state.edition + ':' + chs.length;
+  if (sig !== _chSelectSig) {
+    rebuildChapterSelect(chs);
+    _chSelectSig = sig;
+  }
+
   if (!chs.length) {
     const empty = document.createElement('div');
     empty.className = 'empty-hint';
@@ -410,7 +483,7 @@ function render() {
   }
 
   const totalChaps = chs.length;
-  
+
   // 回章范围选择器（仅当 totalChaps > 8 时才显示，xinke_pingbi 只有 4 回无需分页）
   const needNav = totalChaps > 8;
   if (needNav) {
@@ -484,17 +557,26 @@ function render() {
   } else {
     const singlePage = isSinglePagePerChap(chs);
 
+    // 回目下拉筛选同样作用于少回版本（rangeTo 为 -1/Infinity 时显示全部）
+    const visible = (state.rangeTo === -1 || state.rangeTo === Infinity)
+      ? chs
+      : chs.slice(state.rangeFrom, state.rangeTo + 1);
+    const visibleLines = lines.filter(l => visible.some(c => l.page_no >= c.first_page && l.page_no <= c.last_page));
+    const mainCount = visibleLines.filter(x => x.form_type === 'main').length;
+
     const banner = document.createElement('div');
     banner.className = 'card';
-    const mainCount = lines.filter(x => x.form_type === 'main').length;
     banner.innerHTML = `<b>底本</b>：${esc(currentEditionMeta().title)}　·　`
-      + `共 <b>${chs.length}</b> 回　·　`
-      + `<b>${lines.length}</b> 行（正文 ${mainCount} · 其它 <b>${lines.length - mainCount}</b>）　·　`
+      + `共 <b>${chs.length}</b> 回，當前顯示 <b>${visible.length}</b> 回　·　`
+      + `<b>${visibleLines.length}</b> 行（正文 ${mainCount}）　·　`
       + `<b>${annos.length}</b> 条評點`;
     elContent.appendChild(banner);
 
-    renderChapters(chs, lines, annos, singlePage, chs);
+    renderChapters(visible, lines, annos, singlePage, chs);
   }
+
+  // 渲染完成后回填回目下拉选中态（范围导航改动能反向同步）
+  syncChapterSelect(chs);
 }
 
 function renderChapters(chs, lines, annos, singlePage, allChs) {
@@ -600,6 +682,23 @@ async function main() {
       state.rangeFrom = 0;
       state.rangeTo = -1;
       render();
+    });
+
+    // 事件：回目下拉筛选（写入唯一状态源 rangeFrom/rangeTo）
+    elChapter.addEventListener('change', () => {
+      const { chapters } = filteredData();
+      const chs = buildChs(chapters);
+      if (!chs.length) return;
+      const v = elChapter.value;
+      if (v === 'all') {
+        state.rangeFrom = 0;
+        state.rangeTo = Infinity;
+      } else {
+        const i = parseInt(v, 10);
+        if (Number.isFinite(i)) { state.rangeFrom = i; state.rangeTo = i; }
+      }
+      render();
+      elContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
 
     // 字号调节（0.75 — 1.6，随 --read-scale 作用于正文/评点/引诗）
