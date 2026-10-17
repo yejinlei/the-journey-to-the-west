@@ -7,7 +7,7 @@
  * 路径说明：GitHub Pages 是 site.github.io/USER/REPO/ 子路径，SCOPE 用 self.registration.scope 自动适配。
  */
 
-const CACHE = 'jtw-kg-v8';
+const CACHE = 'jtw-kg-v9';
 const KEEP = 200; // 缓存条目上限，19 张 parquet + wasm + html/js/css
 
 // SW 注册后 scope 形如 https://host/the-journey-to-the-west/，转成站内根前缀
@@ -54,8 +54,17 @@ self.addEventListener('fetch', (e) => {
       fetch(req)
         .then((resp) => {
           if (resp.ok && resp.type === 'basic') {
-            const clone = resp.clone();
-            caches.open(CACHE).then((c) => c.put(req, clone)).catch(() => {});
+            // HTML 缓存前校验：必须含 <nav>，否则视为 404/错误页不缓存
+            if (/\.html$/.test(local)) {
+              resp.clone().text().then((text) => {
+                if (text.includes('<nav>')) {
+                  caches.open(CACHE).then((c) => c.put(req, resp.clone())).catch(() => {});
+                }
+              });
+            } else {
+              const clone = resp.clone();
+              caches.open(CACHE).then((c) => c.put(req, clone)).catch(() => {});
+            }
           }
           return resp;
         })
