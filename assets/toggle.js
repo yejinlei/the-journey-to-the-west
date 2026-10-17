@@ -2,11 +2,12 @@
 //
 // 实现要点：
 //   - 繁 ↔ 简：opencc-js (assets/vendor/opencc.js) 客户端实时转换，零后端
-//   - 白（民国白话·胡适式）：UI 预留开关，暂无语料，置灰禁用
+//   - 白（现代白话）：正文行使用 data 内 text_zh 字段（逐行预译语料），
+//     其余界面文字仍走简体转换；译文缺失的行回退显示原文
 //   - 逐节点转换：递归遍历 DOM，对每个含中文的 Element 取其原始 textContent、
 //     转繁/简后再写回（保留 <span class="src"> 等内嵌结构）
 //   - MutationObserver：监听后续动态插入的 DOM（read.html 换回章、compare.html 换底本）
-//   - localStorage：jtw.toggle = 't' | 's'
+//   - localStorage：jtw.toggle = 't' | 's' | 'w'
 //
 // 用法（页面）：
 //   <script src="assets/vendor/opencc.js"></script>
@@ -23,9 +24,9 @@
   var MODES = {
     t: { label: '繁', desc: '繁体原文' },
     s: { label: '简', desc: '简体' },
-    w: { label: '白', desc: '民国白话（胡适式）— 语料库准备中' },
+    w: { label: '白', desc: '现代白话（已译部分）' },
   };
-  var WHITE_MODE = 'w';  // 仅 UI 占位，无实际转换
+  var WHITE_MODE = 'w';  // 白话模式：正文行由页面按 text_zh 渲染，此处仅做简体回退
 
   // 明确不做文本转换的容器
   var SKIP_TAGS = new Set([
@@ -79,7 +80,7 @@
   function convert(text, mode) {
     if (!state.ready || !text || !hasCJK(text)) return text;
     try {
-      if (mode === 's') return state.t2cn(text);
+      if (mode === 's' || mode === 'w') return state.t2cn(text);
       if (mode === 't') return state.cn2t(text);
     } catch (e) {
       /* 单点失败不影响整体 */
@@ -195,12 +196,7 @@
       b.dataset.mode = key;
       b.innerHTML = meta.label + (key === 'w' ? '<span class="w-tag">·</span>' : '');
       if (key === state.mode) b.classList.add('on');
-      if (key === WHITE_MODE) {
-        b.disabled = true;
-        b.title = meta.desc;
-      } else {
-        b.title = meta.desc;
-      }
+      b.title = meta.desc;
       b.addEventListener('click', function (ev) {
         var target = ev.currentTarget;
         if (target.disabled) return;
@@ -224,12 +220,16 @@
 
   // ---------- 主 API ----------
   function setMode(mode) {
-    if (mode !== 't' && mode !== 's') return;
+    if (mode !== 't' && mode !== 's' && mode !== 'w') return;
     if (mode === state.mode) return;
     state.mode = mode;
     localStorage.setItem(STORAGE_KEY, mode);
     refreshToolbar();
     applyAll();
+    // 通知各页面重渲染（如 read.html 按 text_zh 切换正文行）
+    try {
+      window.dispatchEvent(new CustomEvent('jtw:toggle', { detail: { mode: mode } }));
+    } catch (e) { /* 旧浏览器忽略 */ }
   }
 
   function getMode() { return state.mode; }
