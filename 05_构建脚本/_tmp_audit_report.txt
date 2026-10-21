@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "F:\src\The-Journey-to-the-West\05_构建脚本\proofread_audit.py", line 197, in <module>
+    main()
+  File "F:\src\The-Journey-to-the-West\05_构建脚本\proofread_audit.py", line 165, in main
+    r = audit()
+        ^^^^^^^
+  File "F:\src\The-Journey-to-the-West\05_构建脚本\proofread_audit.py", line 49, in audit
+    d = json.load(open(READ, encoding='utf-8'))
+                       ^^^^
+UnboundLocalError: cannot access local variable 'READ' where it is not associated with a value
