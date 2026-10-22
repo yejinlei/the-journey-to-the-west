@@ -705,7 +705,10 @@ function renderChapters(chs, lines, annos, singlePage, allChs) {
         } else {
           const ft = n.data.form_type;
           const cls = annoClass(ft);
-          html += `<div class="anno ${cls}"><span class="src">頁${pn}·L${n.data.line_idx}·${esc(annoLabel(ft))}</span>${esc(n.data.text || '')}</div>`;
+          // 白话模式：annotations 与 lines 表 xinke 朱批 5 类完全重复，优先用 text_zh
+          const useBai = baiMode() && n.data.text_zh;
+          const text = useBai ? n.data.text_zh : (n.data.text || '');
+          html += `<div class="anno ${cls}"${useBai ? ' data-bai="1"' : ''}><span class="src">頁${pn}·L${n.data.line_idx}·${esc(annoLabel(ft))}</span>${esc(text)}</div>`;
         }
       }
       block.innerHTML = html;
