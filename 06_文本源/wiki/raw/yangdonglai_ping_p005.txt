@@ -1,0 +1,12 @@
+{{header
+| title    = 楊東來先生批評西游記
+| section  = 卷之一
+| author   = 楊訥
+| previous = [[../目次|目次]]
+| next     = [[../第2本|卷之二]]
+| notes    =
+}}
+
+<pages index="NDL1194319 楊東来先生批評西游記.pdf" from=33 to=44 fromsection=楊東來先生批評西游記卷之一 tosection=楊東來先生批評西游記卷之一/>
+
+[[Category:襍劇西游記]]

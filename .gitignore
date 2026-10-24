@@ -1,0 +1,45 @@
+# === 扫描书页（体积过大，不入版本库） ===
+book/
+
+# === gh-pages 部署 worktree（临时挂载点，不入版本库） ===
+gh_pages_deploy/
+
+# === 构建缓存 & 运行时产物 ===
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+node_modules/
+.venv/
+venv/
+dist/
+build/
+*.egg-info/
+
+# === IDE / OS ===
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# === 日志 & 临时文件 ===
+*.log
+*.err
+*.tmp
+scripts/smoke_*.png
+
+# === 密钥 & 本地配置 ===
+.env
+.env.local
+*.pem
+*.key
+
+# === DuckDB WASM 原始文件（体积 70+MB，仓库只保留 .br 压缩版本） ===
+# 例外：docs/ 目录为 GitHub Pages 静态产物，保留完整 wasm 与 .br
+06_Web前端/lib/duckdb/*.wasm
+!06_Web前端/lib/duckdb/*.wasm.br
+!docs/**
+

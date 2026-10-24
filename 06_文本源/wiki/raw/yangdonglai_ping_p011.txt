@@ -1,0 +1,12 @@
+{{header
+| title    = 楊東來先生批評西游記
+| section  = 總論
+| author   = 楊訥
+| previous = [[../小引|小引]]
+| next     = [[../目次|目次]]
+| notes    =
+}}
+
+<pages index="NDL1194319 楊東来先生批評西游記.pdf" from=30 to=32 tosection=總論 />
+
+[[Category:襍劇西游記]]
