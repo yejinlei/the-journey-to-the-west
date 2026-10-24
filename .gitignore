@@ -31,6 +31,11 @@ desktop.ini
 *.tmp
 scripts/smoke_*.png
 
+# === 一次性调试/翻译脚本 & checkpoint ===
+_*.py
+_*.ps1
+_*.json
+
 # === 密钥 & 本地配置 ===
 .env
 .env.local
