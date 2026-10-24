@@ -6,7 +6,7 @@
 <title>正文·评点 · 西游奇谭</title>
 <link rel="stylesheet" href="assets/app.css">
 <script src="assets/vendor/opencc.js"></script>
-<script src="assets/toggle.js?v=099"></script>
+<script src="assets/toggle.js?v=100"></script>
 <style>
   :root{--read-scale:1}
   .ch-controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:6px 0 4px;padding:10px 14px;
@@ -498,17 +498,25 @@ function baiMode() {
   return localStorage.getItem('jtw.toggle') === 'w';
 }
 
-// 白话译文覆盖统计（仅统计正文 main 行）
+// 白话译文覆盖统计（正文 main + 評點 commentary）
 function baiStat(lines) {
   if (!baiMode()) return '';
-  let total = 0, done = 0;
+  let mainTotal = 0, mainDone = 0, cmTotal = 0, cmDone = 0;
   for (const l of lines) {
-    if (l.form_type !== 'main') continue;
-    total++;
-    if (l.text_zh) done++;
+    if (l.form_type === 'main') {
+      mainTotal++;
+      if (l.text_zh) mainDone++;
+    } else if (l.form_type === 'commentary') {
+      cmTotal++;
+      if (l.text_zh) cmDone++;
+    }
   }
-  if (!total || !done) return '';
-  return `　·　白話已譯 <b>${done}</b>/${total} 行（未譯行顯示原文）`;
+  const parts = [];
+  if (mainTotal) parts.push(`正文 <b>${mainDone}</b>/${mainTotal}`);
+  if (cmTotal) parts.push(`評點 <b>${cmDone}</b>/${cmTotal}`);
+  if (!parts.length) return '';
+  const total = mainTotal + cmTotal, done = mainDone + cmDone;
+  return `　·　白話已譯 <b>${done}</b>/${total} 行（${parts.join('，')}；未譯行顯示原文）`;
 }
 
 function render() {
@@ -695,8 +703,8 @@ function renderChapters(chs, lines, annos, singlePage, allChs) {
             // 古本起首詩：詩歌樣式
             html += `<div class="poem">${esc(text)}</div>`;
           } else if (ft === 'commentary') {
-            // 百回詳注悟元子評點
-            html += `<div class="commentary"><span class="src">評</span>${esc(text)}</div>`;
+            // 百回詳注悟元子評點：白话模式下若 text_zh 存在則顯示譯文
+            html += `<div class="commentary"${useBai ? ' data-bai="1"' : ''}><span class="src">評</span>${esc(text)}</div>`;
           } else if (ft === 'caption') {
             html += `<div class="anno 墨批"><span class="src">頁${pn}·L${n.data.line_idx}</span>${esc(text)}</div>`;
           } else {
