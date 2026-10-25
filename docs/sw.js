@@ -7,7 +7,7 @@
  * 路径说明：GitHub Pages 是 site.github.io/USER/REPO/ 子路径，SCOPE 用 self.registration.scope 自动适配。
  */
 
-const CACHE = 'jtw-kg-v25';
+const CACHE = 'jtw-kg-v26';
 const KEEP = 200; // 缓存条目上限，19 张 parquet + wasm + html/js/css
 
 // SW 注册后 scope 形如 https://host/the-journey-to-the-west/，转成站内根前缀
