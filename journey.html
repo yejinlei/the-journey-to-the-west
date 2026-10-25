@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>取经路线 · 西游奇谭</title>
+<link rel="stylesheet" href="assets/app.css">
+<script src="assets/vendor/opencc.js"></script>
+<script src="assets/toggle.js?v=099"></script>
+<script type="importmap">
+{ "imports": { "three": "./assets/vendor/three.module.js" } }
+</script>
+<style>
+  .mapwrap{position:relative;padding:0;margin:0;overflow:hidden;
+    border:1px solid var(--line-gold);border-radius:3px;
+    background:
+      radial-gradient(800px 460px at 20% 30%, rgba(230,201,138,.18), transparent 68%),
+      radial-gradient(600px 380px at 82% 78%, rgba(90,169,179,.12), transparent 70%),
+      linear-gradient(180deg,rgba(255,253,248,.92),rgba(251,245,232,.86));
+    box-shadow:var(--shadow), 0 0 0 1px rgba(176,141,87,.14)}
+  #scene3d{width:100%;height:clamp(400px,60vh,620px);display:block;cursor:grab;touch-action:none}
+  #scene3d:active{cursor:grabbing}
+  .legend-line{display:flex;flex-wrap:wrap;gap:14px;margin:8px 0 4px;font-size:12.5px;color:var(--ink2);align-items:center}
+  .legend-line .sw{display:inline-block;width:22px;height:3px;margin-right:6px;vertical-align:middle;border-radius:2px}
+  .legend-line .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle}
+  .seglist{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+  .segcard{position:relative;padding:12px 14px;font-size:13.5px}
+  .segcard .h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:6px}
+  .segcard .from-to{font-family:var(--kai);font-size:16px;color:#332c25;letter-spacing:.04em}
+  .segcard .ch{color:var(--cinnabar);font-family:var(--kai);font-size:13px;white-space:nowrap}
+  .segcard .meta{color:var(--ink3);font-size:12.5px;margin-top:4px}
+  .segcard .diffbar{margin-top:8px;height:8px;background:rgba(240,230,209,.9);border:1px solid var(--line-gold);border-radius:2px;overflow:hidden}
+  .segcard .diffbar>span{display:block;height:100%;background:linear-gradient(90deg,rgba(90,169,179,.85),rgba(158,43,37,.85))}
+  .segcard .stats{display:flex;gap:14px;font-family:var(--kai);font-size:13px;margin-top:6px;color:var(--ink2)}
+  .segcard .stats b{color:var(--cinnabar);margin-right:3px}
+  .node-tip{position:absolute;pointer-events:none;background:linear-gradient(180deg,rgba(43,32,16,.94),rgba(60,42,20,.92));
+    color:#fdf6ec;padding:6px 10px;border-radius:3px;font-family:var(--kai);font-size:12.5px;
+    border:1px solid var(--gold-l);box-shadow:0 4px 12px rgba(70,52,28,.35);transform:translate(-50%,-130%);
+    white-space:nowrap;display:none;z-index:20}
+  .node-tip .tt{color:var(--gold-l);font-size:11.5px;letter-spacing:.08em}
+  .kpi{display:flex;flex-wrap:wrap;gap:10px;margin:6px 0 14px}
+  .kpi>div{padding:10px 16px;border:1px solid var(--line-gold);border-radius:2px;
+    background:linear-gradient(180deg,rgba(255,253,248,.9),rgba(251,245,232,.85));
+    box-shadow:var(--shadow);font-family:var(--kai);font-size:13.5px;color:var(--ink2)}
+  .kpi b{font-size:22px;color:var(--cinnabar);margin:0 3px;
+    background:linear-gradient(180deg,var(--cinnabar),var(--gold));
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .maphint{position:absolute;right:12px;bottom:10px;font-size:12px;color:var(--ink3);
+    letter-spacing:.08em;pointer-events:none}
+  @media (max-width:640px){
+    /* 移动端首屏优先呈现 3D 沙盘：标题→图例→沙盘→KPI→说明→段卡 */
+    main{display:flex;flex-direction:column}
+    main>h2:nth-of-type(1){order:1;margin:4px 0 10px}
+    .legend-line{order:2}
+    .mapwrap{order:3}
+    .kpi{order:4;margin:12px 0 4px}
+    .hero{order:5;margin-top:14px}
+    .hero .lead{font-size:13.5px;line-height:1.8}
+    main>h2:nth-of-type(2){order:6;margin-top:20px}
+    #seglist{order:7;grid-template-columns:1fr}
+    .legend-line{gap:8px;font-size:11.5px}
+    .kpi{gap:7px}
+    .kpi>div{padding:8px 11px;font-size:12.5px}
+    .kpi b{font-size:19px}
+    .node-tip{max-width:60vw;white-space:normal;text-align:center;line-height:1.5}
+    .maphint{display:none}
+  }
+</style>
+</head>
+<body>
+<header>
+  <span class="seal">西游</span>
+  <h1>西游奇谭</h1>
+  <div class="sub">一心求道 · 十难伏魔 · 三教归真</div>
+  <nav>
+    <a href="index.html">总览</a>
+    <a href="read.html">正文·评点</a>
+    <a href="compare.html">评点对照</a>
+    <a href="entities.html">本体实体</a>
+    <a href="versions.html">版本谱</a>
+    <a href="editions.html">版本图鉴</a>
+    <a href="relics.html">法宝谱</a>
+    <a href="annotations.html">诙谐谱</a>
+    <a href="events.html">事件检索</a>
+    <a href="graph.html">图谱</a>
+    <a href="journey.html" class="on">取经路线</a>
+    <a href="motif.html">母题链</a>
+    <a href="symbols.html">意象星座</a>
+    <a href="voice.html">口吻字镜</a>
+    <a href="witmap.html">诙谐密度</a>
+    <a href="agent.html">Agent</a>
+    <a href="query.html">本体论</a>
+  </nav>
+</header>
+
+<main>
+  <div class="hero" style="margin-top:2px">
+    <span class="seal solid">路线</span>
+    <div class="verse">大唐长安　西行萬里<br>灵山雷音　九九归真</div>
+    <div class="rule"></div>
+    <p class="lead">取经路上共 <b>九九八十一难</b>，然以地理路径论，可切分为若干「旅程段」（JourneySegment）——
+      每一段由起点 Place、终点 Place、覆盖章回、行程天数、难度、途经妖怪数六项构成，
+      并以 next_segment 有向串联，重建取经路线。此页以 <b>Three.js 立体沙盘</b>呈现 <b>18 段关键行程</b>：
+      <b>难度即海拔</b>，火焰山为最高峰；金色光点为行进中的取经人。
+      数据依世德堂本一百回回目整理，为研究示意，非考订定本。</p>
+  </div>
+
+  <div class="kpi">
+    <div>总行程段 <b>18</b></div>
+    <div>覆盖章回 <b>100</b></div>
+    <div>途经妖数 <b>62</b></div>
+    <div>总日数（推） <b>823</b></div>
+    <div>最难点 · 火焰山</div>
+    <div>最难段 · 狮驼国</div>
+  </div>
+
+  <h2>立体路线沙盘</h2>
+  <div class="legend-line">
+    <span><span class="sw" style="background:linear-gradient(90deg,rgba(90,169,179,.85),rgba(158,43,37,.85))"></span>难度渐变（亦映射海拔）</span>
+    <span><span class="dot" style="background:var(--cinnabar)"></span>降妖节点</span>
+    <span><span class="dot" style="background:var(--gold-d)"></span>起点／终点</span>
+    <span><span class="dot" style="background:var(--jade)"></span>收徒节点</span>
+    <span class="small">拖动旋转 · 滚轮缩放 · 悬停节点查看 · 点击跳转段卡</span>
+  </div>
+  <div class="mapwrap">
+    <div id="tip" class="node-tip"></div>
+    <div id="scene3d"></div>
+    <div class="maphint">拖拽旋转 · 滚轮缩放 · 右键平移</div>
+  </div>
+
+  <h2>逐段一览</h2>
+  <div id="seglist" class="seglist"></div>
+</main>
+
+<footer>
+  <span class="seal">评本</span>
+  <div>数据源：吴承恩《西游记》一百回回目整理 · 世德堂本 · 研究示意。</div>
+  <div>本体论依据：<code>jtw:JourneySegment / jtw:from_place / jtw:to_place / jtw:cover_chapters / jtw:difficulty / jtw:encounters_monsters / jtw:next_segment</code></div>
+</footer>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from './assets/vendor/OrbitControls.js';
+
+// ---- 数据：18 段取经旅程（依世德堂本一百回回目整理，为研究示意）----
+const SEGS = [
+  {name:"长安起程", from:"长安城", to:"双叉岭", ch:"12", days:9, diff:0.35, mons:1, kind:"start", note:"三藏西行，遇寅将军"},
+  {name:"五行山收悟空", from:"双叉岭", to:"五行山", ch:"13-14", days:15, diff:0.55, mons:1, kind:"monk", note:"救出悟空，六贼伏诛"},
+  {name:"鹰愁涧收龙马", from:"五行山", to:"鹰愁涧", ch:"15", days:6, diff:0.4, mons:1, kind:"monk", note:"收白龙马"},
+  {name:"高老庄收八戒", from:"鹰愁涧", to:"高老庄", ch:"18-19", days:11, diff:0.4, mons:1, kind:"monk", note:"收伏猪八戒"},
+  {name:"流沙河收沙僧", from:"高老庄", to:"流沙河", ch:"22", days:8, diff:0.5, mons:1, kind:"monk", note:"收伏沙悟净"},
+  {name:"五庄观人参果", from:"流沙河", to:"五庄观", ch:"23-25", days:14, diff:0.45, mons:1, kind:"temple", note:"镇元子、人参果"},
+  {name:"百花羞·黑熊精", from:"五庄观", to:"金兜山", ch:"29-31", days:19, diff:0.6, mons:3, kind:"monster", note:"黄袍怪·猪八戒思淫·乌鸡国"},
+  {name:"车迟国斗法", from:"金兜山", to:"车迟国", ch:"33-37", days:24, diff:0.7, mons:3, kind:"monster", note:"三妖国师·斩鹿砍虎"},
+  {name:"女儿国招亲", from:"车迟国", to:"西梁女国", ch:"53-55", days:22, diff:0.55, mons:1, kind:"monster", note:"子母河·琵琶精"},
+  {name:"火焰山借芭蕉", from:"西梁女国", to:"火焰山", ch:"57-61", days:48, diff:1.0, mons:3, kind:"monster", note:"铁扇·牛魔·小圣"},
+  {name:"真假美猴王", from:"火焰山", to:"六耳猕猴", ch:"58-59", days:20, diff:0.85, mons:1, kind:"monster", note:"六耳猕猴假悟空"},
+  {name:"朱紫国·赛太岁", from:"六耳猕猴", to:"金兜山", ch:"64-67", days:28, diff:0.75, mons:1, kind:"monster", note:"赛太岁盗皇后"},
+  {name:"狮驼国三大魔", from:"金兜山", to:"狮驼国", ch:"74-77", days:38, diff:0.95, mons:3, kind:"monster", note:"青狮·白象·大鹏"},
+  {name:"比丘国救小儿", from:"狮驼国", to:"比丘国", ch:"79-82", days:26, diff:0.65, mons:2, kind:"monster", note:"寿星坐骑"},
+  {name:"无底洞·盘丝洞", from:"比丘国", to:"盘丝洞", ch:"72-73,80", days:18, diff:0.6, mons:2, kind:"monster", note:"七蛛精"},
+  {name:"玄英洞·大鹏翅", from:"盘丝洞", to:"小雷音寺", ch:"84-87", days:32, diff:0.8, mons:2, kind:"monster", note:"黄眉大王"},
+  {name:"玉华州献三宝", from:"小雷音寺", to:"玉华州", ch:"88-89", days:26, diff:0.7, mons:1, kind:"temple", note:"黄狮精偷三兵"},
+  {name:"灵鹫山取真经", from:"玉华州", to:"大雷音寺", ch:"90-100", days:377, diff:0.4, mons:5, kind:"end", note:"九九归真，取经圆满"},
+];
+
+// ---- 节点：2D 示意坐标（非地理比例），海拔由难度决定 ----
+const NODES = [
+  {id:"start", label:"长安", x:940, y:540, kind:"start", ch:"12", role:"大唐都城·起程"},
+  {id:"s1",  label:"双叉岭", x:820, y:520, kind:"monster"},
+  {id:"s2",  label:"五行山", x:700, y:500, kind:"monk", ch:"13-14"},
+  {id:"s3",  label:"鹰愁涧", x:600, y:490, kind:"monk", ch:"15"},
+  {id:"s4",  label:"高老庄", x:500, y:500, kind:"monk", ch:"18-19"},
+  {id:"s5",  label:"流沙河", x:400, y:510, kind:"monk", ch:"22"},
+  {id:"s6",  label:"五庄观", x:300, y:500, kind:"temple", ch:"23-25"},
+  {id:"s7",  label:"黄袍怪", x:210, y:460, kind:"monster", ch:"29-31"},
+  {id:"s8",  label:"车迟国", x:130, y:400, kind:"monster", ch:"33-37"},
+  {id:"s9",  label:"女儿国", x:230, y:340, kind:"monster", ch:"53-55"},
+  {id:"s10", label:"火焰山", x:400, y:300, kind:"monster", ch:"57-61"},
+  {id:"s11", label:"六耳猕猴", x:530, y:340, kind:"monster", ch:"58-59"},
+  {id:"s12", label:"朱紫国", x:660, y:300, kind:"monster", ch:"64-67"},
+  {id:"s13", label:"狮驼国", x:780, y:220, kind:"monster", ch:"74-77"},
+  {id:"s14", label:"比丘国", x:660, y:150, kind:"monster", ch:"79-82"},
+  {id:"s15", label:"盘丝洞", x:520, y:130, kind:"monster", ch:"72-73"},
+  {id:"s16", label:"小雷音", x:380, y:150, kind:"monster", ch:"84-87"},
+  {id:"s17", label:"玉华州", x:220, y:170, kind:"temple", ch:"88-89"},
+  {id:"end", label:"灵山", x:80, y:80, kind:"end", ch:"100", role:"大雷音寺·终点"},
+];
+
+// EDGES[i] 与 SEGS[i] 一一对应（18 段串联 19 节点）
+const EDGES = [];
+for (let i = 0; i < NODES.length - 1; i++) EDGES.push([NODES[i].id, NODES[i + 1].id]);
+
+const KIND_COLOR = {
+  start: 0x8f6f3a, end: 0x8f6f3a, monk: 0x3f6b5e,
+  monster: 0x9e2b25, temple: 0x6a4a8b
+};
+const KIND_R = { start: 3.2, end: 3.2, monk: 2.5, monster: 2.1, temple: 2.1 };
+
+// 节点难度：SEGS[i] 的难度落在其终点 NODES[i+1] 上；起点 0.3
+const nodeDiff = { start: 0.3 };
+for (let i = 0; i < SEGS.length; i++) nodeDiff[NODES[i + 1].id] = SEGS[i].diff;
+
+function diffColorHex(d) {
+  // 0.3 蓝玉 → 0.7 金 → 1.0 朱
+  const jade = new THREE.Color(0x5aa9b3), gold = new THREE.Color(0xb08d57), red = new THREE.Color(0x9e2b25);
+  if (d < 0.65) return jade.clone().lerp(gold, (d - 0.3) / 0.35);
+  return gold.clone().lerp(red, (d - 0.65) / 0.35);
+}
+
+// 2D 示意坐标 → 3D（x 右行、z 纵深、y 海拔=难度）
+function to3D(n) {
+  const d = nodeDiff[n.id] ?? 0.5;
+  return new THREE.Vector3((n.x - 540) / 8.5, 4 + d * 30, (n.y - 310) / 8.5);
+}
+
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+// ================= Three.js 场景（游戏级山河沙盘） =================
+const container = document.getElementById('scene3d');
+const tip = document.getElementById('tip');
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0xdfe8f0, 0.0022);
+
+const sceneH = () => container.clientHeight || 620;
+const camera = new THREE.PerspectiveCamera(52, container.clientWidth / sceneH(), 0.1, 2000);
+camera.position.set(120, 115, 250);
+
+let renderer;
+try {
+  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, preserveDrawingBuffer: true });
+} catch (e) {
+  container.innerHTML = '<div style="padding:70px 20px;text-align:center;color:var(--ink3);font-family:var(--kai);font-size:15px">您的浏览器不支持 WebGL，无法渲染 3D 山河。</div>';
+  throw e;
+}
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(container.clientWidth, sceneH());
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.1;
+container.appendChild(renderer.domElement);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.06;
+controls.target.set(0, 16, 0);
+controls.minDistance = 35;
+controls.maxDistance = 550;
+controls.maxPolarAngle = Math.PI * 0.49;
+controls.autoRotate = true;
+controls.autoRotateSpeed = 0.22;
+
+/* ---- 天穹（渐变着色球 + 太阳） ---- */
+const skyMat = new THREE.ShaderMaterial({
+  side: THREE.BackSide, depthWrite: false,
+  uniforms: {
+    topColor: { value: new THREE.Color(0x6fa8d8) },
+    midColor: { value: new THREE.Color(0xc8dcf0) },
+    botColor: { value: new THREE.Color(0xf6e9cc) },
+    sunDir: { value: new THREE.Vector3(0.55, 0.55, -0.45).normalize() },
+  },
+  vertexShader: `varying vec3 vPos; void main(){ vPos=position; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
+  fragmentShader: `
+    uniform vec3 topColor,midColor,botColor,sunDir; varying vec3 vPos;
+    void main(){
+      vec3 d=normalize(vPos); float h=clamp(d.y,-0.05,1.0);
+      vec3 col = h>0.3 ? mix(midColor,topColor,smoothstep(0.3,1.0,h))
+                       : mix(botColor,midColor,smoothstep(-0.05,0.3,h));
+      float s=pow(max(dot(d,sunDir),0.0),400.0); col+=vec3(1.0,0.93,0.72)*s*2.4;
+      float halo=pow(max(dot(d,sunDir),0.0),7.0); col+=vec3(1.0,0.82,0.5)*halo*0.3;
+      gl_FragColor=vec4(col,1.0);
+    }`,
+});
+scene.add(new THREE.Mesh(new THREE.SphereGeometry(950, 32, 20), skyMat));
+
+/* ---- 光照 ---- */
+scene.add(new THREE.HemisphereLight(0xd4e6ff, 0x8a7a58, 0.7));
+const sun = new THREE.DirectionalLight(0xfff0cc, 1.7);
+sun.position.set(160, 240, -130);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.camera.left = -190; sun.shadow.camera.right = 190;
+sun.shadow.camera.top = 190; sun.shadow.camera.bottom = -190;
+sun.shadow.camera.far = 700; sun.shadow.bias = -0.0005;
+scene.add(sun);
+scene.add(new THREE.DirectionalLight(0x9cb8e0, 0.3).translateX(-140).translateY(110).translateZ(150));
+
+/* ---- Perlin 噪声 ---- */
+const _perm = new Uint8Array(512);
+{ const p = [...Array(256).keys()];
+  for (let i = 255; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [p[i], p[j]] = [p[j], p[i]]; }
+  for (let i = 0; i < 512; i++) _perm[i] = p[i & 255]; }
+const _fade = t => t * t * t * (t * (t * 6 - 15) + 10);
+const _lerp = (a, b, t) => a + (b - a) * t;
+function _grad(h, x, y) { switch (h & 3) { case 0: return x + y; case 1: return -x + y; case 2: return x - y; default: return -x - y; } }
+function noise2(x, y) {
+  const X = Math.floor(x) & 255, Y = Math.floor(y) & 255;
+  x -= Math.floor(x); y -= Math.floor(y);
+  const u = _fade(x), v = _fade(y), a = _perm[X] + Y, b = _perm[X + 1] + Y;
+  return _lerp(_lerp(_grad(_perm[a], x, y), _grad(_perm[b], x - 1, y), u),
+               _lerp(_grad(_perm[a + 1], x, y - 1), _grad(_perm[b + 1], x - 1, y - 1), u), v);
+}
+function fbm(x, y, oct) { let v = 0, a = 1, f = 1, n = 0; for (let i = 0; i < oct; i++) { v += a * noise2(x * f, y * f); n += a; a *= 0.5; f *= 2.03; } return v / n; }
+
+/* ---- 节点 3D 坐标（先于地形） ---- */
+const nodePos = new Map(NODES.map(n => [n.id, to3D(n)]));
+
+/* ---- 程序地形（起伏山河，高难节点隆起为峰） ---- */
+const TW = 560, TD = 340;
+const terrGeo = new THREE.PlaneGeometry(TW, TD, 130, 78);
+terrGeo.rotateX(-Math.PI / 2);
+{
+  const pos = terrGeo.attributes.position;
+  const colors = new Float32Array(pos.count * 3);
+  const cGrass = new THREE.Color(0x6d9a58), cRock = new THREE.Color(0x8a8078),
+        cSnow = new THREE.Color(0xf2f4f6), cSand = new THREE.Color(0xd9c9a2), cDirt = new THREE.Color(0x9a8a68);
+  const tmp = new THREE.Color();
+  const peaks = [...nodePos.values()].filter(p => p.y > 26).map(p => ({ x: p.x, z: p.z, h: (p.y - 8) * 1.5 }));
+  const nodeArr = [...nodePos.values()];
+  for (let i = 0; i < pos.count; i++) {
+    const x = pos.getX(i), z = pos.getZ(i);
+    let h = fbm(x * 0.011 + 5.1, z * 0.011 + 2.3, 5) * 28 + fbm(x * 0.05, z * 0.05, 3) * 5;
+    for (const pk of peaks) { const dx = x - pk.x, dz = z - pk.z; h += pk.h * Math.exp(-(dx * dx + dz * dz) / 800); }
+    let minD = Infinity;
+    for (const np of nodeArr) { const dx = x - np.x, dz = z - np.z; minD = Math.min(minD, dx * dx + dz * dz); }
+    h = _lerp(h, 3.5, Math.exp(-minD / 420) * 0.88);
+    pos.setY(i, h);
+    const hn = Math.max(0, Math.min(1, h / 48));
+    if (h < 4.2) tmp.copy(cSand);
+    else if (hn < 0.3) tmp.copy(cGrass).lerp(cDirt, hn * 0.6);
+    else if (hn < 0.6) tmp.copy(cDirt).lerp(cRock, (hn - 0.3) / 0.3);
+    else if (hn < 0.82) tmp.copy(cRock);
+    else tmp.copy(cRock).lerp(cSnow, (hn - 0.82) / 0.18);
+    const jit = fbm(x * 0.35, z * 0.35, 2) * 0.045;
+    colors[i * 3] = tmp.r + jit; colors[i * 3 + 1] = tmp.g + jit; colors[i * 3 + 2] = tmp.b + jit;
+  }
+  terrGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  terrGeo.computeVertexNormals();
+}
+const terrain = new THREE.Mesh(terrGeo, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.97, metalness: 0.01 }));
+terrain.receiveShadow = true;
+scene.add(terrain);
+
+/* ---- 河流（起点侧蜿蜒水面） ---- */
+{
+  const pts = [];
+  for (let i = 0; i <= 50; i++) {
+    const t = i / 50;
+    pts.push(new THREE.Vector3((t - 0.5) * TW * 0.9, 1.2, Math.sin(t * Math.PI * 3.4 + 0.8) * 50 + Math.cos(t * 8.0) * 14));
+  }
+  const river = new THREE.Mesh(
+    new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 180, 4.2, 8, false),
+    new THREE.MeshPhysicalMaterial({ color: 0x3a6a98, transparent: true, opacity: 0.8, roughness: 0.15, metalness: 0.08, emissive: 0x16304e, emissiveIntensity: 0.3 })
+  );
+  scene.add(river);
+}
+
+/* ---- 文字标签 ---- */
+function makeLabel(text, color = '#2a2018') {
+  const cv = document.createElement('canvas');
+  cv.width = 256; cv.height = 72;
+  const ctx = cv.getContext('2d');
+  ctx.font = '700 40px KaiTi, "Kaiti SC", serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  // 深底白边：先描粗白边再填深色，任何背景下都清晰
+  ctx.strokeStyle = 'rgba(250,244,228,0.92)';
+  ctx.lineWidth = 7;
+  ctx.lineJoin = 'round';
+  ctx.strokeText(text, 128, 38);
+  ctx.fillStyle = color;
+  ctx.fillText(text, 128, 38);
+  const tex = new THREE.CanvasTexture(cv);
+  tex.anisotropy = 4;
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: false, depthWrite: false, transparent: true }));
+  sp.scale.set(22, 6.2, 1);
+  sp.renderOrder = 30;
+  return sp;
+}
+
+/* ---- 光晕纹理 ---- */
+const haloTex = (() => {
+  const c = document.createElement('canvas'); c.width = c.height = 128;
+  const g = c.getContext('2d');
+  const gr = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+  gr.addColorStop(0, 'rgba(255,232,170,1)');
+  gr.addColorStop(0.4, 'rgba(255,200,100,0.5)');
+  gr.addColorStop(1, 'rgba(255,180,70,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, 128, 128);
+  return new THREE.CanvasTexture(c);
+})();
+
+/* ---- 云（径向渐变 Sprite） ---- */
+function makeCloud(scale) {
+  const cv = document.createElement('canvas');
+  cv.width = cv.height = 128;
+  const ctx = cv.getContext('2d');
+  for (let i = 0; i < 22; i++) {
+    const x = 28 + Math.random() * 72, y = 40 + Math.random() * 48, r = 12 + Math.random() * 22;
+    const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+    g.addColorStop(0, 'rgba(255,255,255,0.6)');
+    g.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+  }
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(cv), depthWrite: false, depthTest: false, transparent: true, opacity: 0.6 }));
+  sp.scale.set(scale, scale * 0.42, 1);
+  return sp;
+}
+const clouds = [];
+for (let i = 0; i < 10; i++) {
+  const c = makeCloud(70 + Math.random() * 90);
+  c.position.set(-280 + Math.random() * 560, 80 + Math.random() * 70, -200 + Math.random() * 400);
+  c.userData.speed = 0.8 + Math.random() * 1.2;
+  clouds.push(c); scene.add(c);
+}
+
+/* ---- 路线管道（柔和发光） ---- */
+const fullCurve = new THREE.CatmullRomCurve3(NODES.map(n => nodePos.get(n.id)), false, 'catmullrom', 0.15);
+const routeGroup = new THREE.Group();
+// 三层光晕：外晕（最大最淡）→ 中晕 → 内晕，叠加出柔和光带
+const SOFT = 0xc8b078;
+routeGroup.add(new THREE.Mesh(
+  new THREE.TubeGeometry(fullCurve, 320, 2.6, 8, false),
+  new THREE.MeshBasicMaterial({ color: SOFT, transparent: true, opacity: 0.05, blending: THREE.AdditiveBlending, depthWrite: false })
+));
+routeGroup.add(new THREE.Mesh(
+  new THREE.TubeGeometry(fullCurve, 320, 1.7, 8, false),
+  new THREE.MeshBasicMaterial({ color: SOFT, transparent: true, opacity: 0.08, blending: THREE.AdditiveBlending, depthWrite: false })
+));
+routeGroup.add(new THREE.Mesh(
+  new THREE.TubeGeometry(fullCurve, 320, 1.1, 8, false),
+  new THREE.MeshBasicMaterial({ color: 0xd8c088, transparent: true, opacity: 0.12, blending: THREE.AdditiveBlending, depthWrite: false })
+));
+// 核心管：暖玉哑光，不刺眼
+const coreTube = new THREE.Mesh(
+  new THREE.TubeGeometry(fullCurve, 320, 0.42, 8, false),
+  new THREE.MeshStandardMaterial({ color: 0xb09a68, emissive: 0x8a7040, emissiveIntensity: 0.4, roughness: 0.6, metalness: 0.15 })
+);
+coreTube.castShadow = true;
+routeGroup.add(coreTube);
+// 流光粒子：柔和暖光
+const FLOW_N = 80;
+const flowGeo = new THREE.BufferGeometry();
+const flowPos = new Float32Array(FLOW_N * 3);
+const flowSeed = new Float32Array(FLOW_N);
+for (let i = 0; i < FLOW_N; i++) flowSeed[i] = Math.random();
+flowGeo.setAttribute('position', new THREE.BufferAttribute(flowPos, 3));
+routeGroup.add(new THREE.Points(flowGeo, new THREE.PointsMaterial({ color: 0xe0d0a0, size: 1.5, transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending, depthWrite: false, sizeAttenuation: true })));
+scene.add(routeGroup);
+
+/* ---- 节点（浮动水晶 + 光环 + 粒子） ---- */
+const nodeMeshes = [], nodeGroups = [];
+for (const n of NODES) {
+  const p = nodePos.get(n.id);
+  const d = nodeDiff[n.id] ?? 0.5;
+  const g = new THREE.Group();
+  const crys = new THREE.Mesh(
+    new THREE.OctahedronGeometry(KIND_R[n.kind] || 2.2, 0),
+    new THREE.MeshPhysicalMaterial({ color: 0xd8c088, emissive: 0x9a7840, emissiveIntensity: 0.45, roughness: 0.35, metalness: 0.05, transparent: true, opacity: 0.92 })
+  );
+  crys.castShadow = true;
+  crys.userData.node = n;
+  g.add(crys);
+  const ring = new THREE.Mesh(
+    new THREE.TorusGeometry((KIND_R[n.kind] || 2.2) + 2.4, 0.15, 8, 36),
+    new THREE.MeshBasicMaterial({ color: 0xc8b078, transparent: true, opacity: 0.35, blending: THREE.AdditiveBlending, depthWrite: false })
+  );
+  ring.rotation.x = Math.PI / 2;
+  ring.position.y = -(KIND_R[n.kind] || 2.2) - 1.6;
+  g.add(ring);
+  const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: haloTex, color: 0xd0b880, transparent: true, opacity: 0.3, blending: THREE.AdditiveBlending, depthWrite: false, depthTest: false }));
+  halo.scale.setScalar(11 + d * 5);
+  g.add(halo);
+  // 升腾粒子
+  const PN = 12;
+  const pgeo = new THREE.BufferGeometry();
+  const ppos = new Float32Array(PN * 3);
+  const pseed = new Float32Array(PN);
+  for (let k = 0; k < PN; k++) { ppos[k * 3] = (Math.random() - 0.5) * 3.5; ppos[k * 3 + 1] = Math.random() * 8; ppos[k * 3 + 2] = (Math.random() - 0.5) * 3.5; pseed[k] = Math.random(); }
+  pgeo.setAttribute('position', new THREE.BufferAttribute(ppos, 3));
+  const pts = new THREE.Points(pgeo, new THREE.PointsMaterial({ color: 0xe8d090, size: 0.7, transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending, depthWrite: false }));
+  g.add(pts);
+  g.position.copy(p);
+  g.userData = { crys, ring, halo, pts, pseed, baseY: p.y, phase: Math.random() * Math.PI * 2 };
+  scene.add(g);
+  nodeGroups.push(g);
+  nodeMeshes.push(crys);
+  const label = makeLabel(n.label);
+  label.position.copy(p);
+  label.position.y += (KIND_R[n.kind] || 2.2) + 6.5;
+  scene.add(label);
+}
+
+/* ---- 起点/终点地标 ---- */
+function makeBeacon(nodeId, color, label) {
+  const p = nodePos.get(nodeId);
+  const g = new THREE.Group();
+  const pillar = new THREE.Mesh(new THREE.CylinderGeometry(1.0, 1.9, 22, 8), new THREE.MeshStandardMaterial({ color: 0xd6cdba, roughness: 0.75 }));
+  pillar.castShadow = true;
+  g.add(pillar);
+  const orb = new THREE.Mesh(new THREE.SphereGeometry(2.8, 20, 16), new THREE.MeshBasicMaterial({ color }));
+  orb.position.y = 14;
+  g.add(orb);
+  const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: haloTex, color, transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending, depthWrite: false, depthTest: false }));
+  halo.scale.setScalar(20);
+  halo.position.y = 14;
+  g.add(halo);
+  g.position.set(p.x, 8, p.z);
+  scene.add(g);
+  const lbl = makeLabel(label, '#2a2018');
+  lbl.position.set(p.x, p.y + 26, p.z);
+  scene.add(lbl);
+}
+makeBeacon('start', 0x7fd0ff, '長安 · 起');
+makeBeacon('end', 0xffd070, '靈山 · 終');
+
+/* ---- 取经人（光球 + 尾迹 + 点光源） ---- */
+const pilgrim = new THREE.Group();
+pilgrim.add(new THREE.Mesh(new THREE.SphereGeometry(1.5, 18, 14), new THREE.MeshBasicMaterial({ color: 0xfff6da })));
+const pHalo = new THREE.Sprite(new THREE.SpriteMaterial({ map: haloTex, color: 0xd0b880, transparent: true, opacity: 0.4, blending: THREE.AdditiveBlending, depthWrite: false, depthTest: false }));
+pHalo.scale.setScalar(6);
+pilgrim.add(pHalo);
+pilgrim.add(new THREE.PointLight(0xc8b078, 1.0, 40));
+scene.add(pilgrim);
+const TRAIL_N = 60;
+const trailGeo = new THREE.BufferGeometry();
+const trailPos = new Float32Array(TRAIL_N * 3);
+trailGeo.setAttribute('position', new THREE.BufferAttribute(trailPos, 3));
+scene.add(new THREE.Points(trailGeo, new THREE.PointsMaterial({ color: 0xffca70, size: 1.5, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending, depthWrite: false })));
+const trailPts = [];
+
+/* ---- 植被（低多边形锥树） ---- */
+{
+  const treeGeo = new THREE.ConeGeometry(1.4, 5, 6);
+  for (let i = 0; i < 100; i++) {
+    const x = (Math.random() - 0.5) * TW * 0.9, z = (Math.random() - 0.5) * TD * 0.9;
+    let ok = true;
+    for (const np of nodePos.values()) { const dx = x - np.x, dz = z - np.z; if (dx * dx + dz * dz < 240) { ok = false; break; } }
+    if (!ok) continue;
+    const h = 3.5 + Math.random() * 5;
+    const tree = new THREE.Mesh(treeGeo, new THREE.MeshStandardMaterial({ color: new THREE.Color().setHSL(0.29 + Math.random() * 0.09, 0.42, 0.24 + Math.random() * 0.12), roughness: 0.95 }));
+    tree.scale.setScalar(0.8 + Math.random() * 1.1);
+    tree.scale.y = h / 5;
+    tree.position.set(x, 2.8 + h / 2, z);
+    tree.castShadow = true;
+    scene.add(tree);
+  }
+}
+
+// ================= 交互 =================
+const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2(-10, -10);
+let downX = 0, downY = 0;
+
+function pickNode(ev) {
+  const rect = renderer.domElement.getBoundingClientRect();
+  pointer.x = ((ev.clientX - rect.left) / rect.width) * 2 - 1;
+  pointer.y = -((ev.clientY - rect.top) / rect.height) * 2 + 1;
+  raycaster.setFromCamera(pointer, camera);
+  const hit = raycaster.intersectObjects(nodeMeshes, false)[0];
+  return hit ? hit.object.userData.node : null;
+}
+
+renderer.domElement.addEventListener('pointermove', (ev) => {
+  const n = pickNode(ev);
+  const rect = container.getBoundingClientRect();
+  if (n) {
+    const role = n.role || (n.ch ? ('第 ' + n.ch + ' 回') : '途中节点');
+    const d = nodeDiff[n.id];
+    tip.innerHTML = `<div class="tt">${esc(n.label)}</div><div>${esc(role)}${d != null ? ' · 难度 ' + (d * 10).toFixed(1) : ''}</div>`;
+    tip.style.left = (ev.clientX - rect.left) + 'px';
+    tip.style.top = (ev.clientY - rect.top) + 'px';
+    tip.style.display = 'block';
+    container.style.cursor = 'pointer';
+  } else {
+    tip.style.display = 'none';
+    container.style.cursor = 'grab';
+  }
+});
+renderer.domElement.addEventListener('pointerdown', (ev) => { downX = ev.clientX; downY = ev.clientY; controls.autoRotate = false; });
+renderer.domElement.addEventListener('pointerup', (ev) => {
+  if (Math.hypot(ev.clientX - downX, ev.clientY - downY) > 5) return;
+  const n = pickNode(ev);
+  if (!n) return;
+  const idx = NODES.indexOf(n);
+  if (idx > 0) highlightSeg(idx - 1);
+  else highlightSeg(0);
+});
+
+/* ---- 巡游模式 ---- */
+let cruise = false;
+const cruiseBtn = document.createElement('button');
+cruiseBtn.textContent = '巡遊';
+cruiseBtn.style.cssText = 'position:absolute;top:12px;right:12px;z-index:5;padding:5px 16px;font-family:inherit;font-size:13px;letter-spacing:.12em;background:linear-gradient(180deg,#fdf1ee,#f8e6e2);border:1px solid rgba(158,43,37,.4);border-radius:14px;color:var(--cinnabar);cursor:pointer;';
+container.style.position = 'relative';
+container.appendChild(cruiseBtn);
+cruiseBtn.addEventListener('click', () => {
+  cruise = !cruise;
+  controls.autoRotate = false;
+  cruiseBtn.textContent = cruise ? '停止' : '巡遊';
+  cruiseBtn.style.background = cruise ? 'linear-gradient(180deg,#9e2b25,#7d1f1a)' : 'linear-gradient(180deg,#fdf1ee,#f8e6e2)';
+  cruiseBtn.style.color = cruise ? '#fff' : 'var(--cinnabar)';
+});
+
+// ================= 段卡 =================
+function buildSegCards() {
+  const box = document.getElementById('seglist');
+  for (const s of SEGS) {
+    const card = document.createElement('div');
+    card.className = 'card segcard';
+    const monStr = s.mons > 0 ? `<span title="途经妖怪">${'●'.repeat(Math.min(s.mons, 6))}${s.mons > 6 ? ('+' + (s.mons - 6)) : ' '}</span>` : '<span style="color:var(--ink3)">○</span>';
+    card.innerHTML = `
+      <div class="h">
+        <div class="from-to">${esc(s.from)} <span style="color:var(--gold-d)">→</span> ${esc(s.to)}</div>
+        <div class="ch">第 ${esc(s.ch)} 回</div>
+      </div>
+      <div class="small">${esc(s.name)} · ${esc(s.note)}</div>
+      <div class="stats">
+        <span><b>${s.days}</b>日</span>
+        <span><b>${s.mons}</b>妖</span>
+        <span>难度 <b>${(s.diff * 10).toFixed(1)}/10</b></span>
+        <span style="margin-left:auto">${monStr}</span>
+      </div>
+      <div class="diffbar"><span style="width:${Math.round(s.diff * 100)}%"></span></div>`;
+    box.appendChild(card);
+  }
+}
+
+function highlightSeg(idx) {
+  const card = document.querySelectorAll('.segcard')[idx];
+  if (card) {
+    card.style.boxShadow = '0 0 0 2px rgba(230,201,138,.8), 0 8px 26px rgba(176,141,87,.5)';
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(() => { card.style.boxShadow = ''; }, 2400);
+  }
+}
+
+// ================= 渲染循环 =================
+const clock = new THREE.Clock();
+function animate() {
+  requestAnimationFrame(animate);
+  const dt = Math.min(0.05, clock.getDelta());
+  const t = clock.elapsedTime;
+  controls.update();
+
+  // 路线流光
+  const fp = flowGeo.attributes.position.array;
+  for (let i = 0; i < FLOW_N; i++) {
+    flowSeed[i] = (flowSeed[i] + dt * 0.055) % 1;
+    const p = fullCurve.getPointAt(flowSeed[i]);
+    fp[i * 3] = p.x; fp[i * 3 + 1] = p.y; fp[i * 3 + 2] = p.z;
+  }
+  flowGeo.attributes.position.needsUpdate = true;
+
+  // 节点浮动 + 旋转 + 粒子
+  for (const g of nodeGroups) {
+    const u = g.userData;
+    g.position.y = u.baseY + Math.sin(t * 1.1 + u.phase) * 0.8;
+    u.crys.rotation.y = t * 0.7 + u.phase;
+    u.ring.rotation.z = t * 0.5;
+    const pp = u.pts.geometry.attributes.position.array;
+    for (let k = 0; k < u.pseed.length; k++) {
+      u.pseed[k] += dt * 0.3;
+      if (u.pseed[k] > 1) u.pseed[k] = 0;
+      pp[k * 3 + 1] = u.pseed[k] * 8;
+    }
+    u.pts.geometry.attributes.position.needsUpdate = true;
+    u.pts.material.opacity = 0.45;
+  }
+
+  // 取经人 + 尾迹
+  const tt = (t * 0.02) % 1;
+  const tp = fullCurve.getPointAt(tt);
+  pilgrim.position.copy(tp);
+  pilgrim.position.y += 2.4 + Math.sin(t * 3) * 0.4;
+  pHalo.material.opacity = 0.85 + Math.sin(t * 4) * 0.15;
+  trailPts.unshift(tp.clone().setY(tp.y + 2.4));
+  if (trailPts.length > TRAIL_N) trailPts.pop();
+  const tr = trailGeo.attributes.position.array;
+  for (let i = 0; i < TRAIL_N; i++) {
+    const p = trailPts[Math.min(i, trailPts.length - 1)];
+    tr[i * 3] = p.x; tr[i * 3 + 1] = p.y; tr[i * 3 + 2] = p.z;
+  }
+  trailGeo.attributes.position.needsUpdate = true;
+
+  // 云漂移
+  for (const c of clouds) {
+    c.position.x += c.userData.speed * dt;
+    if (c.position.x > 320) c.position.x = -320;
+  }
+
+  // 巡游镜头
+  if (cruise) {
+    const ct = (t * 0.028) % 1;
+    const camP = fullCurve.getPointAt(ct);
+    const ahead = fullCurve.getPointAt(Math.min(0.999, ct + 0.025));
+    camera.position.lerp(new THREE.Vector3(camP.x * 0.85, camP.y + 32, camP.z + 62), 0.035);
+    camera.lookAt(ahead.x, ahead.y + 5, ahead.z);
+  }
+
+  renderer.render(scene, camera);
+}
+
+function onResize() {
+  const w = container.clientWidth;
+  const h = sceneH();
+  renderer.setSize(w, h);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', onResize);
+window.addEventListener('orientationchange', () => setTimeout(onResize, 200));
+
+buildSegCards();
+animate();
+</script>
+</body>
+</html>

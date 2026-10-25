@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>版本谱 · 西游奇谭</title>
+<link rel="stylesheet" href="assets/app.css">
+<script src="assets/vendor/opencc.js"></script>
+<script src="assets/toggle.js?v=099"></script>
+<style>
+  .vcard{position:relative;padding:14px 16px}
+  .vcard .vhead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+  .vcard .name{font-family:var(--kai);font-size:19px;color:#332c25;letter-spacing:.06em}
+  .vcard .year{font-family:var(--kai);color:var(--cinnabar);font-size:16px}
+  .vcard .pub{color:var(--ink3);font-size:13px}
+  .vcard .desc{margin-top:8px;font-size:14px;color:var(--ink2);line-height:1.85}
+  .vcard .badge{position:absolute;right:12px;top:12px;font-family:var(--kai);font-size:12px;color:var(--cinnabar);
+    border:1px solid rgba(158,43,37,.35);padding:1px 7px;border-radius:2px;background:rgba(158,43,37,.04)}
+  .tree{position:relative;padding:16px 20px 16px 44px}
+  .tree::before{content:'';position:absolute;left:22px;top:16px;bottom:16px;width:2px;
+    background:linear-gradient(180deg,rgba(158,43,37,.4),rgba(158,43,37,.15))}
+  .tree .node{position:relative;padding:8px 0 12px;margin-left:0}
+  .tree .node::before{content:'';position:absolute;left:-22px;top:16px;width:14px;height:1px;
+    background:rgba(158,43,37,.35)}
+  .tree .node::after{content:'';position:absolute;left:-22px;top:12px;width:1px;height:10px;
+    background:rgba(158,43,37,.35)}
+  .tree .node .lab{font-family:var(--kai);font-size:16px;color:#332c25}
+  .tree .node .desc{color:var(--ink3);font-size:13px;margin-top:2px}
+  .tree .node .yr{color:var(--cinnabar);font-family:var(--kai);margin-left:6px}
+  .loadbox{padding:80px 20px;text-align:center;color:var(--ink3);font-family:var(--kai);font-size:16px}
+  .bar-row{display:grid;grid-template-columns:90px 1fr 60px;align-items:center;gap:8px;padding:3px 0}
+  .bar-row .lbl{font-family:var(--kai);font-size:14px;color:#332c25}
+  .bar-row .bar{height:14px;background:linear-gradient(90deg,rgba(158,43,37,.75),rgba(158,43,37,.45));
+    border-radius:2px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.35)}
+  .bar-row .n{text-align:right;font-family:var(--kai);color:var(--cinnabar);font-size:14px}
+  @media (max-width:640px){
+    .bar-row{grid-template-columns:66px 1fr 48px;gap:5px;font-size:12.5px}
+  }
+</style>
+</head>
+<body>
+<header>
+  <span class="seal">西游</span>
+  <h1>西游奇谭</h1>
+  <div class="sub">一心求道 · 十难伏魔 · 三教归真</div>
+  <nav>
+    <a href="index.html">总览</a>
+    <a href="read.html">正文·评点</a>
+    <a href="compare.html">评点对照</a>
+    <a href="entities.html">本体实体</a>
+    <a href="versions.html" class="on">版本谱</a>
+    <a href="editions.html">版本图鉴</a>
+    <a href="relics.html">法宝谱</a>
+    <a href="annotations.html">诙谐谱</a>
+    <a href="events.html">事件检索</a>
+    <a href="graph.html">图谱</a>
+    <a href="journey.html">取经路线</a>
+    <a href="motif.html">母题链</a>
+    <a href="symbols.html">意象星座</a>
+    <a href="voice.html">口吻字镜</a>
+    <a href="witmap.html">诙谐密度</a>
+    <a href="agent.html">Agent</a>
+    <a href="query.html">本体论</a>
+  </nav>
+</header>
+
+<main>
+  <div class="hero" style="margin-top:2px">
+    <span class="seal solid">版本</span>
+    <div class="verse">世德為源　批評為血肉<br>八本對勘　凡四回</div>
+    <div class="rule"></div>
+    <p class="lead">西游诸本之谱系。源流为明万历二十一年（1592）<b>金陵世德堂本</b>，
+      血肉为明清两代批评本、证道本、真诠本、大奇书本等。本工程的直接底本为
+      <b>新刻全像批評西遊記</b>（清，含评点），共七十二叶，涉及第八十六至八十九回。
+      另收世德堂、李评、朱评、清初杨本、大奇书、证道等六源以作参校。</p>
+  </div>
+
+  <h2>诸本一览</h2>
+  <div id="loading" class="loadbox">正在装载数据库与数据表……</div>
+  <div id="content" style="display:none"></div>
+</main>
+
+<footer>
+  <span class="seal">评本</span>
+  <div>底本：<b>新刻全像批評西遊記</b>（清，含评点）第七十六叶至八十七叶。</div>
+  <div>由多 Agent 生成，仅供研究玩索，非定本。</div>
+</footer>
+
+<script type="module">
+import { loadPageData } from './js/page.js';
+
+const elLoading = document.getElementById('loading');
+const elContent = document.getElementById('content');
+
+function esc(s) {
+  if (s === null || s === undefined) return '';
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+const TREE = [
+  { lab: '吴承恩《西游记》', yr: '成书 1592 前后', desc: '万历二十一年，世德堂始刊本，一百回。' },
+  { lab: '金陵世德堂本', yr: '1592', desc: '现存最早刻本，一百回，图版精美。为本工程谱系之源。' },
+  { lab: '李评本', yr: '明万历', desc: '明李廷机评点本。' },
+  { lab: '朱评本', yr: '明', desc: '朱鼎臣评林本。' },
+  { lab: '清初杨本', yr: '清初', desc: '清初评点本。' },
+  { lab: '大奇书本', yr: '清', desc: '大奇书堂刊本（Gallica 分册 4031-4035）。' },
+  { lab: '杨闽斋本', yr: '清', desc: '杨闽斋堂刊本。' },
+  { lab: '真诠本', yr: '清', desc: '清陈士奇校订本，含评点。' },
+  { lab: '新刻全像批評西遊記', yr: '清', desc: '本工程底本，清刻本，含评点，收第七十六叶至八十七叶。' },
+  { lab: '证道本', yr: '清', desc: '清张书绅《西游證道書》，以《易》解《西游》。' },
+  { lab: '刘廷玑本', yr: '清', desc: '刘廷玑《在园杂志》引本，评点诙谐。' },
+];
+
+const TYPE_BAR = [
+  ['底端 colophon', 48, '朱'],
+  ['侧批 side', 33, '朱'],
+  ['夹批 inline', 13, '朱'],
+  ['眉批 top', 11, '朱'],
+  ['引诗 caption', 7, '墨'],
+  ['底批 bottom', 1, '朱'],
+];
+
+async function main() {
+  try {
+    elLoading.textContent = '正在加载页面数据…';
+    const d = await loadPageData('versions');
+    const editions = { rows: d.editions || [] };
+    const annosByCh = { rows: d.annosByCh || [] };
+
+    elLoading.style.display = 'none';
+    elContent.style.display = 'block';
+
+    // 谱系
+    const h1 = document.createElement('h3');
+    h1.innerHTML = '世系树';
+    elContent.appendChild(h1);
+
+    const tree = document.createElement('div');
+    tree.className = 'card tree';
+    let treeHtml = '';
+    for (const n of TREE) {
+      treeHtml += `<div class="node">
+        <div class="lab">${esc(n.lab)}<span class="yr">${esc(n.yr)}</span></div>
+        <div class="desc">${esc(n.desc)}</div>
+      </div>`;
+    }
+    tree.innerHTML = treeHtml;
+    elContent.appendChild(tree);
+
+    // 诸本一览
+    const h2 = document.createElement('h3');
+    h2.innerHTML = '诸本一览';
+    elContent.appendChild(h2);
+
+    const grid = document.createElement('div');
+    grid.className = 'grid';
+    for (const e of editions.rows) {
+      const isBase = e.edition_id === 'xinke_pingbi';
+      const card = document.createElement('div');
+      card.className = 'card vcard';
+      card.innerHTML = `
+        ${isBase ? '<span class="badge">本工程底本</span>' : ''}
+        <div class="vhead">
+          <div class="name">${esc(e.display_name)}</div>
+          <div class="year">${e.year && e.year > 0 ? e.year : '明清'}</div>
+        </div>
+        <div class="pub">id：${esc(e.edition_id)}　·　版坊：${esc(e.publisher)}</div>
+        <div class="desc">${esc(e.desc || '')}</div>
+      `;
+      grid.appendChild(card);
+    }
+    elContent.appendChild(grid);
+
+    // 评点类型分布
+    const h3 = document.createElement('h3');
+    h3.innerHTML = '本回评点分布（共 113 条）';
+    elContent.appendChild(h3);
+    const maxN = Math.max(...TYPE_BAR.map(x => x[1]));
+    const box = document.createElement('div');
+    box.className = 'card';
+    let barHtml = '';
+    for (const [lbl, n, color] of TYPE_BAR) {
+      const w = Math.round((n / maxN) * 100);
+      const bg = color === '朱' ? 'linear-gradient(90deg,rgba(158,43,37,.75),rgba(158,43,37,.45))' : 'linear-gradient(90deg,rgba(63,107,94,.75),rgba(63,107,94,.45))';
+      barHtml += `<div class="bar-row">
+        <div class="lbl">${lbl}</div>
+        <div class="bar" style="width:${w}%;background:${bg}"></div>
+        <div class="n">${n}</div>
+      </div>`;
+    }
+    box.innerHTML = barHtml;
+    elContent.appendChild(box);
+
+    // 各回评点数
+    const h4 = document.createElement('h3');
+    h4.innerHTML = '各回评点数';
+    elContent.appendChild(h4);
+    const tbl = document.createElement('table');
+    tbl.innerHTML = '<thead><tr><th>回</th><th>评点数</th></tr></thead><tbody></tbody>';
+    const tbody = tbl.querySelector('tbody');
+    for (const r of annosByCh.rows) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${esc(r.chapter_ref || '（未归）')}</td><td><b>${r.n}</b></td>`;
+      tbody.appendChild(tr);
+    }
+    elContent.appendChild(tbl);
+  } catch (e) {
+    elLoading.textContent = '加载失败：' + (e && e.message ? e.message : String(e));
+    console.error(e);
+  }
+}
+
+main();
+</script>
+</body>
+</html>

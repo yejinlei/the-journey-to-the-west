@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>诙谐谱 · 西游奇谭</title>
+<link rel="stylesheet" href="assets/app.css">
+<script src="assets/vendor/opencc.js"></script>
+<script src="assets/toggle.js?v=099"></script>
+<style>
+  .filter{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:6px 0;padding:8px 12px;
+    background:linear-gradient(180deg,rgba(255,253,248,.85),rgba(253,248,238,.7));
+    border:1px solid var(--line);border-radius:3px;box-shadow:var(--shadow)}
+  .filter .chip{display:inline-block;padding:3px 10px;font-size:13px;letter-spacing:.06em;
+    border:1px solid var(--line);border-radius:11px;background:rgba(255,253,248,.7);color:var(--ink2);cursor:pointer;
+    user-select:none;transition:all .2s}
+  .filter .chip.on{color:var(--cinnabar);border-color:rgba(158,43,37,.4);
+    background:linear-gradient(180deg,#fdf1ee,#f8e6e2)}
+  .anno-card{padding:12px 14px}
+  .anno-card .hdr{display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap}
+  .anno-card .loc{font-family:var(--kai);font-size:13px;color:var(--cinnabar)}
+  .anno-card .txt{font-family:var(--kai);font-size:16px;line-height:1.85;color:#332c25;margin-top:6px}
+  .anno-card .meta{font-size:12px;color:var(--ink3);margin-top:6px}
+  .loadbox{padding:80px 20px;text-align:center;color:var(--ink3);font-family:var(--kai);font-size:16px}
+  .bar-row{display:grid;grid-template-columns:100px 1fr 60px;align-items:center;gap:8px;padding:3px 0}
+  .bar-row .lbl{font-family:var(--kai);font-size:14px;color:#332c25}
+  .bar-row .bar{height:14px;background:linear-gradient(90deg,rgba(158,43,37,.75),rgba(158,43,37,.45));
+    border-radius:2px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.35)}
+  .bar-row .n{text-align:right;font-family:var(--kai);color:var(--cinnabar);font-size:14px}
+  @media (max-width:640px){
+    .bar-row{grid-template-columns:72px 1fr 48px;gap:5px;font-size:12.5px}
+  }
+</style>
+</head>
+<body>
+<header>
+  <span class="seal">西游</span>
+  <h1>西游奇谭</h1>
+  <div class="sub">一心求道 · 十难伏魔 · 三教归真</div>
+  <nav>
+    <a href="index.html">总览</a>
+    <a href="read.html">正文·评点</a>
+    <a href="compare.html">评点对照</a>
+    <a href="entities.html">本体实体</a>
+    <a href="versions.html">版本谱</a>
+    <a href="editions.html">版本图鉴</a>
+    <a href="relics.html">法宝谱</a>
+    <a href="annotations.html" class="on">诙谐谱</a>
+    <a href="events.html">事件检索</a>
+    <a href="graph.html">图谱</a>
+    <a href="journey.html">取经路线</a>
+    <a href="motif.html">母题链</a>
+    <a href="symbols.html">意象星座</a>
+    <a href="voice.html">口吻字镜</a>
+    <a href="witmap.html">诙谐密度</a>
+    <a href="agent.html">Agent</a>
+    <a href="query.html">本体论</a>
+  </nav>
+</header>
+
+<main>
+  <div class="hero" style="margin-top:2px">
+    <span class="seal solid">诙谐</span>
+    <div class="verse">批评一百十三条<br>朱墨二色 六类分门</div>
+    <div class="rule"></div>
+    <p class="lead">本頁彙集《西游奇谭》底本 <b>新刻全像批評西遊記</b> 的评点全部 <b>113</b> 条：
+      底端 <b>48</b> · 侧批 <b>33</b> · 夹批 <b>13</b> · 眉批 <b>11</b> · 引诗 <b>7</b> · 底批 <b>1</b>。
+      评点家以朱批为主，对诙谐处必加朱批，唯插图的题画诗与回目诗用墨批，以示分别。
+      逐条列名、出处、原文与所属回目。</p>
+  </div>
+
+  <h2>分布</h2>
+  <div id="loading" class="loadbox">正在装载数据库与数据表……</div>
+  <div id="content" style="display:none"></div>
+</main>
+
+<footer>
+  <span class="seal">评本</span>
+  <div>底本：<b>新刻全像批評西遊記</b>（清，含评点）第七十六叶至八十七叶。</div>
+  <div>由多 Agent 生成，仅供研究玩索，非定本。</div>
+</footer>
+
+<script type="module">
+import { loadPageData } from './js/page.js';
+
+const elLoading = document.getElementById('loading');
+const elContent = document.getElementById('content');
+
+const TYPE_META = {
+  colophon: { label: '底端', color: '朱批', desc: '每回末页收语或批评总纲' },
+  side:     { label: '侧批', color: '朱批', desc: '边栏批语' },
+  inline:   { label: '夹批', color: '朱批', desc: '夹在行间' },
+  top:      { label: '眉批', color: '朱批', desc: '页眉批语' },
+  caption:  { label: '引诗', color: '墨批', desc: '插图的题画诗或回目诗' },
+  bottom:   { label: '底批', color: '朱批', desc: '页脚批语' },
+};
+
+function esc(s) {
+  if (s === null || s === undefined) return '';
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+let ALL = [];
+let active = new Set(Object.keys(TYPE_META));
+
+async function main() {
+  try {
+    elLoading.textContent = '正在加载页面数据…';
+    const d = await loadPageData('annotations');
+    ALL = d.annotations || [];
+    elLoading.style.display = 'none';
+    elContent.style.display = 'block';
+    render();
+  } catch (e) {
+    elLoading.textContent = '加载失败：' + (e && e.message ? e.message : String(e));
+    console.error(e);
+  }
+}
+
+function render() {
+  elContent.innerHTML = '';
+
+  // 分布图
+  const dist = {};
+  for (const a of ALL) dist[a.form_type] = (dist[a.form_type] || 0) + 1;
+  const maxN = Math.max(...Object.values(dist));
+  const distBox = document.createElement('div');
+  distBox.className = 'card';
+  let dbHtml = '';
+  for (const [k, v] of Object.entries(TYPE_META)) {
+    const n = dist[k] || 0;
+    const w = Math.round((n / maxN) * 100);
+    const bg = v.color === '朱批'
+      ? 'linear-gradient(90deg,rgba(158,43,37,.75),rgba(158,43,37,.45))'
+      : 'linear-gradient(90deg,rgba(63,107,94,.75),rgba(63,107,94,.45))';
+    dbHtml += `<div class="bar-row">
+      <div class="lbl">${v.label}</div>
+      <div class="bar" style="width:${w}%;background:${bg}"></div>
+      <div class="n">${n}</div>
+    </div>`;
+  }
+  distBox.innerHTML = dbHtml;
+  elContent.appendChild(distBox);
+
+  // 过滤器
+  const filter = document.createElement('div');
+  filter.className = 'filter';
+  filter.innerHTML = `<span class="small muted">显示类型：</span>`;
+  for (const [k, v] of Object.entries(TYPE_META)) {
+    const c = document.createElement('span');
+    c.className = 'chip' + (active.has(k) ? ' on' : '');
+    c.textContent = `${v.label} (${dist[k] || 0})`;
+    c.addEventListener('click', () => {
+      if (active.has(k)) active.delete(k);
+      else active.add(k);
+      render();
+    });
+    filter.appendChild(c);
+  }
+  elContent.appendChild(filter);
+
+  // 全部条目
+  const list = ALL.filter(a => active.has(a.form_type));
+  const grid = document.createElement('div');
+  grid.className = 'grid';
+  for (const a of list) {
+    const meta = TYPE_META[a.form_type] || { label: a.form_type, color: '朱批' };
+    const card = document.createElement('div');
+    card.className = 'card anno-card';
+    card.innerHTML = `
+      <div class="hdr">
+        <span class="loc">页 ${a.page_no} · L${a.line_idx} · ${esc(meta.label)}</span>
+        <span class="tag ${meta.color === '朱批' ? 'red' : ''}">${esc(a.chapter_ref || '')}</span>
+      </div>
+      <div class="txt">${esc(a.text)}</div>
+      <div class="meta">confidence ${a.confidence != null ? Number(a.confidence).toFixed(2) : ''} · id ${esc(a.annotation_id)}</div>
+    `;
+    grid.appendChild(card);
+  }
+  elContent.appendChild(grid);
+
+  const tail = document.createElement('div');
+  tail.className = 'card';
+  tail.innerHTML = `<span class="muted">共 <b>${list.length}</b> 条 · 底本：新刻全像批評西遊記（清，含评点）</span>`;
+  elContent.appendChild(tail);
+}
+
+main();
+</script>
+</body>
+</html>

@@ -1,26 +1,183 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-Hans">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="refresh" content="0; url=docs/index.html">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>西游记多版本数据库</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: "Noto Serif SC", "SimSun", serif; background: #f5f0e6; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-        .container { text-align: center; padding: 40px; }
-        h1 { font-size: 2.5em; color: #8b0000; margin-bottom: 20px; }
-        p { font-size: 1.2em; color: #5d4037; margin-bottom: 10px; }
-        a { color: #c62828; text-decoration: none; border-bottom: 1px dashed #c62828; }
-        a:hover { border-bottom-style: solid; }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>总览 · 西游奇谭</title>
+<link rel="stylesheet" href="assets/app.css">
+<script src="assets/vendor/opencc.js"></script>
+<script src="assets/toggle.js?v=099"></script>
 </head>
 <body>
-    <div class="container">
-        <h1>西游记多版本数据库</h1>
-        <p>正在跳转到首页...</p>
-        <p>如未自动跳转，请点击 <a href="docs/index.html">进入首页</a></p>
-        <p style="margin-top: 30px; font-size: 1em;"><a href="docs/sandui.html">繁简白三语对校页</a></p>
+<header>
+  <span class="seal">西游</span>
+  <h1>西游奇谭</h1>
+  <div class="sub">一心求道 · 十难伏魔 · 三教归真</div>
+  <nav>
+    <a href="index.html" class="on">总览</a>
+    <a href="read.html">正文·评点</a>
+    <a href="compare.html">评点对照</a>
+    <a href="entities.html">本体实体</a>
+    <a href="versions.html">版本谱</a>
+    <a href="editions.html">版本图鉴</a>
+    <a href="relics.html">法宝谱</a>
+    <a href="annotations.html">诙谐谱</a>
+    <a href="events.html">事件检索</a>
+    <a href="graph.html">图谱</a>
+    <a href="journey.html">取经路线</a>
+    <a href="motif.html">母题链</a>
+    <a href="symbols.html">意象星座</a>
+    <a href="voice.html">口吻字镜</a>
+    <a href="witmap.html">诙谐密度</a>
+    <a href="agent.html">Agent</a>
+    <a href="query.html">本体论</a>
+  </nav>
+</header>
+
+<main>
+  <div class="hero">
+    <span class="seal solid">取经</span>
+    <div class="verse">金公施法　水母助威<br>十难伏魔　三教归真</div>
+    <div class="rule"></div>
+    <p class="lead">本工程以吴承恩《西游记》为底本，收录<b>二十种版本</b>，其中
+      <b>十种正文</b>凡五百七十一回、约二百万字：世德堂系统古本一百回、
+      百回详注一百回、西游原旨丹道诗诀一百回、朱鼎臣释厄传六十六回、
+      杨致和西游记传四十一则、新刻批评本四回，以及西游补、后西游记、续西游记
+      三部补续衍生。<b>新刻批评本现存七十二叶</b>，实存正文四回：
+      <b>第八十六回水母助威、八十七回凤仙郡、八十八回玉华施法会、
+      八十九回黄狮精</b>，是为知识库批评标注的核。
+      先立本体论（119 类 · 36 属性 · 455 实体 · 349 关系），
+      再令多个 Agent（读者、评点家、道释诸家，以及数据科学家、文体计量学家、
+      知识图谱工程师）互相质证。<b>妖神有名　法宝有主　师徒有阶　取道有历</b>——
+      四者对勘，方可见西游奇谭之脉络。</p>
+  </div>
+
+  <h2>规模</h2>
+  <div class="grid">
+    <div class="card">正文 <big>10,981</big> 行 · 评点 <big>113</big> 条</div>
+    <div class="card">章回 <big>571</big> 章 · 版本 <big>20</big> 本</div>
+    <div class="card">人物 <big>179</big> · 地点 <big>115</big> · 器物 <big>64</big></div>
+    <div class="card">妖神 <big>52</big> · 官职 <big>17</big> · 引诗 <big>16</big></div>
+    <div class="card">关系 <big>349</big> 条 · 事件 <big>138</big> 桩</div>
+    <div class="card">语义行 <big>5,787</big> · 义理提及 <big>9,006</big></div>
+  </div>
+
+  <h2>评点版本分布</h2>
+  <div class="card">
+    正传底本四源 · 评点汇本八家 · 简本二种 · 续书二种 · 补书一种 · 文献三则 —— 凡二十本。
+    世德堂系统古本（1592）为源，评点本为血肉，余作参校。共收 <b>新刻批评西游记</b>
+    第八十六至八十九回（现存七十二叶），凡四回；全书正文十版并读，
+    批评标注、谱系倾向、学术论点逐层叠加。
+  </div>
+
+  <h2>批评本实存正文 · 凡四回</h2>
+  <div class="card">
+    <b>第八十六回</b>水母助威征怪物　<b>第八十七回</b>鳳仙郡冒天止雨<br>
+    <b>第八十八回</b>禪到玉華施法會　<b>第八十九回</b>開箱盡寶閉嶺逢妖
+  </div>
+
+  <h2>关系谱前八</h2>
+  <div class="card">
+    <b>师徒</b> 50 · <b>拜师</b> 41 · <b>役使</b> 42 · <b>行旅</b> 44 · <b>兵器</b> 38 ·
+    <b>居所</b> 27 · <b>降伏</b> 24 · <b>斗战</b> 19
+  </div>
+
+  <h2>入口</h2>
+  <div class="grid">
+    <div class="card">
+      <h3>繁简白三语对照</h3>
+      <p class="small">以世德堂本为底本校定：繁体原文、简体校注、白话译文三栏并排，标校勘异文，可切换显示，便于对读。</p>
+      <a href="sandui.html">进入 →</a>
     </div>
+    <div class="card">
+      <h3>正文 · 评点</h3>
+      <p class="small">按回阅读，可按评点类型（眉批/侧批/夹批/眉端/底端/题款）与版本过滤，评点条按颜色分门。</p>
+      <a href="read.html">进入 →</a>
+    </div>
+    <div class="card">
+      <h3>评点对照</h3>
+      <p class="small">按回章并置：批评本评点、悟元子详注、底本正文同屏对读，交集自动筛选；后续新增评点版本自动纳入。</p>
+      <a href="compare.html">进入 →</a>
+    </div>
+    <div class="card">
+      <h3>本体实体</h3>
+      <p class="small">人物、地点、器物、妖神、官职、经文，共 <b>455</b> 条，附提及频数与别名链。</p>
+      <a href="entities.html">进入 →</a>
+    </div>
+    <div class="card">
+      <h3>版本谱</h3>
+      <p class="small">二十本对勘：世德堂系统、李评、朱评、杨闽斋、大奇书、新刻批评、证道本、真诠本、闽斋堂、百回详注、刘一明原旨，以及杨致和简本、朱鼎臣简本，西游补、后西游、续西游三部衍生。</p>
+      <a href="versions.html">进入 →</a>
+    </div>
+    <div class="card">
+      <h3>版本图鉴</h3>
+      <p class="small">版本谱系边（V 层）· 每本儒释道三教倾向（Z 层，0-1 三维）· 明清评点家学术论点（W 层）。二十版名录、十五边谱系、完整章回覆盖。</p>
+      <a href="editions.html">进入 →</a>
+    </div>
+    <div class="card">
+      <h3>法宝谱</h3>
+      <p class="small">器物 <b>64</b> 件，附所属人物、出现回次与情节证据。金箍棒、如意棒、九齿钉耙、芭蕉扇、紫金红葫芦，逐一可查。</p>
+      <a href="relics.html">进入 →</a>
+    </div>
+    <div class="card">
+      <h3>诙谐谱</h3>
+      <p class="small">评点 <b>113</b> 条：眉批 <b>33</b> · 底端 <b>48</b> · 夹批 <b>13</b> · 眉端 <b>11</b> · 引诗 <b>7</b>。评点家对诙谐处必加朱批，此处按类型归之。</p>
+      <a href="annotations.html">进入 →</a>
+    </div>
+    <div class="card">
+      <h3>事件检索</h3>
+      <p class="small">事件 <b>138</b> 桩：水母降妖、凤仙劝善、玉华献宝、黄狮斗战，逐桩列名、参与人、场所、原文行号。</p>
+      <a href="events.html">进入 →</a>
+    </div>
+    <div class="card">
+      <h3>图谱</h3>
+      <p class="small">多重视图：师徒关系、法宝谱、事件时序、诙谐密度、版本异文——点选即见本体记录与逐回分布。</p>
+      <a href="graph.html">进入 →</a>
+    </div>
+    <div class="card">
+      <h3>取经路线</h3>
+      <p class="small">R 层·取经路线 SVG 路径图：18 段行程节点，按难度渐变着色，从长安到灵山全程可览。</p>
+      <a href="journey.html">进入 →</a>
+    </div>
+    <div class="card">
+      <h3>母题链</h3>
+      <p class="small">N+S 层·母题链与偏离度：6 大母题（打怪除妖、拜师受戒、变化斗法……）的实例偏离度曲线与趋势。</p>
+      <a href="motif.html">进入 →</a>
+    </div>
+    <div class="card">
+      <h3>意象星座</h3>
+      <p class="small">T 层·意象星座：金箍、兵器、火焰、肉身、法器、果真人——6 大意象星座极坐标星图。</p>
+      <a href="symbols.html">进入 →</a>
+    </div>
+    <div class="card">
+      <h3>口吻字镜</h3>
+      <p class="small">M+P 层·口吻字镜：五角色七维口吻雷达图（泼猴语·戏谑语·经卷语……）与口吻一致性曲线。</p>
+      <a href="voice.html">进入 →</a>
+    </div>
+    <div class="card">
+      <h3>诙谐密度</h3>
+      <p class="small">U 层·诙谐谱热力图：百回 × 八类（戏谑·反讽·双关·谐音……）矩阵热力图，含峰值章回与跨版本比较。</p>
+      <a href="witmap.html">进入 →</a>
+    </div>
+    <div class="card">
+      <h3>Agent</h3>
+      <p class="small">本地 DuckDB-WASM + LangGraph.js：自然语言提问，多步推理，跨版本对勘，评点家视角切入。</p>
+      <a href="agent.html">进入 →</a>
+    </div>
+    <div class="card">
+      <h3>本体论</h3>
+      <p class="small">四层本体统一检索：<b>形态 / 主题 / 思想 / 版本</b>。查 <b>119</b> 类 <b>36</b> 属性 <b>12</b> 类受控词表 <b>20</b> 张数据表，附分组统计与样例。</p>
+      <a href="query.html">进入 →</a>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <span class="seal">评本</span>
+  <div>底本：吴承恩《西游记》（世德堂本 1592 为源流，评点本为血肉）。</div>
+  <div>本体论规范：<a href="../03_本体论规范/jtw_kg_ontology.ttl" target="_blank" rel="noopener">jtw_kg_ontology.ttl</a> · 受控词表：<a href="../03_本体论规范/vocabularies.yaml" target="_blank" rel="noopener">vocabularies.yaml</a></div>
+  <div>由多 Agent 生成，仅供研究玩索，非定本。</div>
+</footer>
+<script></script>
 </body>
 </html>

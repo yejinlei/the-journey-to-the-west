@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>本体论 · 西游奇谭</title>
+<link rel="stylesheet" href="assets/app.css">
+<script src="assets/vendor/opencc.js"></script>
+<script src="assets/toggle.js?v=099"></script>
+<style>
+  /* ---------- 顶部四层总览 ---------- */
+  .onto-hero{margin:2px 0;padding:14px 18px;border:1px solid var(--line-gold);border-radius:3px;
+    background:linear-gradient(180deg,rgba(255,253,248,.88),rgba(253,248,238,.7));
+    box-shadow:var(--shadow)}
+  .onto-hero h2{margin:0 0 6px;font-size:18px;color:#3a2a10;letter-spacing:.12em;border:0;padding:0}
+  .onto-hero .meta{font-size:12.5px;color:var(--ink3);letter-spacing:.04em}
+  .onto-hero .meta b{color:var(--cinnabar);font-weight:600}
+
+  /* ---------- 四层切换 tabs ---------- */
+  .layer-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0;padding:10px;
+    background:linear-gradient(180deg,rgba(255,253,248,.9),rgba(253,248,238,.72));
+    border:1px solid var(--line);border-radius:4px;box-shadow:var(--shadow)}
+  .layer-tab{flex:1 1 200px;display:flex;flex-direction:column;gap:4px;padding:10px 14px;
+    border:1px solid var(--line);border-radius:3px;cursor:pointer;transition:all .22s;
+    background:rgba(255,253,248,.55)}
+  .layer-tab:hover{border-color:rgba(158,43,37,.4);box-shadow:var(--shadow-glow)}
+  .layer-tab.on{border-color:rgba(158,43,37,.55);
+    background:linear-gradient(180deg,#fdf1ee,#f8e6e2);
+    box-shadow:var(--shadow-h)}
+  .layer-tab .row1{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+  .layer-tab .lbl{font-family:var(--kai);font-size:16px;font-weight:700;letter-spacing:.1em;color:#3a2a10}
+  .layer-tab.on .lbl{color:var(--cinnabar-d)}
+  .layer-tab .en{font-size:11.5px;color:var(--ink3);letter-spacing:.16em}
+  .layer-tab .desc{font-size:12.5px;color:var(--ink2);line-height:1.65}
+  .layer-tab .stat{font-size:11.5px;color:var(--ink3);letter-spacing:.06em;
+    padding:1px 6px;background:rgba(240,230,209,.8);border:1px solid var(--line-gold);
+    border-radius:9px}
+  .layer-tab.on .stat{background:rgba(158,43,37,.10);border-color:rgba(158,43,37,.30);color:var(--cinnabar-d)}
+
+  /* ---------- 层说明卡片 ---------- */
+  .layer-intro{padding:10px 14px;margin:10px 0;font-size:13.5px;color:var(--ink2);line-height:1.75;
+    background:rgba(255,253,248,.65);border-left:3px solid var(--cinnabar);border-radius:2px}
+
+  /* ---------- 数据表卡片 ---------- */
+  .table-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:14px;margin:14px 0}
+  .table-card{padding:12px 14px;border-radius:4px;
+    background:linear-gradient(180deg,rgba(255,253,248,.9),rgba(253,248,238,.75));
+    border:1px solid var(--line);box-shadow:var(--shadow)}
+  .table-card > header{display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding-bottom:6px;margin-bottom:8px;border-bottom:1px solid rgba(158,43,37,.16)}
+  .table-card .tname{font-family:var(--kai);font-size:16px;font-weight:700;letter-spacing:.08em;color:#332c25}
+  .table-card .tnum{font-size:11.5px;color:var(--ink3);padding:1px 8px;border-radius:9px;
+    background:rgba(240,230,209,.9);border:1px solid var(--line-gold);letter-spacing:.06em}
+  .table-card .tdesc{font-size:12.5px;color:var(--ink2);margin-bottom:8px;line-height:1.6}
+  .table-card .cols{font-size:11.5px;color:var(--ink3);letter-spacing:.04em;margin-bottom:8px;
+    padding:6px 8px;background:rgba(245,239,227,.5);border:1px dashed var(--line);border-radius:2px}
+  .table-card .cols code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    font-size:11px;color:#6a5223;background:rgba(230,201,138,.24);padding:0 4px;border-radius:2px}
+
+  /* ---------- 分组统计 chip 行 ---------- */
+  .stat-row{margin:6px 0}
+  .stat-row .k{display:inline-block;font-size:11.5px;color:var(--cinnabar);letter-spacing:.1em;
+    margin-right:8px;font-weight:600;vertical-align:middle}
+  .chip-row{display:flex;flex-wrap:wrap;gap:4px;margin:2px 0 8px}
+  .chip{display:inline-flex;align-items:baseline;gap:4px;font-size:11.5px;padding:1px 7px;
+    border:1px solid var(--line-gold);border-radius:9px;background:rgba(255,253,248,.7);color:var(--ink2)}
+  .chip .n{color:#3a2a10;font-weight:600}
+  .chip.empty{color:var(--ink3);background:rgba(245,239,227,.5);border-style:dashed}
+
+  /* ---------- 样例记录 ---------- */
+  .samples{margin-top:8px;padding:8px 10px;background:rgba(245,239,227,.35);
+    border:1px solid rgba(176,141,87,.24);border-radius:2px}
+  .samples .stitle{font-size:11.5px;color:var(--cinnabar);letter-spacing:.14em;font-family:var(--kai);margin-bottom:4px}
+  .samples table{width:100%;border-collapse:collapse;font-size:12px}
+  .samples th,.samples td{padding:3px 6px;text-align:left;vertical-align:top;border-bottom:1px dotted var(--line)}
+  .samples th{font-family:var(--kai);color:var(--cinnabar);font-weight:600;
+    background:rgba(240,230,209,.55);font-size:11.5px;letter-spacing:.06em}
+  .samples td{color:var(--ink2);font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:11.5px}
+  .samples td.txt{font-family:var(--kai);color:var(--ink);font-size:12.5px}
+
+  /* ---------- 空层提示 ---------- */
+  .empty-layer{padding:32px 20px;text-align:center;color:var(--ink3);
+    font-family:var(--kai);font-size:15px;line-height:1.9;
+    background:rgba(245,239,227,.5);border:1px dashed var(--line-gold);border-radius:3px}
+  .empty-layer b{color:var(--cinnabar)}
+
+  /* ---------- 词表 / 本体类 面板 ---------- */
+  .panel-section{margin:22px 0;padding:14px 18px;border-radius:4px;
+    background:linear-gradient(180deg,rgba(255,253,248,.9),rgba(253,248,238,.75));
+    border:1px solid var(--line);box-shadow:var(--shadow)}
+  .panel-section h2{margin:0 0 6px;font-size:19px;color:#332c25;letter-spacing:.1em;
+    border-bottom:1px solid rgba(158,43,37,.2);padding-bottom:6px}
+  .panel-section .hint{font-size:12.5px;color:var(--ink3);margin-bottom:10px;line-height:1.7}
+
+  .voc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px}
+  .voc{padding:10px 14px;background:rgba(255,253,248,.7);border:1px solid var(--line);border-radius:3px}
+  .voc > h4{margin:0 0 6px;font-family:var(--kai);font-size:14px;color:var(--cinnabar);letter-spacing:.08em}
+  .voc > h4 code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    font-size:11.5px;color:var(--ink3);margin-left:6px;letter-spacing:.04em}
+  .voc ul{margin:0;padding-left:18px;font-size:12.5px;color:var(--ink2);line-height:1.85}
+  .voc li b{color:#3a2a10;font-weight:600}
+  .voc li em{font-style:normal;color:var(--ink3);font-size:11.5px;margin-left:4px}
+
+  .cls-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px}
+  .cls-item{padding:8px 12px;background:rgba(255,253,248,.6);border:1px solid var(--line);
+    border-left:3px solid var(--gold);border-radius:2px;font-size:12.5px}
+  .cls-item .n{font-family:var(--kai);font-size:13.5px;color:#332c25;font-weight:700;letter-spacing:.06em}
+  .cls-item .en{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    font-size:11px;color:var(--ink3);margin-left:6px}
+  .cls-item .d{color:var(--ink2);font-size:12px;margin-top:2px;line-height:1.55}
+  .cls-item .sub{font-size:11px;color:var(--ink3);margin-top:2px}
+  .cls-item .sub code{background:rgba(240,230,209,.7);padding:0 4px;border-radius:2px;color:#6a5223}
+
+  /* ---------- 搜索框 ---------- */
+  .search-box{display:flex;gap:8px;align-items:center;margin:8px 0}
+  .search-box input{flex:1;padding:6px 10px;font-size:13.5px;font-family:inherit;
+    border:1px solid var(--line);border-radius:2px;background:rgba(255,253,248,.75);color:var(--ink)}
+  .search-box input:focus{outline:none;border-color:rgba(158,43,37,.4);box-shadow:var(--shadow-glow)}
+  .search-box .count{font-size:12px;color:var(--ink3);white-space:nowrap}
+
+  .footnote{margin:24px 0;font-size:12.5px;color:var(--ink3);text-align:center;line-height:1.8}
+  .footnote b{color:var(--cinnabar)}
+</style>
+</head>
+<body>
+<header>
+  <span class="seal">西游</span>
+  <h1>西游奇谭</h1>
+  <div class="sub">一心求道 · 十难伏魔 · 三教归真</div>
+  <nav>
+    <a href="index.html">总览</a>
+    <a href="read.html">正文·评点</a>
+    <a href="compare.html">评点对照</a>
+    <a href="entities.html">本体实体</a>
+    <a href="versions.html">版本谱</a>
+    <a href="editions.html">版本图鉴</a>
+    <a href="relics.html">法宝谱</a>
+    <a href="annotations.html">诙谐谱</a>
+    <a href="events.html">事件检索</a>
+    <a href="graph.html">图谱</a>
+    <a href="journey.html">取经路线</a>
+    <a href="motif.html">母题链</a>
+    <a href="symbols.html">意象星座</a>
+    <a href="voice.html">口吻字镜</a>
+    <a href="witmap.html">诙谐密度</a>
+    <a href="agent.html">Agent</a>
+    <a href="query.html" class="on">本体论</a>
+  </nav>
+</header>
+
+<main>
+  <div class="hero" style="margin-top:2px">
+    <span class="seal solid">本體</span>
+    <div class="verse">四層並立　詞表為樞<br>版本為脈　思想為歸</div>
+    <div class="rule"></div>
+    <p class="lead">本頁是<b>西游记知识图谱本体</b>的统一检索入口。将 <code>jtw_kg_ontology.ttl</code>、
+      <code>vocabularies.yaml</code>、以及 <code>04_knowledge_data/</code> 下二十张 <code>.parquet</code> 汇总为一份
+      <b>ontology.json</b>，按 <b>形态 · 主题 · 思想 · 版本</b> 四层组织。
+      切换顶层标签即切换层；每层可查表清单、行数、关键列分组统计与样例记录。</p>
+  </div>
+
+  <div id="stats" class="onto-hero">
+    <h2>本体规模</h2>
+    <div class="meta" id="metaLine">载入中…</div>
+  </div>
+
+  <div class="layer-tabs" id="layerTabs">
+    <div class="layer-tab on" data-layer="form">
+      <div class="row1"><span class="lbl">形态层</span><span class="en">Formal</span><span class="stat" data-stat="form">…</span></div>
+      <div class="desc">页面、段落、字符 — OCR 与版式证据链。</div>
+    </div>
+    <div class="layer-tab" data-layer="thematic">
+      <div class="row1"><span class="lbl">主题层</span><span class="en">Thematic</span><span class="stat" data-stat="thematic">…</span></div>
+      <div class="desc">人物、事件、法宝、关系 — 剧情子图一等实体。</div>
+    </div>
+    <div class="layer-tab" data-layer="ideological">
+      <div class="row1"><span class="lbl">思想层</span><span class="en">Ideological</span><span class="stat" data-stat="ideological">…</span></div>
+      <div class="desc">评点家观点、义理提及 — 佛道儒三教与批评学。</div>
+    </div>
+    <div class="layer-tab" data-layer="textual">
+      <div class="row1"><span class="lbl">版本层</span><span class="en">Textual</span><span class="stat" data-stat="textual">…</span></div>
+      <div class="desc">版本、章回、文本行 — 版本谱系与章回结构。</div>
+    </div>
+  </div>
+
+  <section id="layerBody"></section>
+
+  <!-- 词表 -->
+  <section class="panel-section" id="vocabSection">
+    <h2>受控词表 <span style="font-size:12.5px;color:var(--ink3);letter-spacing:.06em;margin-left:8px">vocabularies.yaml</span></h2>
+    <p class="hint">十二类受控词表：核实状态 · 人物分类 · 关系类型 · 教派 · 事件分类 · 评点体例 · 册页编号 · 声音 · 母题 · 三教 · 诙谐 · 版本 ID。词表是本体属性的取值域。</p>
+    <div class="search-box">
+      <input id="vocSearch" placeholder="搜索词表条目或标签…">
+      <span class="count" id="vocCount"></span>
+    </div>
+    <div class="voc-grid" id="vocGrid"></div>
+  </section>
+
+  <!-- 本体类与属性 -->
+  <section class="panel-section" id="classSection">
+    <h2>本体类与属性 <span style="font-size:12.5px;color:var(--ink3);letter-spacing:.06em;margin-left:8px">jtw_kg_ontology.ttl</span></h2>
+    <p class="hint">以 <code>jtw:Thing</code> 为顶层类，向下派生 <code>Edition</code>、<code>Chapter</code>、<code>Page</code>、<code>TextLine</code>、<code>Person</code>、<code>Event</code>、<code>Artifact</code>、<code>Annotation</code> 等。属性含 <code>rdfs:domain / rdfs:range</code> 与中英标签。</p>
+    <div class="search-box">
+      <input id="classSearch" placeholder="搜索类名或属性名…">
+      <span class="count" id="classCount"></span>
+    </div>
+    <h3 style="margin:12px 0 6px;font-size:14.5px;color:var(--cinnabar);letter-spacing:.08em">类 <span id="classN" style="font-size:12.5px;color:var(--ink3)"></span></h3>
+    <div class="cls-grid" id="classGrid"></div>
+    <h3 style="margin:14px 0 6px;font-size:14.5px;color:var(--cinnabar);letter-spacing:.08em">属性 <span id="propN" style="font-size:12.5px;color:var(--ink3)"></span></h3>
+    <div class="cls-grid" id="propGrid"></div>
+  </section>
+
+  <div class="footnote">
+    数据来源：<code>05_构建脚本/export_ontology.py</code> · 生成于 <b id="genAt">…</b><br>
+    形态层 <b>5407</b> · 主题层 <b>1995</b> · 思想层 <b>0</b>（待补） · 版本层 <b>214</b>
+  </div>
+</main>
+
+<script>
+const STATE = { data:null, layer:'form' };
+
+function $(s){return document.querySelector(s)}
+function $all(s){return Array.from(document.querySelectorAll(s))}
+function fmt(n){ return (n==null||n==='') ? '' : (typeof n==='number'? n : String(n)) }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])) }
+
+function statChips(stats){
+  if(!stats || typeof stats !== 'object') return '';
+  let html='';
+  for(const [col, mapping] of Object.entries(stats)){
+    if(col==='rows') continue;
+    if(!mapping || typeof mapping !== 'object') continue;
+    const entries = Object.entries(mapping);
+    if(entries.length===0) continue;
+    html += `<div class="stat-row"><span class="k">${esc(col)}</span>`;
+    html += `<div class="chip-row">`;
+    if(entries.length > 20){
+      html += `<span class="chip" title="共 ${entries.length} 类"><span class="n">${entries.length}</span> 类</span>`;
+      entries.slice(0,12).forEach(([k,v])=>{
+        html += `<span class="chip">${esc(k)} <span class="n">${v}</span></span>`;
+      });
+      if(entries.length>12) html += `<span class="chip empty">+${entries.length-12} 类</span>`;
+    } else {
+      entries.forEach(([k,v])=>{ html += `<span class="chip">${esc(k)} <span class="n">${v}</span></span>` });
+    }
+    html += `</div></div>`;
+  }
+  return html;
+}
+
+function sampleTable(table){
+  const samples = table.samples || [];
+  const columns = table.columns || [];
+  if(samples.length===0){
+    return `<div class="samples"><div class="stitle">样例</div><div style="color:var(--ink3);font-size:12px;padding:6px 4px">暂无样例</div></div>`;
+  }
+  // 展示前 5 列，避免过宽
+  const cols = columns.slice(0, 5);
+  let html = `<div class="samples"><div class="stitle">样例 ${samples.length} 条 · 展示前 ${cols.length} 列</div>`;
+  html += `<table><thead><tr>`;
+  cols.forEach(c=>{ html += `<th>${esc(c)}</th>` });
+  html += `</tr></thead><tbody>`;
+  samples.forEach(row=>{
+    html += `<tr>`;
+    cols.forEach(c=>{
+      const v = fmt(row[c]);
+      const isText = /label|title|desc|text|verse|quote|canonical|name|comment/i.test(c) && v.length > 2;
+      html += `<td class="${isText?'txt':''}">${esc(v)}</td>`;
+    });
+    html += `</tr>`;
+  });
+  html += `</tbody></table></div>`;
+  return html;
+}
+
+function renderLayer(layerId){
+  const layer = STATE.data.layers[layerId];
+  const layerMeta = STATE.data.meta.layers.find(l=>l.id===layerId);
+  const body = $('#layerBody');
+  if(!layer){ body.innerHTML=''; return; }
+  const tables = layer.tables || {};
+  const totals = layer.totals || {};
+  const nTables = Object.keys(tables).length;
+
+  let html = `<div class="layer-intro"><b>${esc(layerMeta.label)}</b>（${esc(layerMeta.en)}）— ${esc(layerMeta.desc)}<br>
+    共 <b>${nTables}</b> 张数据表，合计 <b>${totals.rows||0}</b> 行。</div>`;
+
+  if(nTables===0){
+    html += `<div class="empty-layer">本层当前 <b>暂无数据</b>。<br>
+      <span style="font-size:13px">（<code>scholar_arguments</code> / <code>doctrine_mentions</code> 表已在 <code>04_knowledge_data/</code> 建立空表，等待思想层抽取管线填充。）</span></div>`;
+    body.innerHTML = html; return;
+  }
+
+  html += `<div class="table-grid">`;
+  for(const [name, table] of Object.entries(tables)){
+    const rows = (table.stats && table.stats.rows) || 0;
+    const cols = (table.columns || []).map(c=>`<code>${esc(c)}</code>`).join(' · ');
+    html += `<div class="table-card">`;
+    html += `<header><span class="tname">${esc(table.name)}</span><span class="tnum">${rows} 行</span></header>`;
+    if(table.desc) html += `<div class="tdesc">${esc(table.desc)}</div>`;
+    if(cols) html += `<div class="cols">列：${cols}</div>`;
+    html += statChips(table.stats);
+    html += sampleTable(table);
+    html += `</div>`;
+  }
+  html += `</div>`;
+  body.innerHTML = html;
+}
+
+function renderVocab(filter=''){
+  const vocs = STATE.data.vocabularies || {};
+  const grid = $('#vocGrid');
+  const f = filter.trim().toLowerCase();
+  let html='';
+  let n=0;
+  for(const [key, entries] of Object.entries(vocs)){
+    const items = Array.isArray(entries) ? entries : Object.entries(entries).map(([k,v])=>{
+      if(typeof v==='object' && v !== null) return {k, en: v.en, desc: v.desc, ...v};
+      return {k, v};
+    });
+    let matched = items.map(it=>{
+      const label = it.k || it.label || it.id || '';
+      const en = it.en || '';
+      const desc = it.desc || '';
+      if(f && !(`${label} ${en} ${desc} ${key}`.toLowerCase().includes(f))) return null;
+      return {label, en, desc};
+    }).filter(Boolean);
+    if(f && matched.length===0) continue;
+    n += matched.length;
+    html += `<div class="voc"><h4>${esc(key)}</h4><ul>`;
+    matched.forEach(it=>{
+      html += `<li><b>${esc(it.label)}</b>${it.en?` <em>${esc(it.en)}</em>`:''}${it.desc?`<br><span style="font-size:11.5px;color:var(--ink3)">${esc(it.desc)}</span>`:''}</li>`;
+    });
+    html += `</ul></div>`;
+  }
+  grid.innerHTML = html || `<div style="color:var(--ink3);font-size:13px;padding:8px">无匹配</div>`;
+  $('#vocCount').textContent = `${n} 项`;
+}
+
+function renderClasses(filter=''){
+  const {classes, properties} = STATE.data.ontology || {};
+  const f = filter.trim().toLowerCase();
+  function renderItem(item){
+    const name = item.name || '';
+    const zh = item.label_zh || '';
+    const en = name;
+    const desc = item.comment_zh || '';
+    const sub = item.subClassOf || [];
+    const dom = item.domain ? ['rdfs:domain', item.domain] : null;
+    const rng = item.range ? ['rdfs:range', item.range] : null;
+    const hay = `${name} ${zh} ${desc} ${sub.join(' ')} ${dom?dom.join(' '):''} ${rng?rng.join(' '):''}`.toLowerCase();
+    if(f && !hay.includes(f)) return '';
+    let h = `<div class="cls-item"><span class="n">${esc(zh||name)}</span><span class="en">jtw:${esc(name)}</span>`;
+    if(desc) h += `<div class="d">${esc(desc)}</div>`;
+    if(sub.length) h += `<div class="sub">⊂ ${sub.map(x=>`<code>${esc(x)}</code>`).join(' ')}</div>`;
+    if(dom || rng){
+      h += `<div class="sub">`;
+      if(dom) h += `<code>${esc(dom[1])}</code> → `;
+      if(rng) h += `<code>${esc(rng[1])}</code>`;
+      h += `</div>`;
+    }
+    h += `</div>`;
+    return h;
+  }
+  let classHtml='', propHtml='', nc=0, np=0;
+  Object.values(classes).forEach(c=>{ const r=renderItem(c); if(r){classHtml+=r; nc++;} });
+  Object.values(properties).forEach(c=>{ const r=renderItem(c); if(r){propHtml+=r; np++;} });
+  $('#classGrid').innerHTML = classHtml || `<div style="color:var(--ink3);font-size:13px;padding:8px">无匹配</div>`;
+  $('#propGrid').innerHTML  = propHtml  || `<div style="color:var(--ink3);font-size:13px;padding:8px">无匹配</div>`;
+  $('#classN').textContent = `· ${nc}`;
+  $('#propN').textContent  = `· ${np}`;
+  $('#classCount').textContent = `${nc} 类 / ${np} 属性`;
+}
+
+function renderMeta(){
+  const m = STATE.data.meta;
+  const totalRows = Object.values(STATE.data.layers).reduce((s,l)=> s+(l.totals?.rows||0), 0);
+  const nClass = Object.keys(STATE.data.ontology.classes).length;
+  const nProp  = Object.keys(STATE.data.ontology.properties).length;
+  const nVoc   = Object.keys(STATE.data.vocabularies).length;
+  $('#metaLine').innerHTML = `<b>${esc(m.project)}</b> · 生成于 <code>${esc(m.generated_at)}</code><br>
+    本体类 <b>${nClass}</b> · 属性 <b>${nProp}</b> · 受控词表 <b>${nVoc}</b> 类 · 数据表合计 <b>${totalRows.toLocaleString()}</b> 行`;
+  $('#genAt').textContent = m.generated_at;
+}
+
+async function load(){
+  const r = await fetch('data/ontology.json', {cache:'force-cache'});
+  STATE.data = await r.json();
+  renderMeta();
+  ['form','thematic','ideological','textual'].forEach(id=>{
+    const t = STATE.data.layers[id];
+    const tot = t.totals || {rows:0};
+    const tables = Object.keys(t.tables||{}).length;
+    const stat = $(`[data-stat="${id}"]`);
+    if(stat) stat.textContent = `${tables} 表 · ${tot.rows||0} 行`;
+  });
+  renderLayer('form');
+  renderVocab();
+  renderClasses();
+}
+
+// 交互
+document.addEventListener('click', e=>{
+  const tab = e.target.closest('.layer-tab');
+  if(!tab) return;
+  $all('.layer-tab').forEach(t=>t.classList.remove('on'));
+  tab.classList.add('on');
+  STATE.layer = tab.dataset.layer;
+  renderLayer(STATE.layer);
+});
+let t1, t2;
+$('#vocSearch').addEventListener('input', e=>{ clearTimeout(t1); t1=setTimeout(()=>renderVocab(e.target.value), 150); });
+$('#classSearch').addEventListener('input', e=>{ clearTimeout(t2); t2=setTimeout(()=>renderClasses(e.target.value), 150); });
+
+load();
+</script>
+</body>
+</html>

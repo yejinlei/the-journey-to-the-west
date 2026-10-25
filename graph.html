@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>图谱 · 西游奇谭</title>
+<link rel="stylesheet" href="assets/app.css">
+<script src="assets/vendor/opencc.js"></script>
+<script src="assets/toggle.js?v=099"></script>
+<script src="assets/vendor/d3.min.js"></script>
+<style>
+  .tabs{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0 10px;padding:6px;
+    background:linear-gradient(180deg,rgba(255,253,248,.85),rgba(253,248,238,.7));
+    border:1px solid var(--line);border-radius:3px;box-shadow:var(--shadow)}
+  .tabs button{letter-spacing:.1em;padding:5px 12px;font-size:13.5px;color:var(--ink2);
+    border:1px solid transparent;background:none;border-radius:2px;cursor:pointer;font-family:inherit}
+  .tabs button:hover{color:var(--cinnabar);border-color:rgba(158,43,37,.3);background:rgba(255,255,255,.55)}
+  .tabs button.on{color:var(--cinnabar);border-color:rgba(158,43,37,.35);
+    background:linear-gradient(180deg,#fffdf8,#f6ecd9);font-weight:600}
+  .loadbox{padding:80px 20px;text-align:center;color:var(--ink3);font-family:var(--kai);font-size:16px}
+  .gwrap{display:grid;grid-template-columns:1fr 300px;gap:20px;align-items:start}
+  @media (max-width:960px){.gwrap{grid-template-columns:1fr}}
+  .gtools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 10px}
+  .gtools input,.gtools select{padding:5px 10px;font-size:13.5px;font-family:inherit;
+    background:rgba(255,253,248,.9);border:1px solid var(--line);border-radius:2px}
+  .gside{position:sticky;top:14px;max-height:84vh;overflow:auto;margin:0;font-size:13.5px;padding:18px 20px;
+    background:linear-gradient(180deg,rgba(255,253,248,.97),rgba(253,248,238,.96));
+    border:1px solid var(--line);border-radius:3px;box-shadow:var(--shadow)}
+  .gside h3{margin:0 0 6px;font-size:17px}
+  .gside .kv{border:0;background:none;box-shadow:none;border-radius:0;margin:10px 0 0;width:100%}
+  .gside .kv td{border-bottom:1px dotted #e9ddc7;padding:4px 5px 4px 0;font-size:13px}
+  .gside .kv td:first-child{color:var(--ink3);white-space:nowrap;width:5.5em}
+  .gcanvas{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:3px;
+    background:linear-gradient(180deg,rgba(255,253,248,.92),rgba(253,248,238,.85));box-shadow:var(--shadow)}
+
+  /* ---- D3 力导向关系图 ---- */
+  .gcanvas svg{display:block;cursor:grab;touch-action:none}
+  .gcanvas svg:active{cursor:grabbing}
+  .gnode{cursor:pointer}
+  .gnode circle{stroke:rgba(255,255,255,.9);stroke-width:1.2px;
+    transition:fill-opacity .25s,opacity .25s}
+  .gnode text{font-size:12.5px;fill:#332c25;paint-order:stroke;stroke:rgba(255,253,248,.85);
+    stroke-width:3px;stroke-linejoin:round;pointer-events:none;transition:opacity .25s}
+  .glink{stroke-width:1.3px;stroke-opacity:.55;transition:stroke-opacity .25s,opacity .25s}
+  .glink-label{font-size:11px;fill:#8a7f6d;opacity:0;pointer-events:none;
+    paint-order:stroke;stroke:rgba(255,253,248,.9);stroke-width:3px;stroke-linejoin:round;
+    transition:opacity .25s}
+  .gnode.hl circle{fill-opacity:1;stroke:var(--cinnabar);stroke-width:2px}
+  .gnode.dim{opacity:.18}
+  .glink.hl{stroke-opacity:1;stroke-width:2.2px}
+  .glink.dim{opacity:.12}
+  .glink-label.hl{opacity:1}
+  .gdetail{position:absolute;left:14px;bottom:14px;min-width:170px;padding:10px 14px;
+    background:linear-gradient(180deg,rgba(255,253,248,.97),rgba(253,248,238,.95));
+    border:1px solid var(--line-gold);border-radius:3px;box-shadow:var(--shadow);
+    opacity:0;pointer-events:none;transform:translateY(6px);transition:opacity .25s,transform .25s}
+  .gdetail.on{opacity:1;transform:translateY(0)}
+  .gdetail .ttl{font-family:var(--kai);font-size:16px;color:#33200f;letter-spacing:.08em}
+  .gdetail .typ{display:inline-block;font-size:11px;color:var(--ink3);border:1px solid var(--line);
+    border-radius:8px;padding:0 7px;margin:4px 0 6px}
+  .gdetail .row{font-size:12.5px;color:var(--ink2)}
+  .gdetail .row .lbl{color:var(--ink3);margin-right:8px}
+
+  /* ---- D3 动画条形图 ---- */
+  .dbar-row{display:grid;grid-template-columns:150px 1fr 70px;gap:8px;align-items:center;padding:3px 0}
+  .dbar-row .lbl{font-family:var(--kai);font-size:14px;color:var(--ink2);text-align:right;
+    letter-spacing:.06em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .dbar-row .track{background:rgba(240,230,209,.45);border-radius:2px;height:16px;overflow:hidden}
+  .dbar-row .bar{height:100%;width:0;border-radius:2px}
+  .dbar-row .n{text-align:right;font-family:var(--kai);color:var(--cinnabar);font-size:14px}
+
+  /* ---- D3 事件泳道 ---- */
+  .lanebox{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:3px;
+    background:linear-gradient(180deg,rgba(255,253,248,.92),rgba(253,248,238,.85))}
+  .lanebox svg{display:block;cursor:grab;touch-action:none}
+  .gcanvas svg:active{cursor:grabbing}
+  .evblock{cursor:pointer}
+  .evblock rect{transition:fill .2s}
+  .evblock:hover rect{fill:rgba(158,43,37,.32)}
+  .evtip{position:absolute;z-index:5;max-width:280px;padding:8px 12px;pointer-events:none;
+    background:linear-gradient(180deg,rgba(255,253,248,.98),rgba(253,248,238,.96));
+    border:1px solid var(--line-gold);border-radius:3px;box-shadow:var(--shadow);
+    font-size:12.5px;line-height:1.7;color:var(--ink2);opacity:0;transition:opacity .2s}
+  .evtip.on{opacity:1}
+  .evtip .t{font-family:var(--kai);font-size:14px;color:var(--cinnabar);letter-spacing:.06em}
+
+  /* ---- 移动端 ---- */
+  @media (max-width:640px){
+    .tabs{gap:2px;padding:5px}
+    .tabs button{padding:5px 8px;font-size:12.5px;letter-spacing:.06em}
+    .gwrap{gap:12px}
+    .gside{padding:13px 14px;max-height:none;position:static}
+    .gtools{gap:6px}
+    .gtools input,.gtools select{flex:1 1 auto;min-width:0}
+    .dbar-row{grid-template-columns:96px 1fr 52px;gap:6px}
+    .dbar-row .lbl{font-size:12.5px}
+    .dbar-row .n{font-size:12.5px}
+    .gdetail{left:8px;bottom:8px;right:8px;max-width:none}
+    .evtip{max-width:70vw}
+    .gnode text{font-size:11px}
+  }
+</style>
+</head>
+<body>
+<header>
+  <span class="seal">西游</span>
+  <h1>西游奇谭</h1>
+  <div class="sub">一心求道 · 十难伏魔 · 三教归真</div>
+  <nav>
+    <a href="index.html">总览</a>
+    <a href="read.html">正文·评点</a>
+    <a href="compare.html">评点对照</a>
+    <a href="entities.html">本体实体</a>
+    <a href="versions.html">版本谱</a>
+    <a href="editions.html">版本图鉴</a>
+    <a href="relics.html">法宝谱</a>
+    <a href="annotations.html">诙谐谱</a>
+    <a href="events.html">事件检索</a>
+    <a href="graph.html" class="on">图谱</a>
+    <a href="journey.html">取经路线</a>
+    <a href="motif.html">母题链</a>
+    <a href="symbols.html">意象星座</a>
+    <a href="voice.html">口吻字镜</a>
+    <a href="witmap.html">诙谐密度</a>
+    <a href="agent.html">Agent</a>
+    <a href="query.html">本体论</a>
+  </nav>
+</header>
+
+<main>
+  <div class="hero" style="margin-top:2px">
+    <span class="seal solid">圖譜</span>
+    <div class="verse">師徒寶器　妖神王臣<br>四重視圖　點即見本</div>
+    <div class="rule"></div>
+    <p class="lead">西游图谱四重视图（D3.js 驱动）：<b>关系图</b>（力导向 · 节点可拖拽 · 物理回弹）、<b>实体度分布</b>
+      （动画条形）、<b>事件时序</b>（可缩放泳道）、<b>关系谱前八</b>（动画条形）。
+      数据源：<b>relationships</b>、<b>entities</b>、<b>events</b>、<b>annotations</b> 表。</p>
+  </div>
+
+  <div class="tabs" id="tabs">
+    <button data-view="rel" class="on">关系图</button>
+    <button data-view="ents">实体度</button>
+    <button data-view="events">事件时序</button>
+    <button data-view="pred">关系谱</button>
+  </div>
+
+  <div id="loading" class="loadbox">正在装载数据库与数据表……</div>
+  <div id="content" style="display:none"></div>
+</main>
+
+<footer>
+  <span class="seal">评本</span>
+  <div>底本：<b>新刻全像批評西遊記</b>（清，含评点）第七十六叶至八十七叶。</div>
+  <div>由多 Agent 生成，仅供研究玩索，非定本。</div>
+</footer>
+
+<script type="module">
+import { loadPageData } from './js/page.js';
+
+const elLoading = document.getElementById('loading');
+const elContent = document.getElementById('content');
+const elTabs = document.getElementById('tabs');
+
+function esc(s) {
+  if (s === null || s === undefined) return '';
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+const PRED_COLORS = {
+  'jtw:isMasterOf': '#9e2b25',
+  'jtw:isDiscipleOf': '#b08d57',
+  'jtw:commands': '#3b4a6b',
+  'jtw:travelsTo': '#3f6b5e',
+  'jtw:hasWeapon': '#7d1f1b',
+  'jtw:residesIn': '#5d5449',
+  'jtw:defeats': '#c2504a',
+  'jtw:fightsAgainst': '#8a7f6d',
+  'jtw:rescues': '#2f5a50',
+  'jtw:worships': '#8b5f8b',
+  'jtw:transformsTo': '#b45a7a',
+  'jtw:isKingOf': '#b08d57',
+  'jtw:isSiblingOf': '#6b7f9e',
+  'jtw:alliedWith': '#3f6b5e',
+};
+
+const PRED_LABEL = {
+  'jtw:isMasterOf': '师徒',
+  'jtw:isDiscipleOf': '拜师',
+  'jtw:commands': '役使',
+  'jtw:travelsTo': '行旅',
+  'jtw:hasWeapon': '兵器',
+  'jtw:residesIn': '居所',
+  'jtw:defeats': '降伏',
+  'jtw:fightsAgainst': '斗战',
+  'jtw:rescues': '救难',
+  'jtw:worships': '礼拜',
+  'jtw:transformsTo': '变身',
+  'jtw:isKingOf': '称王',
+  'jtw:isSiblingOf': '兄弟',
+  'jtw:alliedWith': '盟交',
+};
+
+const TYPE_COLOR = { person:'#9e2b25', place:'#3f6b5e', artifact:'#b08d57', monster:'#7d1f1b',
+  official_title:'#3b4a6b', quote:'#8b5f8b', religion:'#2f5a50', event:'#5d5449', other:'#8a7f6d' };
+const TYPE_LABEL = { person:'人物', place:'地点', artifact:'器物', monster:'妖神',
+  official_title:'官职', quote:'引诗', religion:'经文', event:'事件' };
+
+let STATE = null;
+let VIEW = 'rel';
+let SIM = null; // 当前力导向模拟（切视图/筛选时停止）
+
+async function main() {
+  try {
+    elLoading.textContent = '正在加载页面数据…';
+    const d = await loadPageData('graph');
+    STATE = {
+      rels: d.rels || [],
+      ents: d.ents || [],
+      events: d.events || [],
+      annos: d.annos || [],
+      id2Label: new Map(),
+      id2Type: new Map(),
+      id2Mention: new Map(),
+    };
+    for (const e of STATE.ents) {
+      const lbl = e.canonical_name || e.label || e.entity_id;
+      if (!STATE.id2Label.has(e.entity_id) || (e.canonical_name && e.canonical_name !== e.label)) {
+        STATE.id2Label.set(e.entity_id, lbl);
+      }
+      STATE.id2Type.set(e.entity_id, e.type);
+      STATE.id2Mention.set(e.entity_id, e.mention_count || 0);
+    }
+    elLoading.style.display = 'none';
+    elContent.style.display = 'block';
+    render();
+  } catch (e) {
+    elLoading.textContent = '加载失败：' + (e && e.message ? e.message : String(e));
+    console.error(e);
+  }
+}
+
+elTabs.addEventListener('click', (ev) => {
+  const b = ev.target.closest('button');
+  if (!b) return;
+  VIEW = b.dataset.view;
+  elTabs.querySelectorAll('button').forEach(x => x.classList.remove('on'));
+  b.classList.add('on');
+  render();
+});
+
+function render() {
+  if (SIM) { SIM.stop(); SIM = null; }
+  elContent.innerHTML = '';
+  if (VIEW === 'rel') renderRel();
+  else if (VIEW === 'ents') renderEnts();
+  else if (VIEW === 'events') renderEvents();
+  else renderPred();
+}
+
+// ============== 关系图（D3 力导向：持续物理 · 节点可拖拽 · 缩放平移） ==============
+function renderRel() {
+  const wrap = document.createElement('div');
+  wrap.className = 'gwrap';
+
+  const left = document.createElement('div');
+  const right = document.createElement('div');
+  right.className = 'gside';
+
+  const predCount = {};
+  for (const r of STATE.rels) predCount[r.predicate] = (predCount[r.predicate] || 0) + 1;
+  const sortedPreds = Object.entries(predCount).sort((a, b) => b[1] - a[1]);
+
+  const tools = document.createElement('div');
+  tools.className = 'gtools';
+  tools.innerHTML = `<span class="small muted">显示：</span>
+    <select id="selPred"><option value="">全部谓词</option></select>
+    <select id="selType"><option value="">全部类型</option></select>
+    <button id="btnReheat" title="重新激发物理运动" style="font-family:inherit;font-size:13px;padding:4px 10px;
+      background:linear-gradient(180deg,#fdf1ee,#f8e6e2);border:1px solid rgba(158,43,37,.3);
+      border-radius:14px;color:var(--cinnabar);cursor:pointer">扰动</button>
+    <span class="small muted" style="margin-left:auto">滚轮缩放 · 拖拽节点 · 悬停高亮</span>`;
+  left.appendChild(tools);
+
+  const canvas = document.createElement('div');
+  canvas.className = 'gcanvas';
+  left.appendChild(canvas);
+
+  right.innerHTML = '<h3>关系统计</h3><div id="legendBox"></div><div id="statBox" style="margin-top:14px"></div>';
+
+  wrap.appendChild(left);
+  wrap.appendChild(right);
+  elContent.appendChild(wrap);
+
+  const selPred = tools.querySelector('#selPred');
+  for (const [p, n] of sortedPreds) {
+    const opt = document.createElement('option');
+    opt.value = p;
+    opt.textContent = `${PRED_LABEL[p] || p.split(':').pop()} (${n})`;
+    selPred.appendChild(opt);
+  }
+  const selType = tools.querySelector('#selType');
+  for (const t of [...new Set(STATE.ents.map(e => e.type))].sort()) {
+    const opt = document.createElement('option');
+    opt.value = t; opt.textContent = TYPE_LABEL[t] || t;
+    selType.appendChild(opt);
+  }
+
+  const legendBox = right.querySelector('#legendBox');
+  let lh = '<table class="kv">';
+  for (const [p, n] of sortedPreds) {
+    lh += `<tr><td>${esc(PRED_LABEL[p] || p.split(':').pop())}</td><td><span style="display:inline-block;width:12px;height:12px;background:${PRED_COLORS[p] || '#888'};border-radius:2px;vertical-align:middle;margin-right:5px"></span><b>${n}</b></td></tr>`;
+  }
+  legendBox.innerHTML = lh + '</table>';
+
+  const W = 960, H = 600;
+  const svg = d3.select(canvas).append('svg')
+    .attr('viewBox', [0, 0, W, H])
+    .attr('width', '100%');
+
+  svg.append('defs').html(
+    `<marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+       <path d="M0,0L10,5L0,10z" fill="rgba(138,127,109,.5)"/></marker>`);
+
+  const root = svg.append('g');
+  const linkG = root.append('g');
+  const linkLabelG = root.append('g');
+  const nodeG = root.append('g');
+
+  // 节点上的指针手势交给 drag，不触发画布平移
+  svg.call(d3.zoom().scaleExtent([0.2, 5])
+    .filter(ev => (!ev.ctrlKey || ev.type === 'wheel') && !ev.button
+      && !(ev.target.closest && ev.target.closest('.gnode')))
+    .on('zoom', (ev) => {
+      root.attr('transform', ev.transform);
+    }));
+
+  const detail = document.createElement('div');
+  detail.className = 'gdetail';
+  canvas.appendChild(detail);
+
+  let hlId = null, locked = false;
+
+  function buildSim() {
+    if (SIM) { SIM.stop(); SIM = null; }
+    const p = selPred.value, t = selType.value;
+    let rels = STATE.rels;
+    if (p) rels = rels.filter(r => r.predicate === p);
+    rels = rels.slice(0, 400);
+
+    const nodeSet = new Map();
+    for (const r of rels) {
+      for (const id of [r.subject_id, r.object_id]) {
+        const type = STATE.id2Type.get(id) || 'other';
+        if (t && type !== t) continue;
+        if (!nodeSet.has(id)) {
+          nodeSet.set(id, { id, label: STATE.id2Label.get(id) || id, type,
+            mention: STATE.id2Mention.get(id) || 0 });
+        }
+      }
+    }
+    const nodes = [...nodeSet.values()];
+    const links = rels
+      .filter(r => nodeSet.has(r.subject_id) && nodeSet.has(r.object_id))
+      .map(r => ({ source: r.subject_id, target: r.object_id, predicate: r.predicate }));
+
+    // 邻接表
+    const adj = new Map();
+    for (const l of links) {
+      if (!adj.has(l.source)) adj.set(l.source, new Set());
+      if (!adj.has(l.target)) adj.set(l.target, new Set());
+      adj.get(l.source).add(l.target);
+      adj.get(l.target).add(l.source);
+    }
+
+    right.querySelector('#statBox').innerHTML = `<table class="kv">
+      <tr><td>边</td><td>${links.length}</td></tr>
+      <tr><td>节点</td><td>${nodes.length}</td></tr>
+      <tr><td>涉及谓词</td><td>${[...new Set(links.map(e=>e.predicate))].length}</td></tr>
+    </table>`;
+
+    const nodeRadius = n => 8 + Math.min(14, n.mention * 0.5);
+
+    SIM = d3.forceSimulation(nodes)
+      .force('link', d3.forceLink(links).id(d => d.id).distance(95).strength(0.35))
+      .force('charge', d3.forceManyBody().strength(-300).distanceMax(420))
+      .force('center', d3.forceCenter(W / 2, H / 2))
+      .force('x', d3.forceX(W / 2).strength(0.05))
+      .force('y', d3.forceY(H / 2).strength(0.07))
+      .force('collide', d3.forceCollide(n => nodeRadius(n) + 16))
+      .alpha(0.9).alphaDecay(0.022);
+
+    const link = linkG.selectAll('line').data(links, l => `${l.source.id || l.source}-${l.target.id || l.target}-${l.predicate}`)
+      .join('line')
+      .attr('class', 'glink')
+      .attr('stroke', l => PRED_COLORS[l.predicate] || '#888')
+      .attr('marker-end', 'url(#arrow)');
+
+    const linkLabel = linkLabelG.selectAll('text').data(links, l => `${l.source.id || l.source}-${l.target.id || l.target}-${l.predicate}`)
+      .join('text')
+      .attr('class', 'glink-label')
+      .attr('text-anchor', 'middle')
+      .text(l => PRED_LABEL[l.predicate] || '');
+
+    const node = nodeG.selectAll('g.gnode').data(nodes, n => n.id)
+      .join(enter => {
+        const g = enter.append('g').attr('class', 'gnode');
+        g.append('circle');
+        g.append('text');
+        return g;
+      });
+    node.select('circle')
+      .attr('r', nodeRadius)
+      .attr('fill', n => TYPE_COLOR[n.type] || '#888')
+      .attr('fill-opacity', 0.88);
+    node.select('text')
+      .attr('x', n => nodeRadius(n) + 5)
+      .attr('y', 4)
+      .text(n => n.label.slice(0, 8));
+
+    node.call(d3.drag()
+      .on('start', (ev, d) => {
+        ev.sourceEvent && ev.sourceEvent.stopPropagation();
+        if (!ev.active) SIM.alphaTarget(0.28).restart();
+        d.fx = d.x; d.fy = d.y;
+      })
+      .on('drag', (ev, d) => { d.fx = ev.x; d.fy = ev.y; })
+      .on('end', (ev, d) => {
+        if (!ev.active) SIM.alphaTarget(0);
+        d.fx = null; d.fy = null; // 松手后物理回弹
+      }));
+
+    SIM.on('tick', () => {
+      link
+        .attr('x1', l => l.source.x).attr('y1', l => l.source.y)
+        .attr('x2', l => l.target.x).attr('y2', l => l.target.y);
+      linkLabel
+        .attr('x', l => (l.source.x + l.target.x) / 2)
+        .attr('y', l => (l.source.y + l.target.y) / 2);
+      node.attr('transform', n => `translate(${n.x},${n.y})`);
+    });
+
+    function setHighlight(id, lock) {
+      if (lock) locked = !locked || hlId !== id;
+      if (!lock && locked) return;
+      hlId = id;
+      if (!id) {
+        node.classed('hl dim', false);
+        link.classed('hl dim', false);
+        linkLabel.classed('hl', false);
+        detail.classList.remove('on');
+        return;
+      }
+      const nb = adj.get(id) || new Set();
+      node.classed('hl', n => n.id === id || nb.has(n.id))
+          .classed('dim', n => n.id !== id && !nb.has(n.id));
+      link.classed('hl', l => (l.source.id || l.source) === id || (l.target.id || l.target) === id)
+          .classed('dim', l => (l.source.id || l.source) !== id && (l.target.id || l.target) !== id);
+      linkLabel.classed('hl', l => (l.source.id || l.source) === id || (l.target.id || l.target) === id);
+      const n = nodeSet.get(id);
+      if (n) {
+        detail.innerHTML = `<div class="ttl">${esc(n.label)}</div>
+          <span class="typ">${esc(TYPE_LABEL[n.type] || n.type)}</span>
+          <div class="row"><span class="lbl">提及</span><b>${n.mention}</b></div>
+          <div class="row"><span class="lbl">关联</span><b>${nb.size} 节点</b></div>`;
+        detail.classList.add('on');
+      }
+    }
+
+    node
+      .on('mouseenter', (ev, n) => setHighlight(n.id, false))
+      .on('mouseleave', () => { if (!locked) setHighlight(null, false); })
+      .on('click', (ev, n) => { ev.stopPropagation(); locked = false; setHighlight(n.id, true); });
+    svg.on('click', () => { locked = false; setHighlight(null, false); });
+  }
+
+  tools.querySelector('#btnReheat').addEventListener('click', () => {
+    if (SIM) SIM.alpha(0.8).restart();
+  });
+  selPred.addEventListener('change', buildSim);
+  selType.addEventListener('change', buildSim);
+  buildSim();
+}
+
+// ============== 实体度（D3 动画条形） ==============
+function renderEnts() {
+  const wrap = document.createElement('div');
+  wrap.className = 'card';
+
+  const typeCount = {};
+  for (const e of STATE.ents) typeCount[e.type] = (typeCount[e.type] || 0) + 1;
+  const order = ['person','place','artifact','monster','official_title','quote','religion','event'];
+  const data = order.map(t => ({ t, n: typeCount[t] || 0 })).filter(d => d.n > 0);
+  const maxN = d3.max(data, d => d.n);
+
+  wrap.innerHTML = '<h3>类型分布</h3><div class="dbars" id="typeBars"></div>';
+  const bars = d3.select(wrap.querySelector('#typeBars'))
+    .selectAll('div.dbar-row').data(data).join('div').attr('class', 'dbar-row');
+  bars.append('div').attr('class', 'lbl').text(d => TYPE_LABEL[d.t] || d.t);
+  const track = bars.append('div').attr('class', 'track');
+  track.append('div').attr('class', 'bar')
+    .style('background', d => `linear-gradient(90deg,${TYPE_COLOR[d.t] || '#9e2b25'},${TYPE_COLOR[d.t] || '#9e2b25'}80)`)
+    .transition().duration(850).delay((d, i) => i * 60).ease(d3.easeCubicOut)
+    .style('width', d => `${(d.n / maxN) * 100}%`);
+  bars.append('div').attr('class', 'n')
+    .text(0)
+    .transition().duration(850).delay((d, i) => i * 60)
+    .textTween(d => {
+      const i = d3.interpolateNumber(0, d.n);
+      return t => String(Math.round(i(t)));
+    });
+
+  const top20 = [...STATE.ents].sort((a, b) => (b.mention_count || 0) - (a.mention_count || 0)).slice(0, 20);
+  let html = '<h3 style="margin-top:16px">提及前 20</h3>';
+  html += '<table><thead><tr><th>类型</th><th>标签</th><th>canonical</th><th>提及</th></tr></thead><tbody>';
+  for (const e of top20) {
+    html += `<tr><td>${esc(TYPE_LABEL[e.type] || e.type)}</td><td><b>${esc(e.label)}</b></td><td>${esc(e.canonical_name || '')}</td><td><b>${e.mention_count || 0}</b></td></tr>`;
+  }
+  html += '</tbody></table>';
+  wrap.insertAdjacentHTML('beforeend', html);
+  elContent.appendChild(wrap);
+}
+
+// ============== 事件时序（D3 可缩放泳道） ==============
+function renderEvents() {
+  const wrap = document.createElement('div');
+  wrap.className = 'card';
+  wrap.innerHTML = '<h3>事件时序 <span class="small muted" style="font-weight:normal">滚轮缩放 · 拖拽上下平移 · 悬停看摘要</span></h3>';
+  elContent.appendChild(wrap);
+
+  const chOrder = [
+    { label: '第八十六回', first: 4, last: 17 },
+    { label: '第八十七回', first: 18, last: 29 },
+    { label: '第八十八回', first: 30, last: 41 },
+    { label: '第八十九回', first: 42, last: 87 },
+  ];
+  const chapterOf = pn => { for (const c of chOrder) if (pn >= c.first && pn <= c.last) return c.label; return ''; };
+
+  const perPage = new Map();
+  for (const e of STATE.events) {
+    if (!perPage.has(e.page_no)) perPage.set(e.page_no, []);
+    perPage.get(e.page_no).push(e);
+  }
+  const allPages = [...perPage.keys()].sort((a, b) => a - b);
+
+  const laneBox = document.createElement('div');
+  laneBox.className = 'lanebox';
+  wrap.appendChild(laneBox);
+
+  const W = 900, padTop = 30;
+  const COLS = 4, colW = 196, evH = 22;
+  // 每页行高按事件数动态计算（4 列换行）
+  const pages = allPages.map(pn => {
+    const evs = perPage.get(pn);
+    const rows = Math.max(1, Math.ceil(evs.length / COLS));
+    return { pn, evs, h: rows * evH + 10 };
+  });
+  let yOff = padTop;
+  for (const p of pages) { p.y = yOff; yOff += p.h; }
+  const fullH = yOff + 20;
+  const VIEW_H = 560;
+
+  const svg = d3.select(laneBox).append('svg')
+    .attr('viewBox', [0, 0, W, VIEW_H])
+    .attr('width', '100%');
+  const inner = svg.append('g');
+
+  inner.append('text')
+    .attr('x', 10).attr('y', 18)
+    .attr('style', 'font-size:13px;fill:#8a7f6d')
+    .text(`页 ${allPages[0]} — ${allPages[allPages.length - 1]} · 共 ${STATE.events.length} 桩`);
+
+  const tip = document.createElement('div');
+  tip.className = 'evtip';
+  laneBox.appendChild(tip);
+
+  const pageG = inner.selectAll('g.pg').data(pages).join('g')
+    .attr('class', 'pg')
+    .attr('transform', p => `translate(0,${p.y})`);
+
+  pageG.append('text')
+    .attr('x', 10).attr('y', 15)
+    .attr('style', 'font-size:12px;fill:#5d5449')
+    .text(p => `页 ${p.pn}`);
+
+  pageG.append('line')
+    .attr('x1', 96).attr('x2', W - 10)
+    .attr('y1', p => p.h - 4).attr('y2', p => p.h - 4)
+    .attr('stroke', 'rgba(176,141,87,.25)').attr('stroke-dasharray', '2,4');
+
+  // 事件块：4 列流式排列，入场错峰淡入
+  const evSel = pageG.selectAll('g.evblock').data(p => p.evs).join('g')
+    .attr('class', 'evblock')
+    .attr('transform', (e, i) => `translate(${104 + (i % COLS) * colW},${Math.floor(i / COLS) * evH})`);
+
+  evSel.append('rect')
+    .attr('x', 0).attr('y', 3).attr('rx', 2)
+    .attr('width', 188).attr('height', 17)
+    .attr('fill', 'rgba(158,43,37,.15)')
+    .attr('stroke', '#9e2b25').attr('stroke-width', 0.8);
+  evSel.append('text')
+    .attr('x', 6).attr('y', 15)
+    .attr('style', 'font-size:11px;fill:#332c25')
+    .text(e => (e.name || '').slice(0, 12));
+
+  evSel
+    .style('opacity', 0)
+    .transition().duration(450).delay((e, i) => 80 + i * 12)
+    .style('opacity', 1);
+
+  evSel
+    .on('mouseenter', function(ev, e) {
+      const r = laneBox.getBoundingClientRect();
+      tip.innerHTML = `<div class="t">${esc(e.name || '')}</div>
+        <div>页 ${e.page_no} · ${esc(chapterOf(e.page_no))}${e.category ? ' · ' + esc(e.category) : ''}</div>
+        <div>${esc((e.summary || '').slice(0, 90))}</div>`;
+      tip.style.left = Math.min(r.width - 300, Math.max(8, ev.clientX - r.left + 14)) + 'px';
+      tip.style.top = Math.max(8, ev.clientY - r.top - 10) + 'px';
+      tip.classList.add('on');
+    })
+    .on('mousemove', function(ev) {
+      const r = laneBox.getBoundingClientRect();
+      tip.style.left = Math.min(r.width - 300, Math.max(8, ev.clientX - r.left + 14)) + 'px';
+      tip.style.top = Math.max(8, ev.clientY - r.top - 10) + 'px';
+    })
+    .on('mouseleave', () => tip.classList.remove('on'));
+
+  svg.call(d3.zoom()
+    .scaleExtent([1, 3])
+    .translateExtent([[0, 0], [W, fullH]])
+    .extent([[0, 0], [W, VIEW_H]])
+    .on('zoom', (ev) => inner.attr('transform', ev.transform)));
+
+  const stat = document.createElement('div');
+  stat.className = 'card';
+  const byCh = {};
+  for (const e of STATE.events) {
+    const c = chapterOf(e.page_no) || '未归';
+    byCh[c] = (byCh[c] || 0) + 1;
+  }
+  stat.innerHTML = '<h3>按回统计</h3><table><thead><tr><th>回</th><th>桩</th></tr></thead><tbody>' +
+    Object.entries(byCh).map(([k, v]) => `<tr><td>${esc(k)}</td><td><b>${v}</b></td></tr>`).join('') +
+    '</tbody></table>';
+  elContent.appendChild(stat);
+}
+
+// ============== 关系谱（D3 动画条形） ==============
+function renderPred() {
+  const wrap = document.createElement('div');
+  wrap.className = 'card';
+
+  const count = {};
+  for (const r of STATE.rels) count[r.predicate] = (count[r.predicate] || 0) + 1;
+  const data = Object.entries(count)
+    .map(([p, n]) => ({ p, n }))
+    .sort((a, b) => b.n - a.n);
+  const maxN = data[0].n;
+
+  wrap.innerHTML = `<h3>关系谱（${data.length} 谓词，共 ${STATE.rels.length} 条）</h3><div class="dbars" id="predBars"></div>`;
+  const bars = d3.select(wrap.querySelector('#predBars'))
+    .selectAll('div.dbar-row').data(data).join('div').attr('class', 'dbar-row');
+  bars.append('div').attr('class', 'lbl').text(d => PRED_LABEL[d.p] || d.p.split(':').pop());
+  const track = bars.append('div').attr('class', 'track');
+  track.append('div').attr('class', 'bar')
+    .style('background', d => {
+      const c = PRED_COLORS[d.p] || '#9e2b25';
+      return `linear-gradient(90deg,${c},${c}80)`;
+    })
+    .transition().duration(850).delay((d, i) => i * 55).ease(d3.easeCubicOut)
+    .style('width', d => `${(d.n / maxN) * 100}%`);
+  bars.append('div').attr('class', 'n')
+    .text(0)
+    .transition().duration(850).delay((d, i) => i * 55)
+    .textTween(d => {
+      const i = d3.interpolateNumber(0, d.n);
+      return t => String(Math.round(i(t)));
+    });
+
+  let html = '<h3 style="margin-top:16px">各谓词示例</h3>';
+  html += '<table><thead><tr><th>谓词</th><th>主</th><th>客</th><th>页</th><th>证据</th></tr></thead><tbody>';
+  for (const { p } of data) {
+    for (const s of STATE.rels.filter(r => r.predicate === p).slice(0, 2)) {
+      html += `<tr><td>${esc(PRED_LABEL[s.predicate] || s.predicate)}</td>
+        <td><b>${esc(STATE.id2Label.get(s.subject_id) || s.subject_id)}</b></td>
+        <td><b>${esc(STATE.id2Label.get(s.object_id) || s.object_id)}</b></td>
+        <td>${s.page_no || ''}</td>
+        <td>${esc((s.evidence || '').slice(0, 60))}</td></tr>`;
+    }
+  }
+  html += '</tbody></table>';
+  wrap.insertAdjacentHTML('beforeend', html);
+  elContent.appendChild(wrap);
+}
+
+main();
+</script>
+</body>
+</html>

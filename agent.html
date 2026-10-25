@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agent · 西游奇谭</title>
+<link rel="stylesheet" href="assets/app.css">
+<script src="assets/vendor/opencc.js"></script>
+<script src="assets/toggle.js?v=099"></script>
+<style>
+  .chatwrap{display:grid;grid-template-columns:1fr 300px;gap:14px;align-items:start;margin-top:10px}
+  @media (max-width:960px){.chatwrap{grid-template-columns:1fr}}
+  .chat{border:1px solid var(--line);border-radius:3px;padding:14px 16px;background:linear-gradient(180deg,rgba(255,253,248,.92),rgba(253,248,238,.86));
+    box-shadow:var(--shadow);max-height:70vh;overflow-y:auto;font-size:14px;line-height:1.9}
+  .msg{padding:8px 12px;margin:8px 0;border-radius:6px;max-width:88%}
+  .msg.user{margin-left:auto;background:linear-gradient(180deg,rgba(158,43,37,.08),rgba(158,43,37,.04));
+    border:1px solid rgba(158,43,37,.2);color:#332c25}
+  .msg.bot{background:linear-gradient(180deg,rgba(255,255,255,.85),rgba(253,248,238,.5));
+    border:1px solid rgba(59,74,107,.16)}
+  .msg .who{font-family:var(--kai);font-weight:600;margin-right:6px;font-size:13.5px}
+  .msg.bot .who{color:var(--cinnabar)}
+  .msg.user .who{color:var(--indigo)}
+  .msg pre{background:rgba(240,230,209,.6);border:1px solid var(--line2);border-radius:2px;padding:6px 8px;
+    margin:6px 0;font-size:12.5px;overflow:auto;max-height:200px}
+  .msg table{font-size:12.5px}
+  .input-row{display:flex;gap:6px;margin-top:10px;align-items:stretch}
+  .input-row input{flex:1;padding:8px 12px;font-size:14.5px;font-family:inherit;
+    background:rgba(255,253,248,.95);border:1px solid var(--line);border-radius:3px}
+  .input-row button{padding:8px 18px;font-size:14px;font-family:inherit;background:linear-gradient(180deg,#9e2b25,#7d1f1b);
+    color:#fdf6ec;border:none;border-radius:3px;cursor:pointer;letter-spacing:.1em}
+  .input-row button:hover{filter:brightness(1.1)}
+  .side{position:sticky;top:14px;max-height:80vh;overflow:auto;margin:0;font-size:13.5px;padding:14px 16px;
+    background:linear-gradient(180deg,rgba(255,253,248,.95),rgba(253,248,238,.9));
+    border:1px solid var(--line);border-radius:3px;box-shadow:var(--shadow)}
+  .side h3{margin:0 0 6px;font-size:16px}
+  .side h4{margin:14px 0 4px;font-size:13px;color:var(--cinnabar);font-family:var(--kai);letter-spacing:.06em}
+  .side .suggest{display:block;padding:5px 10px;margin:4px 0;font-size:13px;color:var(--ink2);
+    background:rgba(255,253,248,.7);border:1px solid var(--line2);border-radius:2px;cursor:pointer;transition:all .2s;text-align:left;font-family:inherit}
+  .side .suggest:hover{color:var(--cinnabar);border-color:rgba(158,43,37,.35);background:linear-gradient(180deg,#fdf1ee,#f8e6e2)}
+  .loadbox{padding:80px 20px;text-align:center;color:var(--ink3);font-family:var(--kai);font-size:16px}
+  .sql-editor{display:flex;flex-direction:column;gap:6px;padding:10px 12px;margin-top:10px;
+    background:linear-gradient(180deg,rgba(255,253,248,.85),rgba(253,248,238,.7));
+    border:1px solid var(--line);border-radius:3px;box-shadow:var(--shadow)}
+  .sql-editor textarea{width:100%;padding:8px 10px;font-family:Consolas,monospace;font-size:13px;
+    background:rgba(255,253,248,.95);border:1px solid var(--line);border-radius:2px;resize:vertical;min-height:80px}
+  .sql-editor button{align-self:flex-start;padding:6px 14px;font-size:13px;font-family:inherit;
+    background:linear-gradient(180deg,#3b4a6b,#2b3a5b);color:#fdf6ec;border:none;border-radius:2px;cursor:pointer;letter-spacing:.08em}
+</style>
+</head>
+<body>
+<header>
+  <span class="seal">西游</span>
+  <h1>西游奇谭</h1>
+  <div class="sub">一心求道 · 十难伏魔 · 三教归真</div>
+  <nav>
+    <a href="index.html">总览</a>
+    <a href="read.html">正文·评点</a>
+    <a href="compare.html">评点对照</a>
+    <a href="entities.html">本体实体</a>
+    <a href="versions.html">版本谱</a>
+    <a href="editions.html">版本图鉴</a>
+    <a href="relics.html">法宝谱</a>
+    <a href="annotations.html">诙谐谱</a>
+    <a href="events.html">事件检索</a>
+    <a href="graph.html">图谱</a>
+    <a href="journey.html">取经路线</a>
+    <a href="motif.html">母题链</a>
+    <a href="symbols.html">意象星座</a>
+    <a href="voice.html">口吻字镜</a>
+    <a href="witmap.html">诙谐密度</a>
+    <a href="agent.html" class="on">Agent</a>
+    <a href="query.html">本体论</a>
+  </nav>
+</header>
+
+<main>
+  <div class="hero" style="margin-top:2px">
+    <span class="seal solid">Agent</span>
+    <div class="verse">自然语言　转为SQL<br>本地执行　即时回传</div>
+    <div class="rule"></div>
+    <p class="lead">Agent 頁：以 <b>本地 DuckDB-WASM</b> 为算力，接收自然语言提问，
+      以规则+SQL 模板将其转换为对 19 张本体论表的查询，直接执行并回传结果。
+      无需联网、无外泄。也可在下方的 SQL 编辑器直接手写查询。
+      参考架构：<code>nobel-kg</code>（NL → SQL → DuckDB → render）。</p>
+  </div>
+
+  <div id="loading" class="loadbox">正在装载数据库与数据表……</div>
+
+  <div class="sql-editor" id="sqlEditor" style="display:none">
+    <h3 style="margin:0 0 6px">SQL 编辑器（可直接执行）</h3>
+    <textarea id="sqlInput" placeholder="如：SELECT type, count(*) as n FROM entities GROUP BY 1 ORDER BY n DESC">SELECT chapter_label, count(*) as n FROM chapters ORDER BY 1</textarea>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button id="runSql">执行</button>
+      <span class="small muted">表：entities · relationships · editions · annotations · events · lines · chapters · pages · stats · mentions · artifacts · discipleship · antagonism · membership · kinship · involvement · doctrine_mentions · scholar_arguments</span>
+    </div>
+  </div>
+
+  <div id="chatContainer" style="display:none">
+    <div class="chatwrap">
+      <div>
+        <div class="chat" id="chat"></div>
+        <div class="input-row">
+          <input id="askInput" placeholder="如：统计各类型实体数 / 列出所有法宝 / 孙悟空的徒弟有谁 / 各回评点数 ……" />
+          <button id="askBtn">问</button>
+        </div>
+      </div>
+      <div class="side">
+        <h3>示例问句</h3>
+        <button class="suggest" data-q="统计各类型实体数">统计各类型实体数</button>
+        <button class="suggest" data-q="列出所有法宝">列出所有法宝</button>
+        <button class="suggest" data-q="孙悟空的徒弟有谁">孙悟空的徒弟有谁</button>
+        <button class="suggest" data-q="各回评点数">各回评点数</button>
+        <button class="suggest" data-q="按类型分组的评点">按类型分组的评点</button>
+        <button class="suggest" data-q="事件最多的回">事件最多的回</button>
+        <button class="suggest" data-q="第八十六回的事件">第八十六回的事件</button>
+        <button class="suggest" data-q="师徒关系前 20">师徒关系前 20</button>
+        <button class="suggest" data-q="哪些人物拥有武器">哪些人物拥有武器</button>
+        <button class="suggest" data-q="列出所有版本">列出所有版本</button>
+        <h4>系统说明</h4>
+        <div style="font-size:12.5px;color:var(--ink3);line-height:1.85">
+          <p style="margin:4px 0">引擎：DuckDB-WASM 1.32.0（本地 WASM，纯前端）</p>
+          <p style="margin:4px 0">表：19 张本体论 Parquet，装载自 <code>docs/data/*.parquet</code></p>
+          <p style="margin:4px 0">底本：新刻全像批評西遊記（清，含评点）</p>
+          <p style="margin:4px 0">架构：NL → 规则匹配 → SQL 模板 → DuckDB 执行 → 渲染表格</p>
+          <p style="margin:4px 0">参考：<b>nobel-kg</b> · LangGraph.js</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <span class="seal">评本</span>
+  <div>Agent 引擎：本地 DuckDB-WASM · 纯前端 · 无网络</div>
+  <div>由多 Agent 生成，仅供研究玩索，非定本。</div>
+</footer>
+
+<script type="module">
+import { initDB, query, scalar } from './js/db.js';
+
+const elLoading = document.getElementById('loading');
+const elChat = document.getElementById('chat');
+const elAskInput = document.getElementById('askInput');
+const elAskBtn = document.getElementById('askBtn');
+const elChatContainer = document.getElementById('chatContainer');
+const elSqlEditor = document.getElementById('sqlEditor');
+const elSqlInput = document.getElementById('sqlInput');
+const elRunSql = document.getElementById('runSql');
+
+function esc(s) {
+  if (s === null || s === undefined) return '';
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// ====== 规则 → SQL ======
+// 按用户输入的关键词匹配到预定义 SQL 模板；无匹配则原样尝试执行（当 SQL 使用）
+const RULES = [
+  { test: q => /统计.*实体/.test(q) || /各.*类型.*实体/.test(q) || /实体.*类型/.test(q),
+    sql: `SELECT type, count(*) as n FROM entities GROUP BY 1 ORDER BY n DESC` },
+  { test: q => /法宝/.test(q) && /列|列出|所有/.test(q),
+    sql: `SELECT label, canonical_name, aliases, mention_count FROM entities WHERE type='artifact' ORDER BY mention_count DESC` },
+  { test: q => /法宝/.test(q),
+    sql: `SELECT e.label as 器物, e.canonical_name, e.aliases, e.mention_count,
+       GROUP_CONCAT(DISTINCT es.label) as 主人
+       FROM entities e
+       LEFT JOIN relationships r ON r.object_id = e.entity_id AND r.predicate = 'jtw:hasWeapon'
+       LEFT JOIN entities es ON es.entity_id = r.subject_id
+       WHERE e.type = 'artifact'
+       GROUP BY e.entity_id ORDER BY e.mention_count DESC` },
+  { test: q => /徒弟/.test(q) && /孫悟空|孙悟空|行者|悟.*师/.test(q),
+    sql: `SELECT es.label as 徒弟, e.label as 师父, r.evidence
+       FROM relationships r
+       JOIN entities es ON es.entity_id = r.subject_id
+       JOIN entities e  ON e.entity_id = r.object_id
+       WHERE r.predicate = 'jtw:isMasterOf' AND (e.label LIKE '%悟空%' OR e.label LIKE '%行者%' OR e.label LIKE '%孫行者%')` },
+  { test: q => /师父/.test(q) && /徒弟|徒弟是谁/.test(q),
+    sql: `SELECT e.label as 师父, es.label as 徒弟
+       FROM relationships r
+       JOIN entities es ON es.entity_id = r.subject_id
+       JOIN entities e  ON e.entity_id = r.object_id
+       WHERE r.predicate = 'jtw:isMasterOf'` },
+  { test: q => /各回.*评点|评点.*分布|评点.*回/.test(q),
+    sql: `SELECT chapter_ref, count(*) as 评点数 FROM annotations GROUP BY 1 ORDER BY 1` },
+  { test: q => /按类型.*评点|评点.*类型/.test(q),
+    sql: `SELECT form_type, count(*) as n FROM annotations GROUP BY 1 ORDER BY n DESC` },
+  { test: q => /事件最多/.test(q),
+    sql: `SELECT page_no, count(*) as n FROM events GROUP BY 1 ORDER BY n DESC LIMIT 10` },
+  { test: q => /第.*回.*事件/.test(q),
+    sql: (q) => {
+      const m = q.match(/第([^回]+)回/);
+      if (!m) return `SELECT name, page_no, summary FROM events ORDER BY page_no`;
+      const chLbl = '第' + m[1] + '回';
+      const firstPage = { '第八十六回':4, '第八十七回':18, '第八十八回':30, '第八十九回':42 }[chLbl];
+      const lastPage  = { '第八十六回':17, '第八十七回':29, '第八十八回':41, '第八十九回':87 }[chLbl];
+      return `SELECT name, page_no, place_label, summary, line_span
+              FROM events WHERE page_no BETWEEN ${firstPage} AND ${lastPage}
+              ORDER BY page_no`;
+    } },
+  { test: q => /师徒关系/.test(q),
+    sql: `SELECT e1.label as 师父, e2.label as 徒弟, r.evidence
+       FROM relationships r
+       JOIN entities e1 ON e1.entity_id = r.object_id
+       JOIN entities e2 ON e2.entity_id = r.subject_id
+       WHERE r.predicate = 'jtw:isMasterOf'
+       LIMIT 20` },
+  { test: q => /徒弟.*前|徒弟.*20/.test(q),
+    sql: `SELECT e1.label as 师父, e2.label as 徒弟 FROM relationships r
+       JOIN entities e1 ON e1.entity_id = r.object_id
+       JOIN entities e2 ON e2.entity_id = r.subject_id
+       WHERE r.predicate = 'jtw:isMasterOf' LIMIT 20` },
+  { test: q => /武器|兵器/.test(q),
+    sql: `SELECT es.label as 主人, ea.label as 武器
+       FROM relationships r
+       JOIN entities es ON es.entity_id = r.subject_id
+       JOIN entities ea ON ea.entity_id = r.object_id
+       WHERE r.predicate = 'jtw:hasWeapon'` },
+  { test: q => /版本/.test(q) && /列|列出|所有/.test(q),
+    sql: `SELECT edition_id, display_name, year, publisher, desc FROM editions ORDER BY CASE WHEN year > 0 THEN 0 ELSE 1 END, year` },
+  { test: q => /版本/.test(q),
+    sql: `SELECT edition_id, display_name, year, publisher FROM editions` },
+  { test: q => /人物.*前|人物.*20/.test(q),
+    sql: `SELECT label, canonical_name, mention_count FROM entities WHERE type='person' ORDER BY mention_count DESC LIMIT 20` },
+  { test: q => /地点/.test(q),
+    sql: `SELECT label, canonical_name, mention_count FROM entities WHERE type='place' ORDER BY mention_count DESC LIMIT 20` },
+  { test: q => /妖|怪/.test(q),
+    sql: `SELECT label, canonical_name, mention_count FROM entities WHERE type='monster' ORDER BY mention_count DESC LIMIT 20` },
+  { test: q => /事件/.test(q),
+    sql: `SELECT name, page_no, category, place_label, summary FROM events ORDER BY page_no LIMIT 30` },
+  { test: q => /页|页码/.test(q),
+    sql: `SELECT page_no, main_line_count, commentary_line_count, char_count FROM pages ORDER BY page_no` },
+  { test: q => /关系/.test(q),
+    sql: `SELECT predicate, count(*) as n FROM relationships GROUP BY 1 ORDER BY n DESC` },
+];
+
+function resolveSQL(question) {
+  const q = question.trim();
+  // 尝试直接当 SQL
+  if (/^SELECT\s/i.test(q) || /^WITH\s/i.test(q) || /^EXPLAIN\s/i.test(q) || /^SHOW\s/i.test(q) || /^DESC\s/i.test(q)) {
+    return { sql: q, source: 'sql' };
+  }
+  for (const r of RULES) {
+    if (r.test(q)) {
+      const sql = typeof r.sql === 'function' ? r.sql(q) : r.sql;
+      return { sql, source: 'rule' };
+    }
+  }
+  // 兜底：模糊搜索
+  const kw = q.replace(/[?？,，。.!！]/g, '').trim();
+  const safeKw = esc(kw).replace(/'/g, "''");
+  return {
+    sql: `SELECT e.label, e.canonical_name, e.type, e.mention_count, m.mention_text
+          FROM mentions m JOIN entities e ON e.entity_id = m.entity_id
+          WHERE e.label LIKE '%${safeKw}%' OR e.canonical_name LIKE '%${safeKw}%' OR e.aliases LIKE '%${safeKw}%'
+          LIMIT 20`,
+    source: 'fuzzy',
+  };
+}
+
+function fmtCell(v) {
+  if (v === null || v === undefined) return '';
+  if (typeof v === 'number') return String(v);
+  const s = String(v);
+  return s.length > 120 ? s.slice(0, 117) + '…' : s;
+}
+
+function renderTable(colNames, rows, maxRows = 30) {
+  if (!rows.length) return '<p class="muted">（无数据）</p>';
+  const show = rows.slice(0, maxRows);
+  let h = `<table><thead><tr>`;
+  for (const c of colNames) h += `<th>${esc(c)}</th>`;
+  h += '</tr></thead><tbody>';
+  for (const r of show) {
+    h += '<tr>';
+    for (const c of colNames) h += `<td>${esc(fmtCell(r[c]))}</td>`;
+    h += '</tr>';
+  }
+  h += '</tbody></table>';
+  if (rows.length > maxRows) h += `<div class="small muted">（共 ${rows.length} 行，仅显示前 ${maxRows} 行）</div>`;
+  return h;
+}
+
+function pushMessage(kind, html) {
+  const div = document.createElement('div');
+  div.className = 'msg ' + kind;
+  div.innerHTML = html;
+  elChat.appendChild(div);
+  elChat.scrollTop = elChat.scrollHeight;
+}
+
+async function runSQL(sql, opts = {}) {
+  const t0 = performance.now();
+  try {
+    const { columns, rows } = await query(sql);
+    const dt = (performance.now() - t0).toFixed(0);
+    let html = `<div><span class="who">Agent</span>`;
+    html += `<pre>SELECT …</pre>`;
+    html += `<div class="small muted">用时 ${dt} ms · 共 ${rows.length} 行 · 列：${columns.length}</div>`;
+    html += renderTable(columns, rows);
+    html += `</div>`;
+    pushMessage('bot', html);
+    return true;
+  } catch (e) {
+    pushMessage('bot', `<div><span class="who">Agent</span><p style="color:var(--cinnabar)">SQL 执行失败：${esc(e && e.message ? e.message : String(e))}</p></div>`);
+    console.error(e);
+    return false;
+  }
+}
+
+async function handleAsk(q) {
+  q = q.trim();
+  if (!q) return;
+  pushMessage('user', `<span class="who">你</span>${esc(q)}`);
+  elAskInput.value = '';
+
+  const { sql, source } = resolveSQL(q);
+  const t0 = performance.now();
+  try {
+    const { columns, rows } = await query(sql);
+    const dt = (performance.now() - t0).toFixed(0);
+    let html = `<div><span class="who">Agent</span>`;
+    html += `<div class="small muted">命中规则：${esc(source)} · 用时 ${dt} ms · 共 ${rows.length} 行</div>`;
+    html += `<pre>${esc(sql.replace(/\s+/g, ' ').slice(0, 500))}</pre>`;
+    html += renderTable(columns, rows);
+    html += `</div>`;
+    pushMessage('bot', html);
+  } catch (e) {
+    pushMessage('bot', `<div><span class="who">Agent</span><p style="color:var(--cinnabar)">执行失败：${esc(e && e.message ? e.message : String(e))}</p><pre>${esc(sql)}</pre></div>`);
+    console.error(e);
+  }
+}
+
+async function main() {
+  try {
+    await initDB(msg => { elLoading.textContent = msg; });
+    elLoading.style.display = 'none';
+    elChatContainer.style.display = 'block';
+    elSqlEditor.style.display = 'flex';
+    pushMessage('bot', `<div><span class="who">Agent</span>已就绪。数据表 19 张，行数：entities 455 · relationships 349 · annotations 113 · events 138 · lines 1,105。<br>请在右侧选择示例，或在下方输入自然语言提问。</div>`);
+  } catch (e) {
+    elLoading.textContent = '加载失败：' + (e && e.message ? e.message : String(e));
+    console.error(e);
+  }
+}
+
+elAskBtn.addEventListener('click', () => handleAsk(elAskInput.value));
+elAskInput.addEventListener('keydown', e => { if (e.key === 'Enter') handleAsk(elAskInput.value); });
+
+document.querySelectorAll('.suggest').forEach(btn => {
+  btn.addEventListener('click', () => handleAsk(btn.dataset.q));
+});
+
+elRunSql.addEventListener('click', () => {
+  const sql = elSqlInput.value.trim();
+  if (!sql) return;
+  pushMessage('user', `<span class="who">你</span><pre>${esc(sql)}</pre>`);
+  runSQL(sql);
+});
+
+main();
+</script>
+</body>
+</html>

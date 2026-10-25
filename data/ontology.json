@@ -1,0 +1,2823 @@
+{
+  "meta": {
+    "generated_at": "2026-10-16T17:57:45+00:00",
+    "project": "西游记多版本古籍知识图谱本体",
+    "layers": [
+      {
+        "id": "form",
+        "label": "形态层",
+        "en": "Formal",
+        "desc": "页面、段落、字符 — OCR 与版式证据链"
+      },
+      {
+        "id": "thematic",
+        "label": "主题层",
+        "en": "Thematic",
+        "desc": "人物、事件、法宝、关系 — 剧情子图一等实体"
+      },
+      {
+        "id": "ideological",
+        "label": "思想层",
+        "en": "Ideological",
+        "desc": "评点家观点、义理提及 — 佛道儒三教与批评学"
+      },
+      {
+        "id": "textual",
+        "label": "版本层",
+        "en": "Textual",
+        "desc": "版本、章回、文本行 — 版本谱系与章回结构"
+      }
+    ]
+  },
+  "ontology": {
+    "classes": {
+      "Thing": {
+        "name": "Thing",
+        "label_zh": "事物",
+        "comment_zh": "西游记知识图谱顶层类，所有实体继承自此类",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "Edition": {
+        "name": "Edition",
+        "label_zh": "版本",
+        "subClassOf": [
+          "bibo:Document",
+          "jtw:Thing"
+        ],
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "Chapter": {
+        "name": "Chapter",
+        "label_zh": "章回",
+        "subClassOf": [
+          "bibo:Chapter",
+          "jtw:Thing"
+        ],
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "chapter_no": {
+        "name": "chapter_no",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "chapter_title": {
+        "name": "chapter_title",
+        "label_zh": "回目",
+        "range": "string",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "Page": {
+        "name": "Page",
+        "label_zh": "页面",
+        "subClassOf": [
+          "bibo:Page",
+          "jtw:Thing"
+        ],
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "page_no": {
+        "name": "page_no",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "image_path": {
+        "name": "image_path",
+        "label_zh": "图像路径",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "TextLine": {
+        "name": "TextLine",
+        "label_zh": "文本段（形态层）",
+        "comment_zh": "OCR/VLM 抽取的一段文本；含形态类型（title/main/poem/pre/post/inline/top/side/bottom/caption/colophon/preface）",
+        "subClassOf": [
+          "bibo:Chapter",
+          "jtw:Thing"
+        ],
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "line_type": {
+        "name": "line_type",
+        "label_zh": "形态类型",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "line_text": {
+        "name": "line_text",
+        "label_zh": "转录文本",
+        "range": "string",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "line_conf": {
+        "name": "line_conf",
+        "label_zh": "置信度",
+        "range": "float",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "Person": {
+        "name": "Person",
+        "label_zh": "人物",
+        "subClassOf": [
+          "foaf:Person",
+          "jtw:Thing"
+        ],
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "person_name": {
+        "name": "person_name",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "person_alias": {
+        "name": "person_alias",
+        "label_zh": "别名",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "person_category": {
+        "name": "person_category",
+        "label_zh": "人物类别",
+        "comment_zh": "取值：主角/唐僧徒/神仙/佛/帝王/妖魔/世俗/龙神/道士/女仙",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "role": {
+        "name": "role",
+        "label_zh": "在文本中的角色",
+        "comment_zh": "取值：祖师/弟子/使者/客卿/主角/配角/观察者",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "Sect": {
+        "name": "Sect",
+        "label_zh": "门派/机构",
+        "comment_zh": "如：花果山/灵山/天庭/地府/车迟国/狮驼国",
+        "subClassOf": [
+          "jtw:Thing"
+        ],
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "sect_name": {
+        "name": "sect_name",
+        "label_zh": "门派名",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "sect_type": {
+        "name": "sect_type",
+        "label_zh": "门派类型",
+        "comment_zh": "佛/道/天庭/地府/世俗/妖魔/山水",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "Artifact": {
+        "name": "Artifact",
+        "label_zh": "法宝",
+        "subClassOf": [
+          "jtw:Thing"
+        ],
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "artifact_name": {
+        "name": "artifact_name",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "Spell": {
+        "name": "Spell",
+        "label_zh": "法术",
+        "subClassOf": [
+          "jtw:Thing"
+        ],
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "spell_name": {
+        "name": "spell_name",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "Place": {
+        "name": "Place",
+        "label_zh": "地点",
+        "subClassOf": [
+          "jtw:Thing"
+        ],
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "place_name": {
+        "name": "place_name",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "Event": {
+        "name": "Event",
+        "label_zh": "事件",
+        "comment_zh": "降妖/斗法/拜师/结拜/出行/朝见/战斗/变化/受封",
+        "subClassOf": [
+          "jtw:Thing"
+        ],
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "event_name": {
+        "name": "event_name",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "event_category": {
+        "name": "event_category",
+        "label_zh": "事件类别",
+        "comment_zh": "取值：降妖/斗法/拜师/结拜/出行/朝见/战斗/变化/受封/授宝/受戒",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "Theme": {
+        "name": "Theme",
+        "label_zh": "主题",
+        "subClassOf": [
+          "skos:Concept",
+          "jtw:Thing"
+        ],
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "Discipleship": {
+        "name": "Discipleship",
+        "label_zh": "师徒关系",
+        "subClassOf": [
+          "jtw:Thing"
+        ],
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "Kinship": {
+        "name": "Kinship",
+        "label_zh": "亲属关系",
+        "subClassOf": [
+          "jtw:Thing"
+        ],
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "Antagonism": {
+        "name": "Antagonism",
+        "label_zh": "敌对关系",
+        "subClassOf": [
+          "jtw:Thing"
+        ],
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "Membership": {
+        "name": "Membership",
+        "label_zh": "归属关系",
+        "subClassOf": [
+          "jtw:Thing"
+        ],
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "Possession": {
+        "name": "Possession",
+        "label_zh": "法宝持有关系",
+        "subClassOf": [
+          "jtw:Thing"
+        ],
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "Involvement": {
+        "name": "Involvement",
+        "label_zh": "事件参与关系",
+        "subClassOf": [
+          "jtw:Thing"
+        ],
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "PlotOrder": {
+        "name": "PlotOrder",
+        "label_zh": "情节序列关系",
+        "subClassOf": [
+          "jtw:Thing"
+        ],
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "AnnotationOf": {
+        "name": "AnnotationOf",
+        "label_zh": "评点归属",
+        "subClassOf": [
+          "jtw:Thing"
+        ],
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "EditionLineage": {
+        "name": "EditionLineage",
+        "label_zh": "版本源流",
+        "subClassOf": [
+          "jtw:Thing"
+        ],
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "ChapterOf": {
+        "name": "ChapterOf",
+        "label_zh": "章节归属",
+        "subClassOf": [
+          "jtw:Thing"
+        ],
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "relation_type": {
+        "name": "relation_type",
+        "label_zh": "关系类型",
+        "domain": "Thing",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "subjectOf": {
+        "name": "subjectOf",
+        "label_zh": "关系主体",
+        "range": "string",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "objectOf": {
+        "name": "objectOf",
+        "label_zh": "关系客体",
+        "range": "string",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "Register": {
+        "name": "Register",
+        "label_zh": "语体",
+        "comment_zh": "《西游》语体分类：市井白话/佛道偈颂/诗词歌赋/打怪套话/诙谐段子/帝王语/叙述语/佛语/道语/妖语",
+        "subClassOf": [
+          "skos:Concept",
+          "jtw:Thing"
+        ],
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "register_id": {
+        "name": "register_id",
+        "label_zh": "语体ID",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "register_name": {
+        "name": "register_name",
+        "label_zh": "语体名",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "register_desc": {
+        "name": "register_desc",
+        "label_zh": "语体描述",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "token_freq": {
+        "name": "token_freq",
+        "label_zh": "特征字频",
+        "range": "string",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "avg_sentence_len": {
+        "name": "avg_sentence_len",
+        "label_zh": "平均句长",
+        "range": "float",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "punctuation_density": {
+        "name": "punctuation_density",
+        "label_zh": "标点密度",
+        "range": "float",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "formal_score": {
+        "name": "formal_score",
+        "label_zh": "文白比",
+        "range": "float",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "Voice": {
+        "name": "Voice",
+        "label_zh": "口吻",
+        "comment_zh": "同一个人物在不同情境下的语言模式，如：悟空文人语/泼猴语/戏谑语；唐僧经卷语/感伤语",
+        "subClassOf": [
+          "skos:Concept",
+          "jtw:Thing"
+        ],
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "voice_id": {
+        "name": "voice_id",
+        "label_zh": "口吻ID",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "voice_name": {
+        "name": "voice_name",
+        "label_zh": "口吻名",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "owner_person": {
+        "name": "owner_person",
+        "label_zh": "所属人物",
+        "range": "Person",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "trigger_context": {
+        "name": "trigger_context",
+        "label_zh": "触发情境",
+        "comment_zh": "如：斗智时/受挫时/谈经时/戏谑时/严肃时",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "fingerprint": {
+        "name": "fingerprint",
+        "label_zh": "指纹",
+        "comment_zh": "字符 n-gram / 高频词 / 困惑度 / 情绪字密度（对应《红楼未完》字镜）",
+        "range": "string",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "Motif": {
+        "name": "Motif",
+        "label_zh": "母题/套路",
+        "comment_zh": "西游反复出现的叙事模板：打怪模板/拜师模板/受封模板/变化模板/结拜模板/受戒模板",
+        "subClassOf": [
+          "skos:Concept",
+          "jtw:Thing"
+        ],
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "motif_id": {
+        "name": "motif_id",
+        "label_zh": "母题ID",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "motif_name": {
+        "name": "motif_name",
+        "label_zh": "母题名",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "motif_template": {
+        "name": "motif_template",
+        "label_zh": "模板骨架",
+        "comment_zh": "如：【妖精现】→【悟空辨】→【法宝斗】→【祖师救】→【受降】",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "motif_frequency": {
+        "name": "motif_frequency",
+        "label_zh": "出现频次",
+        "range": "integer",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "MotifInstance": {
+        "name": "MotifInstance",
+        "label_zh": "母题实例",
+        "subClassOf": [
+          "jtw:Thing"
+        ],
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "Wit": {
+        "name": "Wit",
+        "label_zh": "诙谐/机锋",
+        "subClassOf": [
+          "jtw:Thing"
+        ],
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "wit_type": {
+        "name": "wit_type",
+        "label_zh": "诙谐类型",
+        "comment_zh": "取值：戏谑/反讽/双关/谐音/胡闹/挑衅/自嘲/冷幽默",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "humor_level": {
+        "name": "humor_level",
+        "label_zh": "诙谐强度",
+        "range": "float",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "register_drift": {
+        "name": "register_drift",
+        "label_zh": "语体漂移",
+        "comment_zh": "同一回目在不同版本间的语体分布差异（比字符层更能反映编辑意图）",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "voice_consistency": {
+        "name": "voice_consistency",
+        "label_zh": "口吻一致性",
+        "comment_zh": "检查某人物的口吻在长文本中是否漂移，用于生成式推演的质量控制",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "ArtifactState": {
+        "name": "ArtifactState",
+        "label_zh": "法宝状态",
+        "comment_zh": "法宝状态机：沉睡/激活/持有/传递中/被收/被夺/失效/回归本主",
+        "subClassOf": [
+          "skos:Concept"
+        ],
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "ArtifactEvent": {
+        "name": "ArtifactEvent",
+        "label_zh": "法宝事件",
+        "comment_zh": "法宝流转的每一次变动都是一等事件，仿 nobel-kg 关系一等实体",
+        "subClassOf": [
+          "jtw:Event"
+        ],
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "from_holder": {
+        "name": "from_holder",
+        "label_zh": "从持有者",
+        "range": "Person",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "to_holder": {
+        "name": "to_holder",
+        "label_zh": "至持有者",
+        "range": "Person",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "state_change": {
+        "name": "state_change",
+        "label_zh": "状态变更",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "JourneySegment": {
+        "name": "JourneySegment",
+        "label_zh": "旅程段",
+        "comment_zh": "取经路上的一段旅程，从 A 地到 B 地，绑定章回范围",
+        "subClassOf": [
+          "jtw:Thing"
+        ],
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "from_place": {
+        "name": "from_place",
+        "label_zh": "起点",
+        "range": "Place",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "to_place": {
+        "name": "to_place",
+        "label_zh": "终点",
+        "range": "Place",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "cover_chapters": {
+        "name": "cover_chapters",
+        "label_zh": "覆盖章回",
+        "range": "string",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "travel_days": {
+        "name": "travel_days",
+        "label_zh": "行程天数",
+        "range": "integer",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "difficulty": {
+        "name": "difficulty",
+        "label_zh": "难度",
+        "range": "float",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "encounters_monsters": {
+        "name": "encounters_monsters",
+        "label_zh": "途经妖怪数",
+        "range": "integer",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "MotifChain": {
+        "name": "MotifChain",
+        "label_zh": "母题延续链",
+        "comment_zh": "同一母题在多个章回/回目/版本中的实例序列，附偏离度时间曲线",
+        "subClassOf": [
+          "jtw:Thing"
+        ],
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "deviation_trend": {
+        "name": "deviation_trend",
+        "label_zh": "偏离度趋势",
+        "comment_zh": "递增（越写越胡闹）/递减/震荡/平稳 — 用于分析作者创作节奏",
+        "range": "string",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "Symbol": {
+        "name": "Symbol",
+        "label_zh": "意象/符号",
+        "subClassOf": [
+          "skos:Concept",
+          "jtw:Thing"
+        ],
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "symbol_name": {
+        "name": "symbol_name",
+        "label_zh": "意象名",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "symbol_theme": {
+        "name": "symbol_theme",
+        "label_zh": "关联主题",
+        "range": "Theme",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "symbol_frequency": {
+        "name": "symbol_frequency",
+        "label_zh": "频次",
+        "range": "integer",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "WitMap": {
+        "name": "WitMap",
+        "label_zh": "诙谐谱",
+        "comment_zh": "全书诙谐强度的章节级分布，用于跨版本比较（世德堂 vs 李评）",
+        "subClassOf": [
+          "jtw:Thing"
+        ],
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "chapter_wit_density": {
+        "name": "chapter_wit_density",
+        "label_zh": "章回诙谐密度",
+        "comment_zh": "每章回的诙谐标记数 / 章回总行数",
+        "range": "float",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "EditionLineageNode": {
+        "name": "EditionLineageNode",
+        "label_zh": "版本节点",
+        "subClassOf": [
+          "jtw:Thing"
+        ],
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "editor_intent": {
+        "name": "editor_intent",
+        "label_zh": "编辑意图",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "editor_change_type": {
+        "name": "editor_change_type",
+        "label_zh": "改动类型",
+        "comment_zh": "取值：增补评点/删减诗词/改写人物口吻/图像增补/删减段落/加标题",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "Doctrine": {
+        "name": "Doctrine",
+        "label_zh": "教派/论理",
+        "comment_zh": "儒/释/道三教及其子派，包括内丹/符箓/禅宗/天台/华严/程朱理学等",
+        "subClassOf": [
+          "skos:Concept",
+          "jtw:Thing"
+        ],
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "doctrine_id": {
+        "name": "doctrine_id",
+        "label_zh": "教派ID",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "doctrine_name": {
+        "name": "doctrine_name",
+        "label_zh": "教派名",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "doctrine_school": {
+        "name": "doctrine_school",
+        "label_zh": "所属宗教",
+        "comment_zh": "儒/释/道 三选一",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "doctrine_sub": {
+        "name": "doctrine_sub",
+        "label_zh": "子派",
+        "comment_zh": "如：道→内丹/符箓/清微/灵宝；释→禅/天台/华严/净土；儒→理学/心学/经世",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "DoctrinalStance": {
+        "name": "DoctrinalStance",
+        "label_zh": "论理立场",
+        "comment_zh": "三教在文本中的立场：褒扬/贬抑/中立/融合/对比 — 与 verification_status 配合",
+        "subClassOf": [
+          "jtw:Thing"
+        ],
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "stance_toward": {
+        "name": "stance_toward",
+        "label_zh": "立场针对",
+        "comment_zh": "如：贬道符箓/褒佛禅宗/褒儒忠孝/贬佛空谈/褒道内丹",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "stance_attitude": {
+        "name": "stance_attitude",
+        "label_zh": "立场态度",
+        "comment_zh": "取值：褒扬/贬抑/中立/融合/对比/批判",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "doctrine_conflict": {
+        "name": "doctrine_conflict",
+        "label_zh": "教派冲突",
+        "comment_zh": "三教在特定回目中的冲突/融合/辩论，一等事件。例：车迟国斗法（贬道符箓）；比丘国（褒道内丹）；五行山（悟空=佛性回归）",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "conflict_chapter": {
+        "name": "conflict_chapter",
+        "label_zh": "冲突所在章回",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "conflict_parties": {
+        "name": "conflict_parties",
+        "label_zh": "冲突各方",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "conflict_resolution": {
+        "name": "conflict_resolution",
+        "label_zh": "冲突解决方式",
+        "comment_zh": "取值：以佛胜道/以道胜佛/融合/未解/超越",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "CultivationPath": {
+        "name": "CultivationPath",
+        "label_zh": "修行路径",
+        "comment_zh": "取经/炼心/内丹/符箓/斋戒/讲经/坐禅 等具体修行方式",
+        "subClassOf": [
+          "jtw:Thing"
+        ],
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "cultivation_type": {
+        "name": "cultivation_type",
+        "label_zh": "修行类型",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "cultivation_goal": {
+        "name": "cultivation_goal",
+        "label_zh": "修行目标",
+        "comment_zh": "取值：成道/成佛/证仙/证圣/超脱/受封/受戒",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "inner_cultivation_stage": {
+        "name": "inner_cultivation_stage",
+        "label_zh": "心性阶段",
+        "comment_zh": "如悟空的心猿归正进程：石猴→齐天→取经→斗战胜佛；唐僧：俗人→取经→旃檀功德佛",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "Scholar": {
+        "name": "Scholar",
+        "label_zh": "学者/评点家",
+        "subClassOf": [
+          "foaf:Person",
+          "jtw:Thing"
+        ],
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "work_title": {
+        "name": "work_title",
+        "label_zh": "评点著作名",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "school_of": {
+        "name": "school_of",
+        "label_zh": "所属学派",
+        "comment_zh": "佛学/理学/丹道/文学/考证 五派",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "ScholarlyArgument": {
+        "name": "ScholarlyArgument",
+        "label_zh": "学术论点",
+        "comment_zh": "学者对某问题的具体论点，可被多版本引用/反驳",
+        "subClassOf": [
+          "jtw:Thing"
+        ],
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "argued_by": {
+        "name": "argued_by",
+        "label_zh": "论者",
+        "range": "Scholar",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "argues_about": {
+        "name": "argues_about",
+        "label_zh": "论点对象",
+        "comment_zh": "指向 Person/Event/Theme/Doctrine/TextLine",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "argument_stance": {
+        "name": "argument_stance",
+        "label_zh": "论点立场",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "argument_evidence": {
+        "name": "argument_evidence",
+        "label_zh": "论点证据",
+        "range": "TextLine",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "edition_doctrine_tendency": {
+        "name": "edition_doctrine_tendency",
+        "label_zh": "版本教派倾向",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "edition_id": {
+        "name": "edition_id",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "has_source": {
+        "name": "has_source",
+        "_kind": "class",
+        "_first_token": "jtw"
+      },
+      "derived_from": {
+        "name": "derived_from",
+        "label_zh": "衍生自",
+        "_kind": "class",
+        "_first_token": "jtw"
+      }
+    },
+    "properties": {
+      "edition_id": {
+        "name": "edition_id",
+        "label_zh": "版本ID",
+        "comment_zh": "形如 shidetang / li_ping / daqishi / xinke_pingbi 等",
+        "domain": "Edition",
+        "range": "string",
+        "_kind": "property",
+        "_first_token": "jtw"
+      },
+      "edition_title": {
+        "name": "edition_title",
+        "label_zh": "版本名称",
+        "domain": "Edition",
+        "range": "string",
+        "_kind": "property",
+        "_first_token": "jtw"
+      },
+      "print_year": {
+        "name": "print_year",
+        "label_zh": "刊刻年份",
+        "domain": "Edition",
+        "range": "gYear",
+        "_kind": "property",
+        "_first_token": "jtw"
+      },
+      "publisher": {
+        "name": "publisher",
+        "label_zh": "刊刻/出版机构",
+        "domain": "Edition",
+        "range": "string",
+        "_kind": "property",
+        "_first_token": "jtw"
+      },
+      "has_source": {
+        "name": "has_source",
+        "label_zh": "源流自",
+        "domain": "Edition",
+        "range": "Edition",
+        "_kind": "property",
+        "_first_token": "jtw"
+      },
+      "belongs_to_edition": {
+        "name": "belongs_to_edition",
+        "label_zh": "所属版本",
+        "domain": "Chapter",
+        "range": "Edition",
+        "_kind": "property",
+        "_first_token": "jtw"
+      },
+      "belongsToChapter": {
+        "name": "belongsToChapter",
+        "domain": "Page",
+        "range": "Chapter",
+        "_kind": "property",
+        "_first_token": "jtw"
+      },
+      "belongsToEdition": {
+        "name": "belongsToEdition",
+        "domain": "Page",
+        "range": "Edition",
+        "_kind": "property",
+        "_first_token": "jtw"
+      },
+      "onPage": {
+        "name": "onPage",
+        "domain": "TextLine",
+        "range": "Page",
+        "_kind": "property",
+        "_first_token": "jtw"
+      },
+      "verification_status": {
+        "name": "verification_status",
+        "label_zh": "核验状态",
+        "comment_zh": "取值：已核实/存疑/待核实/版本间冲突",
+        "domain": "Thing",
+        "range": "string",
+        "_kind": "property",
+        "_first_token": "jtw"
+      },
+      "source_page": {
+        "name": "source_page",
+        "label_zh": "证据页面",
+        "domain": "Thing",
+        "range": "Page",
+        "_kind": "property",
+        "_first_token": "jtw"
+      },
+      "source_text": {
+        "name": "source_text",
+        "label_zh": "原文片段",
+        "domain": "Thing",
+        "range": "string",
+        "_kind": "property",
+        "_first_token": "jtw"
+      },
+      "is_official": {
+        "name": "is_official",
+        "label_zh": "是否正传记载",
+        "domain": "Thing",
+        "range": "boolean",
+        "_kind": "property",
+        "_first_token": "jtw"
+      },
+      "hasRegister": {
+        "name": "hasRegister",
+        "label_zh": "所属语体",
+        "domain": "TextLine",
+        "range": "Register",
+        "_kind": "property",
+        "_first_token": "jtw"
+      },
+      "usesVoice": {
+        "name": "usesVoice",
+        "label_zh": "使用口吻",
+        "domain": "TextLine",
+        "range": "Voice",
+        "_kind": "property",
+        "_first_token": "jtw"
+      },
+      "instanceOfMotif": {
+        "name": "instanceOfMotif",
+        "domain": "MotifInstance",
+        "range": "Motif",
+        "_kind": "property",
+        "_first_token": "jtw"
+      },
+      "instance_deviation": {
+        "name": "instance_deviation",
+        "label_zh": "偏离度",
+        "comment_zh": "与模板的偏离程度，低=套路化，高=创新/胡闹感强",
+        "domain": "MotifInstance",
+        "range": "float",
+        "_kind": "property",
+        "_first_token": "jtw"
+      },
+      "hasWit": {
+        "name": "hasWit",
+        "label_zh": "诙谐标记",
+        "domain": "TextLine",
+        "range": "Wit",
+        "_kind": "property",
+        "_first_token": "jtw"
+      },
+      "artifact_state": {
+        "name": "artifact_state",
+        "label_zh": "当前状态",
+        "domain": "Artifact",
+        "range": "ArtifactState",
+        "_kind": "property",
+        "_first_token": "jtw"
+      },
+      "next_segment": {
+        "name": "next_segment",
+        "label_zh": "下一段",
+        "comment_zh": "路径的有向串联，重建取经路线",
+        "domain": "JourneySegment",
+        "range": "JourneySegment",
+        "_kind": "property",
+        "_first_token": "jtw"
+      },
+      "chain_motif": {
+        "name": "chain_motif",
+        "domain": "MotifChain",
+        "range": "Motif",
+        "_kind": "property",
+        "_first_token": "jtw"
+      },
+      "chain_includes": {
+        "name": "chain_includes",
+        "label_zh": "包含实例",
+        "domain": "MotifChain",
+        "range": "MotifInstance",
+        "_kind": "property",
+        "_first_token": "jtw"
+      },
+      "features_symbol": {
+        "name": "features_symbol",
+        "label_zh": "出现意象",
+        "domain": "TextLine",
+        "range": "Symbol",
+        "_kind": "property",
+        "_first_token": "jtw"
+      },
+      "derives_from_edition": {
+        "name": "derives_from_edition",
+        "label_zh": "衍生自版本",
+        "domain": "Edition",
+        "range": "Edition",
+        "_kind": "property",
+        "_first_token": "jtw"
+      },
+      "hasDoctrine": {
+        "name": "hasDoctrine",
+        "label_zh": "涉及教派",
+        "domain": "TextLine",
+        "range": "Doctrine",
+        "_kind": "property",
+        "_first_token": "jtw"
+      },
+      "refersToDoctrinalStance": {
+        "name": "refersToDoctrinalStance",
+        "label_zh": "承载论理立场",
+        "domain": "TextLine",
+        "range": "DoctrinalStance",
+        "_kind": "property",
+        "_first_token": "jtw"
+      },
+      "person_holds_doctrine": {
+        "name": "person_holds_doctrine",
+        "label_zh": "人物所属教派",
+        "domain": "Person",
+        "range": "Doctrine",
+        "_kind": "property",
+        "_first_token": "jtw"
+      },
+      "practices_cultivation": {
+        "name": "practices_cultivation",
+        "label_zh": "修习路径",
+        "domain": "Person",
+        "range": "CultivationPath",
+        "_kind": "property",
+        "_first_token": "jtw"
+      },
+      "confucian_tendency": {
+        "name": "confucian_tendency",
+        "label_zh": "儒倾向",
+        "domain": "Edition",
+        "range": "float",
+        "_kind": "property",
+        "_first_token": "jtw"
+      },
+      "buddhist_tendency": {
+        "name": "buddhist_tendency",
+        "label_zh": "释倾向",
+        "domain": "Edition",
+        "range": "float",
+        "_kind": "property",
+        "_first_token": "jtw"
+      },
+      "daoist_tendency": {
+        "name": "daoist_tendency",
+        "label_zh": "道倾向",
+        "domain": "Edition",
+        "range": "float",
+        "_kind": "property",
+        "_first_token": "jtw"
+      },
+      "lineage_type": {
+        "name": "lineage_type",
+        "label_zh": "衍生态",
+        "comment_zh": "取值：重刻/加评/简本/改写/缩略，描述两版本的派生关系",
+        "domain": "EditionLineage",
+        "range": "string",
+        "_kind": "property",
+        "_first_token": "jtw"
+      },
+      "mentions": {
+        "name": "mentions",
+        "label_zh": "提及人物",
+        "domain": "TextLine",
+        "range": "Person",
+        "_kind": "property",
+        "_first_token": "jtw"
+      },
+      "refersToEvent": {
+        "name": "refersToEvent",
+        "domain": "TextLine",
+        "range": "Event",
+        "_kind": "property",
+        "_first_token": "jtw"
+      },
+      "refersToArtifact": {
+        "name": "refersToArtifact",
+        "domain": "TextLine",
+        "range": "Artifact",
+        "_kind": "property",
+        "_first_token": "jtw"
+      },
+      "refersToPlace": {
+        "name": "refersToPlace",
+        "domain": "TextLine",
+        "range": "Place",
+        "_kind": "property",
+        "_first_token": "jtw"
+      }
+    }
+  },
+  "vocabularies": {
+    "verification_status": {
+      "已核实": {
+        "en": "verified",
+        "desc": "至少两版原文印证或有明确史料"
+      },
+      "存疑": {
+        "en": "doubtful",
+        "desc": "单一版本出现，或与主流版本冲突"
+      },
+      "待核实": {
+        "en": "pending",
+        "desc": "VLM 抽取初稿，未交叉验证"
+      },
+      "版本间冲突": {
+        "en": "cross_edition_conflict",
+        "desc": "不同版本对同一事实表述不一致"
+      }
+    },
+    "person_category": {
+      "主角": {
+        "en": "protagonist",
+        "desc": "唐僧师徒 + 关键配角"
+      },
+      "唐僧徒": {
+        "en": "pilgrim",
+        "desc": "唐僧/孙悟空/猪八戒/沙僧/白龙马"
+      },
+      "神仙": {
+        "en": "deity",
+        "desc": "道教神仙、天尊、元帅"
+      },
+      "佛": {
+        "en": "buddha",
+        "desc": "如来、观音、弥勒、文殊、普贤"
+      },
+      "帝王": {
+        "en": "monarch",
+        "desc": "各国王/玉帝/阎王"
+      },
+      "妖魔": {
+        "en": "demon",
+        "desc": "妖王/妖怪/精怪/魔头"
+      },
+      "世俗": {
+        "en": "mortal",
+        "desc": "百姓、官宦、僧道普通角色"
+      },
+      "龙神": {
+        "en": "dragon_deity",
+        "desc": "龙王、龙子龙孙"
+      },
+      "道士": {
+        "en": "daoist",
+        "desc": "各派道士/真人"
+      },
+      "女仙": {
+        "en": "female_deity",
+        "desc": "观音/铁扇公主/女儿国王"
+      }
+    },
+    "relation_type": {
+      "拜师": {
+        "en": "formal_disciple",
+        "desc": "正式拜师收徒"
+      },
+      "拜佛": {
+        "en": "buddha_devotee",
+        "desc": "皈依佛门"
+      },
+      "拜道祖": {
+        "en": "daoist_devotee",
+        "desc": "皈依道门"
+      },
+      "收徒": {
+        "en": "accepted_disciple",
+        "desc": "从师父视角"
+      },
+      "化生": {
+        "en": "spiritual_child",
+        "desc": "灵性化生，如唐僧"
+      },
+      "兄妹": {
+        "en": "sibling"
+      },
+      "父子": {
+        "en": "parent_child"
+      },
+      "师徒同源": {
+        "en": "same_lineage",
+        "desc": "同源不同门，如菩提祖师与如来"
+      },
+      "仇敌": {
+        "en": "arch_enemy"
+      },
+      "宿敌": {
+        "en": "longterm_enemy"
+      },
+      "临时敌对": {
+        "en": "temporary_enemy"
+      },
+      "主从": {
+        "en": "master_servant"
+      },
+      "祖师": {
+        "en": "patriarch"
+      },
+      "弟子": {
+        "en": "disciple"
+      },
+      "使者": {
+        "en": "envoy"
+      },
+      "客卿": {
+        "en": "advisor"
+      },
+      "成员": {
+        "en": "member"
+      },
+      "持有者": {
+        "en": "holder"
+      },
+      "制造者": {
+        "en": "maker"
+      },
+      "传递者": {
+        "en": "transmitter"
+      },
+      "主角": {
+        "en": "protagonist"
+      },
+      "配角": {
+        "en": "supporting"
+      },
+      "观察者": {
+        "en": "observer"
+      },
+      "参与者": {
+        "en": "participant"
+      }
+    },
+    "sect_type": {
+      "佛": {
+        "en": "buddhist"
+      },
+      "道": {
+        "en": "daoist"
+      },
+      "天庭": {
+        "en": "celestial"
+      },
+      "地府": {
+        "en": "underworld"
+      },
+      "世俗": {
+        "en": "mortal_kingdom"
+      },
+      "妖魔": {
+        "en": "demon"
+      },
+      "山水": {
+        "en": "mountain"
+      },
+      "龙宫": {
+        "en": "dragon_palace"
+      }
+    },
+    "event_category": {
+      "降妖": {
+        "en": "demon_subdue"
+      },
+      "斗法": {
+        "en": "magic_duel"
+      },
+      "拜师": {
+        "en": "disciple_bow"
+      },
+      "结拜": {
+        "en": "sworn_brothers"
+      },
+      "出行": {
+        "en": "journey"
+      },
+      "朝见": {
+        "en": "audience"
+      },
+      "战斗": {
+        "en": "combat"
+      },
+      "变化": {
+        "en": "transformation"
+      },
+      "受封": {
+        "en": "enfeoffment"
+      },
+      "授宝": {
+        "en": "artifact_grant"
+      },
+      "受戒": {
+        "en": "precept_taking"
+      },
+      "论道": {
+        "en": "dao_discourse"
+      },
+      "讲经": {
+        "en": "dharma_talk"
+      }
+    },
+    "annotation_form": {
+      "眉批": {
+        "en": "top_margin"
+      },
+      "夹批": {
+        "en": "inline"
+      },
+      "旁批": {
+        "en": "side_margin"
+      },
+      "回前总评": {
+        "en": "chapter_pre"
+      },
+      "回后总评": {
+        "en": "chapter_post"
+      },
+      "图注": {
+        "en": "caption"
+      },
+      "题署": {
+        "en": "colophon"
+      },
+      "序跋": {
+        "en": "preface_postscript"
+      }
+    },
+    "register_id": {
+      "market_colloquial": {
+        "display": "市井白话",
+        "en": "market_colloquial",
+        "tokens": "咱 你 我 咋 干 那 这 得 啥",
+        "formal_score": 0.1
+      },
+      "buddhist_chant": {
+        "display": "佛道偈颂",
+        "en": "buddhist_chant",
+        "tokens": "阿弥陀佛 如来 诸法 空性 三藏 佛 菩萨 观音",
+        "formal_score": 0.9
+      },
+      "daoist_chant": {
+        "display": "道门玄谈",
+        "en": "daoist_chant",
+        "tokens": "太上 天尊 大道 三清 灵宝 金丹 丹道 玄门",
+        "formal_score": 0.9
+      },
+      "poetry_song": {
+        "display": "诗词歌赋",
+        "en": "poetry_song",
+        "tokens": "诗云 有诗为证 赋曰 词曰 诗曰",
+        "formal_score": 0.85
+      },
+      "monster_battle": {
+        "display": "打怪套话",
+        "en": "monster_battle",
+        "tokens": "妖精 孽畜 泼怪 老孙 一棒 定住 现原形 化形",
+        "formal_score": 0.3
+      },
+      "monkey_mischief": {
+        "display": "猴子胡闹",
+        "en": "monkey_mischief",
+        "tokens": "嘻嘻哈哈 耍弄 捉弄 闹 顽 皮 撒 泼",
+        "formal_score": 0.2
+      },
+      "monarch_speech": {
+        "display": "帝王语",
+        "en": "monarch_speech",
+        "tokens": "朕 寡人 王 天朝 朝廷 敕",
+        "formal_score": 0.8
+      },
+      "narrator_voice": {
+        "display": "叙述语",
+        "en": "narrator_voice",
+        "tokens": "话说 却说 且说 只见 却说那",
+        "formal_score": 0.5
+      },
+      "buddha_speech": {
+        "display": "佛语",
+        "en": "buddha_speech",
+        "tokens": "善哉 施主 众生 因果 缘法 佛门",
+        "formal_score": 0.9
+      },
+      "demon_speech": {
+        "display": "妖语",
+        "en": "demon_speech",
+        "tokens": "小猢狲 和尚 唐僧 师父 老孙 吃 嚼",
+        "formal_score": 0.3
+      }
+    },
+    "voice_id": {
+      "wukong_scholar": {
+        "display": "悟空文人语",
+        "owner": "sun-wukong",
+        "trigger": "谈经/论道/自谦时",
+        "example": "小圣乃天地生成之灵长"
+      },
+      "wukong_monkey": {
+        "display": "悟空泼猴语",
+        "owner": "sun-wukong",
+        "trigger": "挑衅/胡闹时",
+        "example": "俺老孙去！"
+      },
+      "wukong_mischievous": {
+        "display": "悟空戏谑语",
+        "owner": "sun-wukong",
+        "trigger": "戏弄八戒/调侃时",
+        "example": "你这呆子"
+      },
+      "tang_sutra": {
+        "display": "唐僧经卷语",
+        "owner": "tang-sanzang",
+        "trigger": "讲经/念经时",
+        "example": "阿弥陀佛，贫僧..."
+      },
+      "tang_melancholy": {
+        "display": "唐僧感伤语",
+        "owner": "tang-sanzang",
+        "trigger": "遇险/思乡时"
+      },
+      "zhujie_glutton": {
+        "display": "八戒贪嘴语",
+        "owner": "zhu-bajie",
+        "trigger": "想吃/偷懒/抱怨时",
+        "example": "师兄，我饿了"
+      },
+      "shajiej_steady": {
+        "display": "沙僧稳重语",
+        "owner": "sha-wujing",
+        "trigger": "劝和/挑担时",
+        "example": "大师兄，二师兄，莫吵了"
+      },
+      "yaojing_provoke": {
+        "display": "妖怪挑衅语",
+        "owner": "demon",
+        "trigger": "现原形/斗法时"
+      }
+    },
+    "motif_id": {
+      "monster_subdue": {
+        "display": "打怪模板",
+        "template": "【妖现】→【辨妖】→【法宝斗】→【祖师救】→【受降】",
+        "typical_pages": "5-8"
+      },
+      "disciple_bow": {
+        "display": "拜师模板",
+        "template": "【遇恩人】→【自报家门】→【叩拜】→【受名】"
+      },
+      "enfeoffment": {
+        "display": "受封模板",
+        "template": "【功成】→【上天庭/回灵山】→【册封】→【职司】"
+      },
+      "transformation": {
+        "display": "变化模板",
+        "template": "【起念】→【捻诀】→【变形】→【显威】"
+      },
+      "sworn_brothers": {
+        "display": "结拜模板",
+        "template": "【相遇】→【共事】→【称兄道弟】"
+      },
+      "precept_taking": {
+        "display": "受戒模板",
+        "template": "【入佛门/道门】→【赐法名】→【拜经】"
+      }
+    },
+    "three_teachings": {
+      "儒": {
+        "en": "confucianism",
+        "desc": "孔孟之道，礼乐教化，入世治世",
+        "key_concepts": "仁 义 礼 智 信 忠 孝 君臣 父子",
+        "representative": "孔子 孟子 荀子"
+      },
+      "释": {
+        "en": "buddhism",
+        "desc": "佛门教法，因果轮回，出世超脱",
+        "key_concepts": "空 无常 涅槃 轮回 因果 菩提 般若",
+        "representative": "如来 观音 文殊 普贤"
+      },
+      "道": {
+        "en": "daoism",
+        "desc": "老庄之学，自然无为，长生久视",
+        "key_concepts": "道 德 无为 自然 阴阳 气 金丹",
+        "representative": "太上老君 元始天尊 灵宝天尊"
+      }
+    },
+    "wit_type": {
+      "戏谑": {
+        "en": "teasing"
+      },
+      "反讽": {
+        "en": "irony"
+      },
+      "双关": {
+        "en": "pun"
+      },
+      "谐音": {
+        "en": "homophone_pun"
+      },
+      "胡闹": {
+        "en": "mischief"
+      },
+      "挑衅": {
+        "en": "provocation"
+      },
+      "自嘲": {
+        "en": "self_deprecation"
+      },
+      "冷幽默": {
+        "en": "deadpan"
+      }
+    },
+    "edition_id": {
+      "shidetang": {
+        "display": "世德堂本",
+        "year": 1592,
+        "publisher": "金陵世德堂",
+        "desc": "现存最早刻本，1592"
+      },
+      "li_ping": {
+        "display": "李评本",
+        "year": null,
+        "publisher": "明李廷机评点本"
+      },
+      "daqishi": {
+        "display": "大奇书本",
+        "year": null,
+        "publisher": "大奇书堂",
+        "desc": "Gallica 分册 4031-4035"
+      },
+      "xinke_pingbi": {
+        "display": "新刻全像批评西游记",
+        "year": null,
+        "publisher": "清"
+      },
+      "zhenquan": {
+        "display": "真诠本",
+        "year": null,
+        "publisher": "清陈士奇真诠本"
+      },
+      "yangminzhai": {
+        "display": "杨闽斋本",
+        "year": null,
+        "publisher": "杨闽斋堂"
+      },
+      "minzhaitang": {
+        "display": "闽斋堂本",
+        "year": null,
+        "publisher": "闽斋堂"
+      },
+      "zhengdao": {
+        "display": "证道本",
+        "year": null,
+        "publisher": "清证道本"
+      }
+    }
+  },
+  "layers": {
+    "form": {
+      "tables": {
+        "pages": {
+          "name": "pages",
+          "desc": "页面（含 OCR 与形态统计）",
+          "columns": [
+            "page_id",
+            "edition",
+            "edition_dirname",
+            "page_no",
+            "page_order",
+            "dc_source",
+            "dc_title",
+            "layout",
+            "line_count",
+            "char_count",
+            "main_line_count",
+            "commentary_line_count",
+            "entity_count",
+            "relation_count",
+            "event_count",
+            "chapter_ref",
+            "model",
+            "generated_at",
+            "ocr_seconds",
+            "annotation_seconds"
+          ],
+          "stats": {
+            "rows": 639,
+            "edition": {
+              "xiyou_yuanzhi": 101,
+              "xu_xiyouji": 101,
+              "gubao": 100,
+              "baihui_xiangzhu": 100,
+              "xinke_pingbi": 72,
+              "zhu_ping": 66,
+              "xiyouji_zhuan": 41,
+              "hou_xiyouji": 41,
+              "xiyou_bu": 17
+            }
+          },
+          "samples": [
+            {
+              "page_id": "xinke_pingbi#p00002",
+              "edition": "xinke_pingbi",
+              "edition_dirname": "新刻全像批评西游记",
+              "page_no": 2,
+              "page_order": 2,
+              "dc_source": "新刻全像批评西游记\\p0002.jpg",
+              "dc_title": "新刻全像批评西游记（清） 第2页",
+              "layout": "parse_failed",
+              "line_count": 0,
+              "char_count": 0,
+              "main_line_count": 0,
+              "commentary_line_count": 0,
+              "entity_count": 0,
+              "relation_count": 0,
+              "event_count": 0,
+              "chapter_ref": "",
+              "model": "sensenova-6.8-flash-lite",
+              "generated_at": "2026-10-11T17:53:33Z",
+              "ocr_seconds": 60.71,
+              "annotation_seconds": 1.06
+            },
+            {
+              "page_id": "xinke_pingbi#p00003",
+              "edition": "xinke_pingbi",
+              "edition_dirname": "新刻全像批评西游记",
+              "page_no": 3,
+              "page_order": 3,
+              "dc_source": "新刻全像批评西游记\\p0003.jpg",
+              "dc_title": "新刻全像批评西游记（清） 第3页",
+              "layout": "parse_failed",
+              "line_count": 0,
+              "char_count": 0,
+              "main_line_count": 0,
+              "commentary_line_count": 0,
+              "entity_count": 0,
+              "relation_count": 0,
+              "event_count": 0,
+              "chapter_ref": "",
+              "model": "sensenova-6.8-flash-lite",
+              "generated_at": "2026-10-11T17:53:35Z",
+              "ocr_seconds": 62.95,
+              "annotation_seconds": 0.96
+            },
+            {
+              "page_id": "xinke_pingbi#p00004",
+              "edition": "xinke_pingbi",
+              "edition_dirname": "新刻全像批评西游记",
+              "page_no": 4,
+              "page_order": 4,
+              "dc_source": "新刻全像批评西游记\\p0004.jpg",
+              "dc_title": "新刻全像批评西游记（清） 第4页",
+              "layout": "vertical",
+              "line_count": 12,
+              "char_count": 238,
+              "main_line_count": 9,
+              "commentary_line_count": 0,
+              "entity_count": 5,
+              "relation_count": 7,
+              "event_count": 3,
+              "chapter_ref": "第八十六回",
+              "model": "sensenova-6.8-flash-lite",
+              "generated_at": "2026-10-11T17:53:03Z",
+              "ocr_seconds": 15.69,
+              "annotation_seconds": 16.38
+            },
+            {
+              "page_id": "xinke_pingbi#p00005",
+              "edition": "xinke_pingbi",
+              "edition_dirname": "新刻全像批评西游记",
+              "page_no": 5,
+              "page_order": 5,
+              "dc_source": "新刻全像批评西游记\\p0005.jpg",
+              "dc_title": "新刻全像批评西游记（清） 第5页",
+              "layout": "vertical",
+              "line_count": 4,
+              "char_count": 30,
+              "main_line_count": 0,
+              "commentary_line_count": 0,
+              "entity_count": 7,
+              "relation_count": 5,
+              "event_count": 4,
+              "chapter_ref": "第79回",
+              "model": "sensenova-6.8-flash-lite",
+              "generated_at": "2026-10-11T18:14:53Z",
+              "ocr_seconds": 9.22,
+              "annotation_seconds": 7.6
+            }
+          ]
+        },
+        "lines": {
+          "name": "lines",
+          "desc": "文本段（形态层，form_type 区分正文/评点/诗词）",
+          "columns": [
+            "line_id",
+            "page_id",
+            "edition",
+            "page_no",
+            "line_idx",
+            "form_type",
+            "text",
+            "char_count",
+            "confidence",
+            "is_commentary"
+          ],
+          "stats": {
+            "rows": 10981,
+            "edition": {
+              "xu_xiyouji": 3075,
+              "gubao": 2538,
+              "baihui_xiangzhu": 1379,
+              "hou_xiyouji": 1250,
+              "xinke_pingbi": 1105,
+              "zhu_ping": 765,
+              "xiyou_bu": 469,
+              "xiyou_yuanzhi": 256,
+              "xiyouji_zhuan": 144
+            },
+            "form_type": {
+              "main": 10315,
+              "commentary": 329,
+              "title": 116,
+              "verse": 91,
+              "colophon": 48,
+              "side": 33,
+              "poem": 17,
+              "inline": 13,
+              "top": 11,
+              "caption": 7,
+              "bottom": 1
+            }
+          },
+          "samples": [
+            {
+              "line_id": "xinke_pingbi#p00004#L000",
+              "page_id": "xinke_pingbi#p00004",
+              "edition": "xinke_pingbi",
+              "page_no": 4,
+              "line_idx": 0,
+              "form_type": "title",
+              "text": "新刻全像批評西遊記",
+              "char_count": 9,
+              "confidence": 0.95,
+              "is_commentary": false
+            },
+            {
+              "line_id": "xinke_pingbi#p00004#L001",
+              "page_id": "xinke_pingbi#p00004",
+              "edition": "xinke_pingbi",
+              "page_no": 4,
+              "line_idx": 1,
+              "form_type": "title",
+              "text": "第八十六回 水母助威征怪物 金公施法滅妖邪",
+              "char_count": 21,
+              "confidence": 0.95,
+              "is_commentary": false
+            },
+            {
+              "line_id": "xinke_pingbi#p00004#L002",
+              "page_id": "xinke_pingbi#p00004",
+              "edition": "xinke_pingbi",
+              "page_no": 4,
+              "line_idx": 2,
+              "form_type": "main",
+              "text": "話說孫大聖牽着馬挑着担滿山頭尋叫師父忽見豬八",
+              "char_count": 22,
+              "confidence": 0.9,
+              "is_commentary": false
+            },
+            {
+              "line_id": "xinke_pingbi#p00004#L003",
+              "page_id": "xinke_pingbi#p00004",
+              "edition": "xinke_pingbi",
+              "page_no": 4,
+              "line_idx": 3,
+              "form_type": "main",
+              "text": "戒氣哼哼的跑將來道哥哥你喊怎的行者道師父不見",
+              "char_count": 22,
+              "confidence": 0.9,
+              "is_commentary": false
+            }
+          ]
+        },
+        "annotations": {
+          "name": "annotations",
+          "desc": "评点行（眉批/夹批/旁批/回前/回后/图注/题署/序跋）",
+          "columns": [
+            "annotation_id",
+            "page_id",
+            "edition",
+            "page_no",
+            "line_idx",
+            "form_type",
+            "text",
+            "confidence",
+            "chapter_ref"
+          ],
+          "stats": {
+            "rows": 113,
+            "edition": {
+              "xinke_pingbi": 113
+            },
+            "form_type": {
+              "colophon": 48,
+              "side": 33,
+              "inline": 13,
+              "top": 11,
+              "caption": 7,
+              "bottom": 1
+            }
+          },
+          "samples": [
+            {
+              "annotation_id": "xinke_pingbi#p00004#L011",
+              "page_id": "xinke_pingbi#p00004",
+              "edition": "xinke_pingbi",
+              "page_no": 4,
+              "line_idx": 11,
+              "form_type": "colophon",
+              "text": "批評西遊記 卷八十六",
+              "confidence": 0.8,
+              "chapter_ref": "第八十六回"
+            },
+            {
+              "annotation_id": "xinke_pingbi#p00005#L001",
+              "page_id": "xinke_pingbi#p00005",
+              "edition": "xinke_pingbi",
+              "page_no": 5,
+              "line_idx": 1,
+              "form_type": "caption",
+              "text": "连环洞假献唐僧头",
+              "confidence": 0.95,
+              "chapter_ref": "第79回"
+            },
+            {
+              "annotation_id": "xinke_pingbi#p00005#L003",
+              "page_id": "xinke_pingbi#p00005",
+              "edition": "xinke_pingbi",
+              "page_no": 5,
+              "line_idx": 3,
+              "form_type": "caption",
+              "text": "隐雾山行者救三藏",
+              "confidence": 0.95,
+              "chapter_ref": "第79回"
+            },
+            {
+              "annotation_id": "xinke_pingbi#p00007#L022",
+              "page_id": "xinke_pingbi#p00007",
+              "edition": "xinke_pingbi",
+              "page_no": 7,
+              "line_idx": 22,
+              "form_type": "side",
+              "text": "此平西...",
+              "confidence": 0.6,
+              "chapter_ref": "第27回"
+            }
+          ]
+        },
+        "line_semantics": {
+          "name": "line_semantics",
+          "desc": "文本行语义标注（register/voice/wit/motif 四维隐性约束实例）",
+          "columns": [
+            "line_id",
+            "edition",
+            "page_no",
+            "register_id",
+            "voice_id",
+            "wit_type",
+            "humor_level",
+            "motif_id"
+          ],
+          "stats": {
+            "rows": 5787,
+            "edition": {
+              "gubao": 2538,
+              "baihui_xiangzhu": 1379,
+              "xinke_pingbi": 1105,
+              "zhu_ping": 765
+            }
+          },
+          "samples": [
+            {
+              "line_id": "xinke_pingbi#p00004#L000",
+              "edition": "xinke_pingbi",
+              "page_no": 4,
+              "register_id": "narrator_voice",
+              "voice_id": null,
+              "wit_type": null,
+              "humor_level": 0.0,
+              "motif_id": null
+            },
+            {
+              "line_id": "xinke_pingbi#p00004#L001",
+              "edition": "xinke_pingbi",
+              "page_no": 4,
+              "register_id": "monster_battle",
+              "voice_id": null,
+              "wit_type": null,
+              "humor_level": 0.0,
+              "motif_id": null
+            },
+            {
+              "line_id": "xinke_pingbi#p00004#L002",
+              "edition": "xinke_pingbi",
+              "page_no": 4,
+              "register_id": "market_colloquial",
+              "voice_id": "shajiej_steady",
+              "wit_type": null,
+              "humor_level": 0.0,
+              "motif_id": null
+            },
+            {
+              "line_id": "xinke_pingbi#p00004#L003",
+              "edition": "xinke_pingbi",
+              "page_no": 4,
+              "register_id": "market_colloquial",
+              "voice_id": null,
+              "wit_type": null,
+              "humor_level": 0.0,
+              "motif_id": null
+            }
+          ]
+        }
+      },
+      "totals": {
+        "rows": 17520
+      }
+    },
+    "thematic": {
+      "tables": {
+        "entities": {
+          "name": "entities",
+          "desc": "实体（人物/妖魔/法宝/地点/官职/引文/宗教）",
+          "columns": [
+            "entity_id",
+            "entity_id_raw",
+            "edition",
+            "type",
+            "label",
+            "canonical_name",
+            "aliases",
+            "mention_count"
+          ],
+          "stats": {
+            "rows": 455,
+            "edition": {
+              "xinke_pingbi": 455
+            },
+            "type": {
+              "person": 179,
+              "place": 115,
+              "artifact": 64,
+              "monster": 52,
+              "official_title": 17,
+              "quote": 16,
+              "religion": 11,
+              "event": 1
+            }
+          },
+          "samples": [
+            {
+              "entity_id": "xinke_pingbi/sun-wukong",
+              "entity_id_raw": "sun-wukong",
+              "edition": "xinke_pingbi",
+              "type": "person",
+              "label": "孫大聖",
+              "canonical_name": "孫悟空",
+              "aliases": "行者|孫大聖",
+              "mention_count": 4
+            },
+            {
+              "entity_id": "xinke_pingbi/zhu-bajie",
+              "entity_id_raw": "zhu-bajie",
+              "edition": "xinke_pingbi",
+              "type": "person",
+              "label": "豬八戒",
+              "canonical_name": "豬八戒",
+              "aliases": "八戒",
+              "mention_count": 4
+            },
+            {
+              "entity_id": "xinke_pingbi/tang-sanzang",
+              "entity_id_raw": "tang-sanzang",
+              "edition": "xinke_pingbi",
+              "type": "person",
+              "label": "唐僧",
+              "canonical_name": "唐僧",
+              "aliases": "師父",
+              "mention_count": 6
+            },
+            {
+              "entity_id": "xinke_pingbi/sha-wujing",
+              "entity_id_raw": "sha-wujing",
+              "edition": "xinke_pingbi",
+              "type": "person",
+              "label": "沙僧",
+              "canonical_name": "沙悟淨",
+              "aliases": "沙和尚|沙僧",
+              "mention_count": 4
+            }
+          ]
+        },
+        "relationships": {
+          "name": "relationships",
+          "desc": "关系（subject→predicate→object，含证据与核实状态）",
+          "columns": [
+            "relation_id",
+            "page_id",
+            "edition",
+            "page_no",
+            "subject_id",
+            "predicate",
+            "object_id",
+            "line_idx",
+            "line_id",
+            "evidence",
+            "verification_status"
+          ],
+          "stats": {
+            "rows": 349,
+            "edition": {
+              "xinke_pingbi": 349
+            },
+            "predicate": {
+              "jtw:isMasterOf": 50,
+              "jtw:travelsTo": 44,
+              "jtw:commands": 42,
+              "jtw:isDiscipleOf": 41,
+              "jtw:hasWeapon": 38,
+              "jtw:residesIn": 27,
+              "jtw:defeats": 24,
+              "jtw:fightsAgainst": 19,
+              "jtw:rescues": 19,
+              "jtw:worships": 12,
+              "jtw:transformsTo": 11,
+              "jtw:isKingOf": 11,
+              "jtw:isSiblingOf": 7,
+              "jtw:alliedWith": 4
+            },
+            "verification_status": {
+              "待核实": 349
+            }
+          },
+          "samples": [
+            {
+              "relation_id": "xinke_pingbi#p00004#R0",
+              "page_id": "xinke_pingbi#p00004",
+              "edition": "xinke_pingbi",
+              "page_no": 4,
+              "subject_id": "sun-wukong",
+              "predicate": "jtw:isDiscipleOf",
+              "object_id": "唐僧",
+              "line_idx": 2,
+              "line_id": "xinke_pingbi#p00004#L002",
+              "evidence": "話說孫大聖牽着馬挑着担滿山頭尋叫師父",
+              "verification_status": "待核实"
+            },
+            {
+              "relation_id": "xinke_pingbi#p00004#R1",
+              "page_id": "xinke_pingbi#p00004",
+              "edition": "xinke_pingbi",
+              "page_no": 4,
+              "subject_id": "zhu-bajie",
+              "predicate": "jtw:isDiscipleOf",
+              "object_id": "唐僧",
+              "line_idx": 4,
+              "line_id": "xinke_pingbi#p00004#L004",
+              "evidence": "八戒道我原來只跟唐僧做和尚的",
+              "verification_status": "待核实"
+            },
+            {
+              "relation_id": "xinke_pingbi#p00004#R2",
+              "page_id": "xinke_pingbi#p00004",
+              "edition": "xinke_pingbi",
+              "page_no": 4,
+              "subject_id": "sha-wujing",
+              "predicate": "jtw:isDiscipleOf",
+              "object_id": "唐僧",
+              "line_idx": 9,
+              "line_id": "xinke_pingbi#p00004#L009",
+              "evidence": "沙和尚帶師父那里出恭去了",
+              "verification_status": "待核实"
+            },
+            {
+              "relation_id": "xinke_pingbi#p00004#R3",
+              "page_id": "xinke_pingbi#p00004",
+              "edition": "xinke_pingbi",
+              "page_no": 4,
+              "subject_id": "sun-wukong",
+              "predicate": "jtw:isSiblingOf",
+              "object_id": "豬八戒",
+              "line_idx": 7,
+              "line_id": "xinke_pingbi#p00004#L007",
+              "evidence": "行者道兄弟我不怪你",
+              "verification_status": "待核实"
+            }
+          ]
+        },
+        "events": {
+          "name": "events",
+          "desc": "事件（含主演、地点、摘要、事件类别）",
+          "columns": [
+            "event_id",
+            "page_id",
+            "edition",
+            "page_no",
+            "name",
+            "actor_ids",
+            "actor_count",
+            "place_label",
+            "summary",
+            "line_span",
+            "category"
+          ],
+          "stats": {
+            "rows": 138,
+            "edition": {
+              "xinke_pingbi": 138
+            },
+            "category": {
+              "": 138
+            }
+          },
+          "samples": [
+            {
+              "event_id": "xinke_pingbi#p00004#E0",
+              "page_id": "xinke_pingbi#p00004",
+              "edition": "xinke_pingbi",
+              "page_no": 4,
+              "name": "孫悟空尋師父",
+              "actor_ids": "sun-wukong|tang-sanzang",
+              "actor_count": 2,
+              "place_label": "",
+              "summary": "孫大聖牽馬挑擔滿山尋找失蹤的師父唐僧",
+              "line_span": "2|3",
+              "category": ""
+            },
+            {
+              "event_id": "xinke_pingbi#p00004#E1",
+              "page_id": "xinke_pingbi#p00004",
+              "edition": "xinke_pingbi",
+              "page_no": 4,
+              "name": "豬八戒戰妖精",
+              "actor_ids": "zhu-bajie|demon",
+              "actor_count": 2,
+              "place_label": "",
+              "summary": "豬八戒捨命與妖精戰了一會，得命回來",
+              "line_span": "4|5|6",
+              "category": ""
+            },
+            {
+              "event_id": "xinke_pingbi#p00004#E2",
+              "page_id": "xinke_pingbi#p00004",
+              "edition": "xinke_pingbi",
+              "page_no": 4,
+              "name": "沙僧歸來",
+              "actor_ids": "sha-wujing|sun-wukong",
+              "actor_count": 2,
+              "place_label": "",
+              "summary": "沙僧來到，孫行者問師父去向",
+              "line_span": "9|10",
+              "category": ""
+            },
+            {
+              "event_id": "xinke_pingbi#p00005#E3",
+              "page_id": "xinke_pingbi#p00005",
+              "edition": "xinke_pingbi",
+              "page_no": 5,
+              "name": "木母助威征怪物",
+              "actor_ids": "zhu-bajie|yaoguai",
+              "actor_count": 2,
+              "place_label": "",
+              "summary": "猪八戒协助征讨妖怪",
+              "line_span": "0",
+              "category": ""
+            }
+          ]
+        },
+        "artifacts": {
+          "name": "artifacts",
+          "desc": "法宝（持有者/来源/状态）",
+          "columns": [
+            "artifact_id",
+            "name",
+            "origin",
+            "state",
+            "holder_id"
+          ],
+          "stats": {
+            "rows": 0
+          },
+          "samples": []
+        },
+        "discipleship": {
+          "name": "discipleship",
+          "desc": "师徒关系（含是否正式、证据）",
+          "columns": [
+            "relation_id",
+            "master_id",
+            "disciple_id",
+            "relation_type",
+            "is_official",
+            "verification_status",
+            "source_page",
+            "source_text"
+          ],
+          "stats": {
+            "rows": 0
+          },
+          "samples": []
+        },
+        "kinship": {
+          "name": "kinship",
+          "desc": "亲属关系",
+          "columns": [
+            "relation_id",
+            "subject_id",
+            "object_id",
+            "relation_type",
+            "verification_status",
+            "source_page",
+            "source_text"
+          ],
+          "stats": {
+            "rows": 0
+          },
+          "samples": []
+        },
+        "antagonism": {
+          "name": "antagonism",
+          "desc": "敌对关系",
+          "columns": [
+            "relation_id",
+            "subject_id",
+            "object_id",
+            "relation_type",
+            "verification_status",
+            "source_page",
+            "source_text"
+          ],
+          "stats": {
+            "rows": 0
+          },
+          "samples": []
+        },
+        "possession": {
+          "name": "possession",
+          "desc": "法宝持有",
+          "columns": [
+            "relation_id",
+            "person_id",
+            "artifact_id",
+            "role",
+            "verification_status"
+          ],
+          "stats": {
+            "rows": 0
+          },
+          "samples": []
+        },
+        "membership": {
+          "name": "membership",
+          "desc": "派系归属",
+          "columns": [
+            "relation_id",
+            "person_id",
+            "sect_id",
+            "role",
+            "verification_status"
+          ],
+          "stats": {
+            "rows": 0
+          },
+          "samples": []
+        },
+        "involvement": {
+          "name": "involvement",
+          "desc": "事件参与角色",
+          "columns": [
+            "relation_id",
+            "person_id",
+            "event_id",
+            "role",
+            "verification_status"
+          ],
+          "stats": {
+            "rows": 0
+          },
+          "samples": []
+        },
+        "mentions": {
+          "name": "mentions",
+          "desc": "实体×文本行 提及",
+          "columns": [
+            "entity_id",
+            "entity_id_raw",
+            "entity_type",
+            "line_id",
+            "mention_text"
+          ],
+          "stats": {
+            "rows": 1053
+          },
+          "samples": [
+            {
+              "entity_id": "xinke_pingbi/sun-wukong",
+              "entity_id_raw": "sun-wukong",
+              "entity_type": "person",
+              "line_id": "xinke_pingbi#p00004#L002",
+              "mention_text": "話說孫大聖牽着馬挑着担滿山頭尋叫師父"
+            },
+            {
+              "entity_id": "xinke_pingbi/sun-wukong",
+              "entity_id_raw": "sun-wukong",
+              "entity_type": "person",
+              "line_id": "xinke_pingbi#p00004#L003",
+              "mention_text": "行者道師父不見"
+            },
+            {
+              "entity_id": "xinke_pingbi/sun-wukong",
+              "entity_id_raw": "sun-wukong",
+              "entity_type": "person",
+              "line_id": "xinke_pingbi#p00004#L006",
+              "mention_text": "反而問我行者道兄弟"
+            },
+            {
+              "entity_id": "xinke_pingbi/sun-wukong",
+              "entity_id_raw": "sun-wukong",
+              "entity_type": "person",
+              "line_id": "xinke_pingbi#p00004#L010",
+              "mention_text": "只見沙僧來到行者問道沙僧"
+            }
+          ]
+        }
+      },
+      "totals": {
+        "rows": 1995
+      }
+    },
+    "ideological": {
+      "tables": {
+        "scholar_arguments": {
+          "name": "scholar_arguments",
+          "desc": "评点家观点（含学派、立场）",
+          "columns": [
+            "argument_id",
+            "scholar_id",
+            "work_title",
+            "school",
+            "argues_about",
+            "stance",
+            "evidence_line_id"
+          ],
+          "stats": {
+            "rows": 11,
+            "school": {
+              "丹道": 3,
+              "考证": 3,
+              "理学": 2,
+              "佛学": 2,
+              "文学": 1
+            },
+            "stance": {
+              "三教归儒，西游实为阐发纲常伦理之书，非谈空谈玄": 1,
+              "心猿归正即修身养性、去欲存理之功，喻儒家克己复礼": 1,
+              "殆《华严》之外篇也，以佛家因果轮回、心性解脱论西游": 1,
+              "唐僧即金蝉子转世，取经乃佛门度化之旅，证佛法无边": 1,
+              "证道之书，其中金丹炉鼎、阴阳五行之说隐于妖怪斗法之中": 1,
+              "师徒五众配金木水火土五行，沿途妖魔鬼怪皆外魔内因之象": 1,
+              "车迟三怪喻外丹符箓之妄，悟空破之彰内丹心性之正": 1,
+              "以趣胜，嬉笑怒骂皆成文章，神魔游戏之中含讽世之旨": 1,
+              "世德堂本为现存最早刻本，神魔小说尤以明世德堂本为宗": 1,
+              "游戏之作，虽极诞妄，然非作者别含深意，实为神魔小说集大成": 1,
+              "嬉笑怒骂的滑稽小说，非道书非佛书，须作游戏文字读": 1
+            }
+          },
+          "samples": [
+            {
+              "argument_id": "sch-arg-000",
+              "scholar_id": "zhang-shushen",
+              "work_title": "新说西游记",
+              "school": "理学",
+              "argues_about": "《西游》旨归",
+              "stance": "三教归儒，西游实为阐发纲常伦理之书，非谈空谈玄",
+              "evidence_line_id": null
+            },
+            {
+              "argument_id": "sch-arg-001",
+              "scholar_id": "zhang-shushen",
+              "work_title": "新说西游记",
+              "school": "理学",
+              "argues_about": "悟空成佛",
+              "stance": "心猿归正即修身养性、去欲存理之功，喻儒家克己复礼",
+              "evidence_line_id": null
+            },
+            {
+              "argument_id": "sch-arg-002",
+              "scholar_id": "you-dong",
+              "work_title": "西游真诠序",
+              "school": "佛学",
+              "argues_about": "《西游》义理",
+              "stance": "殆《华严》之外篇也，以佛家因果轮回、心性解脱论西游",
+              "evidence_line_id": null
+            },
+            {
+              "argument_id": "sch-arg-003",
+              "scholar_id": "you-dong",
+              "work_title": "西游真诠序",
+              "school": "佛学",
+              "argues_about": "金蝉转世",
+              "stance": "唐僧即金蝉子转世，取经乃佛门度化之旅，证佛法无边",
+              "evidence_line_id": null
+            }
+          ]
+        },
+        "doctrine_mentions": {
+          "name": "doctrine_mentions",
+          "desc": "义理提及（佛/道/儒）",
+          "columns": [
+            "line_id",
+            "doctrine",
+            "school",
+            "sub",
+            "stance_attitude"
+          ],
+          "stats": {
+            "rows": 9006,
+            "school": {
+              "道": 3876,
+              "儒": 3840,
+              "释": 1290
+            },
+            "doctrine": {
+              "道": 3876,
+              "儒": 3840,
+              "释": 1290
+            }
+          },
+          "samples": [
+            {
+              "line_id": "xinke_pingbi#p00004#L002",
+              "doctrine": "儒",
+              "school": "儒",
+              "sub": "父",
+              "stance_attitude": "陈述"
+            },
+            {
+              "line_id": "xinke_pingbi#p00004#L003",
+              "doctrine": "儒",
+              "school": "儒",
+              "sub": "父",
+              "stance_attitude": "陈述"
+            },
+            {
+              "line_id": "xinke_pingbi#p00004#L003",
+              "doctrine": "道",
+              "school": "道",
+              "sub": "道",
+              "stance_attitude": "陈述"
+            },
+            {
+              "line_id": "xinke_pingbi#p00004#L004",
+              "doctrine": "道",
+              "school": "道",
+              "sub": "道",
+              "stance_attitude": "陈述"
+            }
+          ]
+        }
+      },
+      "totals": {
+        "rows": 9017
+      }
+    },
+    "textual": {
+      "tables": {
+        "editions": {
+          "name": "editions",
+          "desc": "版本名录（源流/年份/刊刻机构）",
+          "columns": [
+            "edition_id",
+            "display_name",
+            "year",
+            "publisher",
+            "desc",
+            "category"
+          ],
+          "stats": {
+            "rows": 20,
+            "category": {
+              "评点": 8,
+              "正传底本": 4,
+              "文献": 3,
+              "简本": 2,
+              "续书": 2,
+              "补书": 1
+            }
+          },
+          "samples": [
+            {
+              "edition_id": "shidetang",
+              "display_name": "世德堂本",
+              "year": 1592,
+              "publisher": "金陵世德堂",
+              "desc": "现存最早刻本，1592",
+              "category": "正传底本"
+            },
+            {
+              "edition_id": "li_ping",
+              "display_name": "李评本",
+              "year": -1,
+              "publisher": "明李廷机评点本",
+              "desc": "含评点",
+              "category": "评点"
+            },
+            {
+              "edition_id": "daqishi",
+              "display_name": "大奇书本",
+              "year": -1,
+              "publisher": "大奇书堂",
+              "desc": "Gallica 分册 4031-4035",
+              "category": "评点"
+            },
+            {
+              "edition_id": "xinke_pingbi",
+              "display_name": "新刻全像批评西游记",
+              "year": -1,
+              "publisher": "清",
+              "desc": "含评点",
+              "category": "评点"
+            }
+          ]
+        },
+        "chapters": {
+          "name": "chapters",
+          "desc": "章回（回号/回目/所属版本）",
+          "columns": [
+            "chapter_id",
+            "edition",
+            "chapter_label",
+            "chapter_title",
+            "raw_title",
+            "first_page",
+            "first_line_id"
+          ],
+          "stats": {
+            "rows": 571,
+            "edition": {
+              "xiyou_yuanzhi": 101,
+              "xu_xiyouji": 101,
+              "gubao": 100,
+              "baihui_xiangzhu": 100,
+              "zhu_ping": 66,
+              "xiyouji_zhuan": 41,
+              "hou_xiyouji": 41,
+              "xiyou_bu": 17,
+              "xinke_pingbi": 4
+            }
+          },
+          "samples": [
+            {
+              "chapter_id": "xinke_pingbi/第八十六回",
+              "edition": "xinke_pingbi",
+              "chapter_label": "第八十六回",
+              "chapter_title": "水母助威征怪物 金公施法滅妖邪",
+              "raw_title": "第八十六回 水母助威征怪物 金公施法滅妖邪",
+              "first_page": 4,
+              "first_line_id": "xinke_pingbi#p00004#L001"
+            },
+            {
+              "chapter_id": "xinke_pingbi/第八十七回",
+              "edition": "xinke_pingbi",
+              "chapter_label": "第八十七回",
+              "chapter_title": "鳳仙郡冒天止雨 孫大聖勸善施霖",
+              "raw_title": "第八十七回 鳳仙郡冒天止雨 孫大聖勸善施霖",
+              "first_page": 18,
+              "first_line_id": "xinke_pingbi#p00018#L017"
+            },
+            {
+              "chapter_id": "xinke_pingbi/第八十八回",
+              "edition": "xinke_pingbi",
+              "chapter_label": "第八十八回",
+              "chapter_title": "禪到玉華施法會 心猿木土授門人",
+              "raw_title": "第八十八回 禪到玉華施法會 心猿木土授門人",
+              "first_page": 30,
+              "first_line_id": "xinke_pingbi#p00030#L005"
+            },
+            {
+              "chapter_id": "xinke_pingbi/第八十九回",
+              "edition": "xinke_pingbi",
+              "chapter_label": "第八十九回",
+              "chapter_title": "",
+              "raw_title": "第八十九回",
+              "first_page": 42,
+              "first_line_id": "xinke_pingbi#p00042#L024"
+            }
+          ]
+        },
+        "edition_tendency": {
+          "name": "edition_tendency",
+          "desc": "版本三教倾向（儒/释/道三维评分，Z 层）",
+          "columns": [
+            "tendency_id",
+            "edition_id",
+            "confucian",
+            "buddhist",
+            "daoist",
+            "note"
+          ],
+          "stats": {
+            "rows": 11
+          },
+          "samples": [
+            {
+              "tendency_id": "tend-000",
+              "edition_id": "shidetang",
+              "confucian": 0.3,
+              "buddhist": 0.4,
+              "daoist": 0.55,
+              "note": "世德堂本（1592），儒释道合流而未偏锋"
+            },
+            {
+              "tendency_id": "tend-001",
+              "edition_id": "li_ping",
+              "confucian": 0.35,
+              "buddhist": 0.35,
+              "daoist": 0.5,
+              "note": "李卓吾评本，重人物与文趣，三教并观"
+            },
+            {
+              "tendency_id": "tend-002",
+              "edition_id": "daqishi",
+              "confucian": 0.3,
+              "buddhist": 0.35,
+              "daoist": 0.55,
+              "note": "大奇书本，承世德堂系统"
+            },
+            {
+              "tendency_id": "tend-003",
+              "edition_id": "xinke_pingbi",
+              "confucian": 0.3,
+              "buddhist": 0.45,
+              "daoist": 0.45,
+              "note": "新刻全像批评本，评点重文理与佛道源流"
+            }
+          ]
+        },
+        "edition_lineage": {
+          "name": "edition_lineage",
+          "desc": "版本谱系（派生关系与衍生态，V 层）",
+          "columns": [
+            "lineage_id",
+            "from_edition",
+            "to_edition",
+            "lineage_type",
+            "note"
+          ],
+          "stats": {
+            "rows": 15
+          },
+          "samples": [
+            {
+              "lineage_id": "lineage-000",
+              "from_edition": "shidetang",
+              "to_edition": "gubao",
+              "lineage_type": "重刻",
+              "note": "世德堂原文系统直承，维基《西游》古本"
+            },
+            {
+              "lineage_id": "lineage-001",
+              "from_edition": "shidetang",
+              "to_edition": "daqishi",
+              "lineage_type": "重刻",
+              "note": "大奇书堂重刻世德堂本"
+            },
+            {
+              "lineage_id": "lineage-002",
+              "from_edition": "daqishi",
+              "to_edition": "yangminzhai",
+              "lineage_type": "简本",
+              "note": "杨闽斋本依大奇书系统缩略"
+            },
+            {
+              "lineage_id": "lineage-003",
+              "from_edition": "yangminzhai",
+              "to_edition": "minzhaitang",
+              "lineage_type": "重刻",
+              "note": "闽斋堂承杨闽斋"
+            }
+          ]
+        }
+      },
+      "totals": {
+        "rows": 617
+      }
+    }
+  }
+}

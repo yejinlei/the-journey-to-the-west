@@ -1,0 +1,167 @@
+{
+  "project": "Journey-to-the-West Knowledge Graph",
+  "version": "0.1.0",
+  "built_at": "2026-10-16T13:25:31Z",
+  "ontology": "../03_本体论规范/jtw_kg_ontology.ttl",
+  "vocabularies": "../03_本体论规范/vocabularies.yaml",
+  "source_extract_dir": "book\\extract",
+  "counts": {
+    "annotations": 113,
+    "antagonism": 0,
+    "artifacts": 0,
+    "chapters": 270,
+    "discipleship": 0,
+    "doctrine_mentions": 9006,
+    "edition_lineage": 10,
+    "edition_tendency": 11,
+    "editions": 11,
+    "entities": 455,
+    "events": 138,
+    "involvement": 0,
+    "kinship": 0,
+    "line_semantics": 5787,
+    "lines": 5787,
+    "membership": 0,
+    "mentions": 1053,
+    "pages": 338,
+    "possession": 0,
+    "relationships": 349,
+    "scholar_arguments": 11,
+    "stats": 72
+  },
+  "tables": [
+    {
+      "name": "annotations",
+      "path": "annotations.parquet",
+      "rows": 113,
+      "size_bytes": 9410
+    },
+    {
+      "name": "antagonism",
+      "path": "antagonism.parquet",
+      "rows": 0,
+      "size_bytes": 4223
+    },
+    {
+      "name": "artifacts",
+      "path": "artifacts.parquet",
+      "rows": 0,
+      "size_bytes": 3127
+    },
+    {
+      "name": "chapters",
+      "path": "chapters.parquet",
+      "rows": 270,
+      "size_bytes": 21890
+    },
+    {
+      "name": "discipleship",
+      "path": "discipleship.parquet",
+      "rows": 0,
+      "size_bytes": 4669
+    },
+    {
+      "name": "doctrine_mentions",
+      "path": "doctrine_mentions.parquet",
+      "rows": 9006,
+      "size_bytes": 51334
+    },
+    {
+      "name": "edition_lineage",
+      "path": "edition_lineage.parquet",
+      "rows": 10,
+      "size_bytes": 4157
+    },
+    {
+      "name": "edition_tendency",
+      "path": "edition_tendency.parquet",
+      "rows": 11,
+      "size_bytes": 4849
+    },
+    {
+      "name": "editions",
+      "path": "editions.parquet",
+      "rows": 11,
+      "size_bytes": 4587
+    },
+    {
+      "name": "entities",
+      "path": "entities.parquet",
+      "rows": 455,
+      "size_bytes": 24369
+    },
+    {
+      "name": "events",
+      "path": "events.parquet",
+      "rows": 138,
+      "size_bytes": 28757
+    },
+    {
+      "name": "involvement",
+      "path": "involvement.parquet",
+      "rows": 0,
+      "size_bytes": 3255
+    },
+    {
+      "name": "kinship",
+      "path": "kinship.parquet",
+      "rows": 0,
+      "size_bytes": 4223
+    },
+    {
+      "name": "line_semantics",
+      "path": "line_semantics.parquet",
+      "rows": 5787,
+      "size_bytes": 50310
+    },
+    {
+      "name": "lines",
+      "path": "lines.parquet",
+      "rows": 5787,
+      "size_bytes": 2472285
+    },
+    {
+      "name": "membership",
+      "path": "membership.parquet",
+      "rows": 0,
+      "size_bytes": 3243
+    },
+    {
+      "name": "mentions",
+      "path": "mentions.parquet",
+      "rows": 1053,
+      "size_bytes": 41405
+    },
+    {
+      "name": "pages",
+      "path": "pages.parquet",
+      "rows": 338,
+      "size_bytes": 33106
+    },
+    {
+      "name": "possession",
+      "path": "possession.parquet",
+      "rows": 0,
+      "size_bytes": 3279
+    },
+    {
+      "name": "relationships",
+      "path": "relationships.parquet",
+      "rows": 349,
+      "size_bytes": 25234
+    },
+    {
+      "name": "scholar_arguments",
+      "path": "scholar_arguments.parquet",
+      "rows": 11,
+      "size_bytes": 5939
+    },
+    {
+      "name": "stats",
+      "path": "stats.parquet",
+      "rows": 72,
+      "size_bytes": 9151
+    }
+  ],
+  "status": "v0.8_semantics_layers"
+}
