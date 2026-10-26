@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>关键情节异文对勘 · 西游版本学</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  body{font-family:"Noto Serif SC","Source Han Serif SC","SimSun",serif;background:#f7f1e6;color:#2a2a2a;margin:0;}
+  header{background:linear-gradient(135deg,#6b3410,#a0522d);color:#fff8ee;padding:24px 32px;}
+  header h1{margin:0 0 6px;font-size:26px;letter-spacing:2px;}
+  header p{margin:0;opacity:.85;font-size:14px;}
+  .wrap{max-width:1200px;margin:0 auto;padding:24px;}
+  .back{display:inline-block;color:#8b4513;text-decoration:none;font-size:14px;margin-bottom:16px;}
+  .back:hover{text-decoration:underline;}
+  .moment{background:#fff;border:1px solid #d9c9a8;border-radius:10px;padding:20px 24px;margin-bottom:20px;box-shadow:0 2px 6px rgba(107,52,16,.08);}
+  .moment h2{margin:0 0 6px;color:#6b3410;font-size:20px;border-left:4px solid #8b4513;padding-left:12px;}
+  .moment .desc{color:#7a5a3c;font-size:14px;margin-bottom:16px;padding-left:16px;}
+  .tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;border-bottom:1px solid #e8dcc0;padding-bottom:10px;}
+  .tab{padding:6px 14px;border:1px solid #d9c9a8;border-radius:20px;background:#fffdf7;cursor:pointer;font-size:13px;font-family:inherit;}
+  .tab.on{background:#8b4513;color:#fff;border-color:#8b4513;}
+  .tab.miss{opacity:.4;text-decoration:line-through;cursor:not-allowed;}
+  .pane{display:none;}
+  .pane.on{display:block;}
+  .meta{font-size:13px;color:#8b4513;margin-bottom:8px;padding:6px 0;border-bottom:1px dashed #e8dcc0;}
+  .cols{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+  @media(max-width:800px){.cols{grid-template-columns:1fr;}}
+  .col{background:#fdfaf2;border:1px solid #ece0c2;border-radius:6px;padding:12px 14px;}
+  .col h4{margin:0 0 8px;font-size:14px;}
+  .col.x h4{color:#2a2a2a;}
+  .col.s h4{color:#3a5a8a;font-family:"Noto Sans SC","Microsoft YaHei",sans-serif;}
+  .col.z h4{color:#8b4513;font-style:italic;}
+  .col .txt{font-size:14px;line-height:1.9;white-space:pre-wrap;}
+  .col.s .txt{font-family:"Noto Sans SC","Microsoft YaHei",sans-serif;}
+  .col.z .txt{color:#5a3a1c;}
+  .miss-note{padding:30px;text-align:center;color:#a08868;font-size:14px;background:#faf5ea;border-radius:6px;}
+</style>
+</head>
+<body>
+<header>
+  <h1>📜 关键情节异文对勘</h1>
+  <p>跨 7 个版本的 8 个经典场面对照：同情节下繁/简/白三栏并呈，可直接比对各版本文字差异</p>
+</header>
+<div class="wrap">
+  <a class="back" href="index.html">← 返回首页</a>
+  <div id="out"></div>
+</div>
+<script>
+let DATA = null;
+async function init(){
+  DATA = await fetch('data/yiwen.json').then(r=>r.json());
+  const out = document.getElementById('out');
+  const ED_NAMES = {
+    gubao:'世德堂古本', baihui_xiangzhu:'百回詳注', zhu_ping:'朱鼎臣简本',
+    xiyouji_zhuan:'杨致和简本', xinke_pingbi:'新刻全像批评',
+    xiyou_bu:'西游补（董說）', hou_xiyouji:'後西游記'
+  };
+  let html='';
+  DATA.forEach((m, mi)=>{
+    const vkeys = Object.keys(ED_NAMES);
+    let tabsHtml = '';
+    let panesHtml = '';
+    let firstHit = true;
+    vkeys.forEach(vk=>{
+      const hit = m.versions[vk];
+      if(!hit){
+        tabsHtml += `<span class="tab miss">${ED_NAMES[vk]}（无此情节）</span>`;
+        return;
+      }
+      const isOn = firstHit?'on':'';
+      tabsHtml += `<span class="tab ${isOn}" data-mi="${mi}" data-vk="${vk}" onclick="switchPane(${mi},'${vk}',this)">${ED_NAMES[vk]}</span>`;
+      panesHtml += `<div class="pane ${isOn}" id="p-${mi}-${vk}">
+        <div class="meta">📖 ${hit.ch_title}</div>
+        <div class="cols">
+          <div class="col x"><h4>【繁体原文】</h4><div class="txt">${escape(hit.x)}</div></div>
+          <div class="col s"><h4>【规范简体】</h4><div class="txt">${escape(hit.s)}</div></div>
+          <div class="col z"><h4>【白话译文】</h4><div class="txt">${escape(hit.z)}</div></div>
+        </div>
+      </div>`;
+      firstHit = false;
+    });
+    html += `<div class="moment">
+      <h2>${m.name}</h2>
+      <div class="desc">${m.desc}</div>
+      <div class="tabs">${tabsHtml}</div>
+      ${panesHtml}
+    </div>`;
+  });
+  out.innerHTML = html;
+}
+function switchPane(mi, vk, el){
+  const tabs = el.parentElement.querySelectorAll('.tab');
+  tabs.forEach(t=>t.classList.remove('on'));
+  el.classList.add('on');
+  const panes = el.parentElement.parentElement.querySelectorAll('.pane');
+  panes.forEach(p=>p.classList.remove('on'));
+  document.getElementById('p-'+mi+'-'+vk).classList.add('on');
+}
+function escape(s){
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+init();
+</script>
+</body>
+</html>
