@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>西游全书检索 · 繁简白三版</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  body { font-family: "Noto Serif SC", "Source Han Serif SC", "SimSun", serif; background:#f7f1e6; color:#2a2a2a; margin:0; }
+  header { background:linear-gradient(135deg,#6b3410,#a0522d); color:#fff8ee; padding:24px 32px; box-shadow:0 2px 8px rgba(0,0,0,.15); }
+  header h1 { margin:0 0 6px 0; font-size:26px; letter-spacing:2px; }
+  header p { margin:0; opacity:.85; font-size:14px; }
+  .wrap { max-width:1100px; margin:0 auto; padding:24px; }
+  .search-box { background:#fff; border:1px solid #d9c9a8; border-radius:10px; padding:20px; margin-bottom:20px; box-shadow:0 2px 6px rgba(107,52,16,.08); }
+  .row { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+  .row label { font-size:14px; color:#5a3a1c; }
+  input[type=text] { flex:1; min-width:240px; padding:10px 14px; font-size:16px; border:1px solid #c9b48a; border-radius:6px; font-family:inherit; background:#fffdf7; }
+  button { padding:10px 20px; background:#8b4513; color:#fff; border:none; border-radius:6px; font-size:15px; cursor:pointer; font-family:inherit; }
+  button:hover { background:#a0522d; }
+  button:disabled { background:#b8a088; cursor:not-allowed; }
+  select { padding:8px 12px; border:1px solid #c9b48a; border-radius:6px; font-family:inherit; background:#fffdf7; }
+  .editions { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+  .editions label { display:flex; align-items:center; gap:4px; padding:6px 12px; border:1px solid #d9c9a8; border-radius:20px; background:#fffdf7; font-size:13px; cursor:pointer; }
+  .editions label.on { background:#8b4513; color:#fff; border-color:#8b4513; }
+  .stat { font-size:13px; color:#7a5a3c; margin-bottom:10px; }
+  .result { background:#fff; border:1px solid #e8dcc0; border-radius:8px; padding:16px 18px; margin-bottom:12px; box-shadow:0 1px 3px rgba(0,0,0,.04); }
+  .result .meta { display:flex; gap:12px; font-size:13px; color:#8b4513; margin-bottom:8px; border-bottom:1px dashed #e8dcc0; padding-bottom:6px; }
+  .result .meta .ed { font-weight:600; }
+  .result .meta a { color:#8b4513; text-decoration:none; margin-left:auto; }
+  .result .meta a:hover { text-decoration:underline; }
+  .result .snippet { font-size:15px; line-height:1.8; }
+  .result .snippet .x { color:#2a2a2a; margin-bottom:6px; }
+  .result .snippet .s { color:#4a4a4a; font-family:"Noto Sans SC","Source Han Sans SC","Microsoft YaHei",sans-serif; margin-bottom:6px; }
+  .result .snippet .z { color:#5a3a1c; font-style:italic; }
+  mark { background:#f9e79f; color:#6b3410; padding:1px 2px; border-radius:2px; font-weight:600; }
+  .pager { text-align:center; margin:20px 0; }
+  .pager button { margin:0 4px; padding:6px 12px; background:#fff; color:#8b4513; border:1px solid #c9b48a; }
+  .pager button.on { background:#8b4513; color:#fff; }
+  .loading { text-align:center; padding:40px; color:#8b6840; font-size:15px; }
+  .empty { text-align:center; padding:40px; color:#a08868; font-size:15px; }
+  .back { display:inline-block; margin:0 0 16px 0; color:#8b4513; text-decoration:none; font-size:14px; }
+  .back:hover { text-decoration:underline; }
+  .opt { display:flex; gap:16px; font-size:13px; color:#5a3a1c; flex-wrap:wrap; }
+  .opt label { display:flex; align-items:center; gap:4px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>📚 西游全书检索</h1>
+  <p>跨 9 个版本共 10,981 段，同时检索繁体 · 简体 · 白话</p>
+</header>
+<div class="wrap">
+  <a class="back" href="index.html">← 返回首页</a>
+  <div class="search-box">
+    <div class="row">
+      <input id="q" type="text" placeholder="输入检索词：可搜繁体、简体、白话（例：花果山 / 筋斗云 / 三打白骨精 / 皇帝轮流做）" autofocus>
+      <button id="btn" onclick="doSearch()">检索</button>
+    </div>
+    <div class="editions" id="eds"></div>
+    <div class="opt">
+      <label><input type="checkbox" id="col_x" checked> 繁体原文</label>
+      <label><input type="checkbox" id="col_s" checked> 简体</label>
+      <label><input type="checkbox" id="col_z" checked> 白话</label>
+      <label><input type="checkbox" id="exact"> 精确匹配（不分词）</label>
+    </div>
+  </div>
+  <div id="out"></div>
+</div>
+<script>
+const EDIT_META = {};
+const DATA = {}; // id -> chapters array
+let loaded = 0;
+const PAGE_SIZE = 20;
+let curHits = [];
+let curPage = 0;
+
+async function init() {
+  const idx = await fetch('data/read/index.json').then(r=>r.json());
+  const box = document.getElementById('eds');
+  idx.editions.forEach(e => {
+    if (e.id === 'diancang') return; // 点校本作为附属
+    EDIT_META[e.id] = e;
+    const lab = document.createElement('label');
+    lab.className = 'on';
+    lab.innerHTML = `<input type="checkbox" value="${e.id}" checked>${e.name}`;
+    lab.querySelector('input').addEventListener('change', ev => {
+      lab.classList.toggle('on', ev.target.checked);
+    });
+    box.appendChild(lab);
+  });
+  document.getElementById('q').addEventListener('keydown', e => { if (e.key==='Enter') doSearch(); });
+}
+
+async function loadEdition(id) {
+  if (DATA[id]) return;
+  const data = await fetch('data/read/'+id+'.json').then(r=>r.json());
+  // 标准化：data可能是数组（含lines）
+  const chaps = [];
+  for (const ch of data) {
+    const lines = typeof ch.lines === 'string' ? JSON.parse(ch.lines) : ch.lines;
+    chaps.push({ l: ch.l, t: ch.t, p: ch.p, lines });
+  }
+  DATA[id] = chaps;
+  loaded++;
+}
+
+function highlight(text, kw) {
+  if (!text || !kw) return text || '';
+  const esc = kw.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  return text.replace(new RegExp(esc,'gi'), m => `<mark>${m}</mark>`);
+}
+
+function snippet(text, kw, radius=80) {
+  if (!text) return '';
+  const idx = text.toLowerCase().indexOf(kw.toLowerCase());
+  if (idx < 0) return text.length > radius*2 ? text.slice(0,radius*2)+'…' : text;
+  const start = Math.max(0, idx-radius);
+  const end = Math.min(text.length, idx+kw.length+radius);
+  return (start>0?'…':'') + text.slice(start,end) + (end<text.length?'…':'');
+}
+
+async function doSearch() {
+  const kw = document.getElementById('q').value.trim();
+  const out = document.getElementById('out');
+  if (!kw) { out.innerHTML = '<div class="empty">请输入检索词</div>'; return; }
+  out.innerHTML = '<div class="loading">正在检索…（首次检索会加载各版本，请稍候）</div>';
+  const col_x = document.getElementById('col_x').checked;
+  const col_s = document.getElementById('col_s').checked;
+  const col_z = document.getElementById('col_z').checked;
+  const exact = document.getElementById('exact').checked;
+  const eds = [...document.querySelectorAll('#eds input:checked')].map(i=>i.value);
+  // 加载所有选中版本
+  await Promise.all(eds.map(id => loadEdition(id)));
+  // 检索
+  const hits = [];
+  for (const id of eds) {
+    const chaps = DATA[id];
+    for (const ch of chaps) {
+      for (const ln of ch.lines) {
+        const hay = (col_x?ln.x:'')+' '+(col_s?ln.s:'')+' '+(col_z?ln.z:'');
+        let matched = false;
+        if (exact) {
+          matched = hay.toLowerCase().includes(kw.toLowerCase());
+        } else {
+          // 按2字起切分：整体匹配即中
+          matched = hay.toLowerCase().includes(kw.toLowerCase());
+        }
+        if (matched) {
+          hits.push({ ed:id, ch:ch.l, cht:ch.t, type:ln.t, x:ln.x, s:ln.s, z:ln.z });
+        }
+      }
+    }
+  }
+  curHits = hits;
+  curPage = 0;
+  renderPage();
+}
+
+function renderPage() {
+  const out = document.getElementById('out');
+  const kw = document.getElementById('q').value.trim();
+  if (!curHits.length) { out.innerHTML = '<div class="empty">未找到匹配结果</div>'; return; }
+  const totalPages = Math.ceil(curHits.length / PAGE_SIZE);
+  const page = curHits.slice(curPage*PAGE_SIZE, (curPage+1)*PAGE_SIZE);
+  let html = `<div class="stat">共找到 <b>${curHits.length}</b> 处匹配，第 ${curPage+1}/${totalPages} 页</div>`;
+  for (const h of page) {
+    const em = EDIT_META[h.ed];
+    const xs = col_x_ok(h.x) ? `<div class="x"><b>【繁】</b> ${highlight(snippet(h.x,kw),kw)}</div>` : '';
+    const ss = col_s_ok(h.s) ? `<div class="s"><b>【简】</b> ${highlight(snippet(h.s,kw),kw)}</div>` : '';
+    const zs = col_z_ok(h.z) ? `<div class="z"><b>【白】</b> ${highlight(snippet(h.z,kw),kw)}</div>` : '';
+    html += `<div class="result">
+      <div class="meta">
+        <span class="ed">${em?em.name:h.ed}</span>
+        <span>${h.ch}${h.cht?' · '+h.cht:''}</span>
+        <span style="opacity:.7">${h.type||''}</span>
+        <a href="sandui.html?ed=${h.ed}&ch=${encodeURIComponent(h.ch)}" target="_blank">在三语对读页打开 →</a>
+      </div>
+      <div class="snippet">${xs}${ss}${zs}</div>
+    </div>`;
+  }
+  // 分页
+  html += '<div class="pager">';
+  for (let i=0;i<totalPages;i++) {
+    html += `<button class="${i===curPage?'on':''}" onclick="goPage(${i})">${i+1}</button>`;
+  }
+  html += '</div>';
+  out.innerHTML = html;
+}
+function col_x_ok(){return document.getElementById('col_x').checked;}
+function col_s_ok(){return document.getElementById('col_s').checked;}
+function col_z_ok(){return document.getElementById('col_z').checked;}
+function goPage(p){curPage=p;renderPage();window.scrollTo(0,0);}
+
+init();
+</script>
+</body>
+</html>
