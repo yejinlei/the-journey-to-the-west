@@ -3,446 +3,365 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>《西游记》繁简白三语对照 · 校对版</title>
-<script src="https://aisearch-task.bj.bcebos.com/static/tailwindcss-3.4.17.js"></script>
+<title>《西游记》繁简白三语对照 · 校订版</title>
 <style>
   :root{
-    --paper:#faf6ed;
-    --ink:#2b2118;
-    --ink2:#5c4a39;
-    --ink3:#8a7560;
-    --cinnabar:#9e2b25;
-    --gold:#c89b3c;
-    --gold-l:#e0c279;
-    --line:#d9cdb8;
-    --line-gold:#e6c98a;
-    --shadow:0 1px 3px rgba(90,60,20,.08);
+    --paper:#faf6ed; --ink:#2b2118; --ink2:#5c4a39; --ink3:#8a7560;
+    --cinnabar:#9e2b25; --gold:#c89b3c; --line:#d9cdb8;
+    --cols:3; --scale:1;
   }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);
-    font-family:'PingFang SC','Microsoft YaHei','Hiragino Sans GB',sans-serif;
-    line-height:1.75;
-  }
+    font-family:'PingFang SC','Microsoft YaHei','Hiragino Sans GB',sans-serif;line-height:1.75}
+  a{color:var(--cinnabar);text-decoration:none}
+  a:hover{text-decoration:underline}
   .serif{font-family:'Songti SC','STSong','SimSun',serif}
   .kai{font-family:'Kaiti SC','STKaiti','KaiTi',serif}
+
+  .topbar{padding:10px 24px;border-bottom:1px solid var(--line);background:#fbf7ee;
+    display:flex;flex-wrap:wrap;gap:14px;font-size:13px;align-items:center}
+  .topbar a{color:var(--ink2)}
+
   .hero{background:
     radial-gradient(ellipse at 20% 0%,rgba(200,155,60,.15),transparent 50%),
     radial-gradient(ellipse at 80% 100%,rgba(158,43,37,.1),transparent 50%),
     linear-gradient(180deg,#fbf6e9,#f3ead5);
-    padding:56px 24px 40px;text-align:center;border-bottom:1px solid var(--line);
-  }
-  .hero h1{font-family:'Songti SC','STSong',serif;font-weight:900;font-size:42px;
-    letter-spacing:.18em;margin:0 0 12px;color:var(--cinnabar);
-    text-shadow:1px 1px 0 rgba(200,155,60,.2);
-  }
-  .hero .sub{font-size:15px;color:var(--ink2);letter-spacing:.25em;margin-bottom:18px}
-  .hero .meta-row{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;font-size:13px;color:var(--ink3)}
+    padding:44px 24px 32px;text-align:center;border-bottom:1px solid var(--line)}
+  .hero h1{font-family:'Songti SC','STSong',serif;font-weight:900;font-size:40px;
+    letter-spacing:.18em;margin:0 0 10px;color:var(--cinnabar);
+    text-shadow:1px 1px 0 rgba(200,155,60,.2)}
+  .hero .sub{font-size:15px;color:var(--ink2);letter-spacing:.28em;margin-bottom:16px}
+  .hero .meta-row{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;font-size:13px;color:var(--ink3)}
   .hero .meta-row span{padding:3px 12px;background:rgba(255,255,255,.6);border:1px solid var(--line);border-radius:20px}
-  .container{max-width:1200px;margin:0 auto;padding:24px 20px 60px}
-  .toolbar{position:sticky;top:0;z-index:10;background:rgba(250,246,237,.95);
-    backdrop-filter:blur(8px);padding:12px 16px;border:1px solid var(--line);border-radius:8px;
-    box-shadow:var(--shadow);margin-bottom:24px;display:flex;gap:12px;flex-wrap:wrap;align-items:center}
-  .toolbar label{font-size:13px;color:var(--ink2);letter-spacing:.08em}
-  .toolbar select,.toolbar button{font-family:inherit;font-size:14px;padding:6px 12px;
-    border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink);cursor:pointer}
-  .toolbar button.primary{background:linear-gradient(180deg,#c8352e,#9e2b25);color:#fff;border-color:#8a221d}
-  .toolbar button.primary:hover{filter:brightness(1.08)}
-  .toolbar button.ghost{background:transparent}
-  .toolbar .chips{display:flex;gap:6px;flex-wrap:wrap}
-  .chip{padding:4px 12px;font-size:13px;border:1px solid var(--line);border-radius:16px;
-    background:#fff;color:var(--ink2);cursor:pointer;user-select:none;transition:all .2s}
-  .chip.on{background:linear-gradient(180deg,#fdf1ee,#f8e6e2);color:var(--cinnabar);border-color:rgba(158,43,37,.4)}
-  .chap-head{margin:30px 0 18px;padding:16px 20px;border:1px solid var(--line-gold);
-    background:linear-gradient(180deg,rgba(230,201,138,.1),rgba(230,201,138,.02));
-    border-radius:6px;position:relative;
+
+  .bar{position:sticky;top:0;z-index:20;display:flex;flex-wrap:wrap;gap:12px;align-items:center;
+    padding:10px 24px;background:rgba(250,246,237,.96);backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--line);box-shadow:0 1px 3px rgba(90,60,20,.06)}
+  .bar label{font-size:13px;color:var(--ink2);display:flex;gap:6px;align-items:center}
+  .bar select{font-family:inherit;font-size:13.5px;padding:4px 8px;border:1px solid var(--line);
+    border-radius:4px;background:#fffdf8;color:var(--ink);max-width:15em}
+  .chips{display:flex;gap:6px}
+  .chip{display:inline-block;padding:2px 11px;font-size:12.5px;letter-spacing:.06em;
+    border:1px solid var(--line);border-radius:12px;background:rgba(255,253,248,.8);
+    color:var(--ink3);cursor:pointer;user-select:none;transition:all .18s}
+  .chip.on{color:var(--cinnabar);border-color:rgba(158,43,37,.45);
+    background:linear-gradient(180deg,#fdf1ee,#f8e6e2)}
+  .spacer{flex:1}
+  .bar button{font-family:inherit;font-size:13px;padding:5px 13px;cursor:pointer;
+    border:1px solid var(--line);border-radius:4px;background:#fffdf8;color:var(--ink2)}
+  .bar button:hover{background:#f6eee0}
+  .bar .scale{display:flex;gap:4px;align-items:center;font-size:12.5px;color:var(--ink3)}
+
+  .colhead{display:grid;grid-template-columns:repeat(var(--cols,3),1fr);
+    gap:0;max-width:1500px;margin:0 auto;padding:14px 20px 6px;
+    font-size:12.5px;letter-spacing:.16em;color:var(--ink3);text-align:center}
+  .colhead .ch{padding:4px 0;border-bottom:1px solid var(--line)}
+
+  .stage{max-width:1500px;margin:0 auto;padding:8px 20px 60px;font-size:calc(15.5px * var(--scale))}
+  .loading{padding:80px 0;text-align:center;color:var(--ink3);font-family:'Kaiti SC',serif;font-size:16px}
+
+  .row{display:grid;grid-template-columns:repeat(var(--cols,3),1fr);gap:0;
+    align-items:start;border-bottom:1px dotted rgba(217,205,184,.55)}
+  .row:last-child{border-bottom:none}
+  .cell{padding:9px 14px;word-break:break-word;overflow-wrap:anywhere}
+  .cell + .cell{border-left:1px solid rgba(217,205,184,.6)}
+  .cell.ft{font-family:'Songti SC','STSong','SimSun',serif;color:var(--ink)}
+  .cell.js{color:var(--ink2)}
+  .cell.bh{font-family:'Kaiti SC','STKaiti','KaiTi',serif;color:#3a4a3c}
+  .miss{color:#bdb2a2;font-size:.85em;font-style:italic}
+
+  .row.verse .cell{font-family:'Songti SC','STSong','SimSun',serif;font-style:italic;
+    color:#4a3f33;background:rgba(200,155,60,.05)}
+  .row.title .cell{font-weight:700;color:var(--cinnabar);background:rgba(158,43,37,.045)}
+  .row.commentary .cell,.row.colophon .cell{color:#6a5a48;font-size:.94em;background:rgba(120,110,90,.045)}
+  .row.caption .cell,.row.side .cell,.row.top .cell,.row.bottom .cell{color:#7a6a58;font-size:.93em}
+
+  body.hide-ft .ft{display:none}
+  body.hide-js .js{display:none}
+  body.hide-bh .bh{display:none}
+
+  .diancang{max-width:1500px;margin:0 auto 60px;padding:0 20px}
+  .diancang .inner{border:1px solid var(--gold);border-radius:6px;background:#fffdf6;
+    padding:20px 24px;box-shadow:0 1px 4px rgba(90,60,20,.07)}
+  .diancang h2{font-size:18px;color:var(--cinnabar);margin:0 0 4px;letter-spacing:.06em}
+  .diancang .note{font-size:12.5px;color:var(--ink3);margin-bottom:14px}
+  .diancang .body{white-space:pre-wrap;font-size:15.5px;line-height:2;color:var(--ink)}
+
+  footer{max-width:1500px;margin:0 auto;padding:24px 20px 60px;border-top:1px solid var(--line);
+    font-size:12.5px;color:var(--ink3);line-height:2}
+
+  @media(max-width:820px){
+    .row{grid-template-columns:1fr !important}
+    .cell + .cell{border-left:none;border-top:1px dotted rgba(217,205,184,.8)}
+    .colhead{display:none}
+    .hero h1{font-size:30px}
   }
-  .chap-head::before{content:'第';position:absolute;left:-1px;top:-1px;width:40px;height:40px;
-    background:var(--cinnabar);color:#fff;display:flex;align-items:center;justify-content:center;
-    font-family:'Songti SC',serif;font-size:18px;border-radius:0 0 6px 0}
-  .chap-head h2{margin:0 0 6px 40px;font-family:'Songti SC',serif;font-size:24px;
-    letter-spacing:.1em;color:var(--cinnabar)}
-  .chap-head .couple{margin-left:40px;font-family:'Kaiti SC',serif;font-size:15px;color:var(--ink2)}
-  .tri-grid{display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:24px}
-  @media(min-width:900px){.tri-grid{grid-template-columns:1fr 1fr 1fr}}
-  @media(min-width:640px) and (max-width:899px){.tri-grid{grid-template-columns:1fr 1fr}}
-  .panel{background:#fff;border:1px solid var(--line);border-radius:8px;padding:18px 20px;
-    box-shadow:var(--shadow);position:relative;transition:transform .2s;
-  }
-  .panel:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(90,60,20,.1)}
-  .panel.ft{border-top:3px solid #8b5a2b}
-  .panel.js{border-top:3px solid #5a7a4a}
-  .panel.bh{border-top:3px solid #9e2b25}
-  .panel .tag{position:absolute;top:-11px;left:16px;padding:2px 12px;font-size:12px;
-    letter-spacing:.15em;border-radius:10px;color:#fff;font-weight:500}
-  .panel.ft .tag{background:#8b5a2b}
-  .panel.js .tag{background:#5a7a4a}
-  .panel.bh .tag{background:#9e2b25}
-  .panel .content{margin-top:8px;font-size:15.5px;line-height:1.85;color:var(--ink)}
-  .panel.ft .content{font-family:'Songti SC','STSong',serif;letter-spacing:.03em}
-  .panel.js .content{font-family:'PingFang SC','Microsoft YaHei',sans-serif}
-  .panel.bh .content{font-family:'Kaiti SC','STKaiti',serif;color:#4a3828}
-  .correction{display:inline-block;background:linear-gradient(180deg,#fff8e1,#ffecb3);
-    border-bottom:2px wavy var(--gold);padding:0 3px;margin:0 1px;cursor:help;position:relative}
-  .correction:hover::after{content:attr(data-tip);position:absolute;bottom:100%;left:50%;
-    transform:translateX(-50%);background:#333;color:#fff;padding:4px 10px;border-radius:4px;
-    font-size:12px;white-space:nowrap;z-index:20;pointer-events:none;font-family:sans-serif}
-  .poetry{padding:12px 16px;background:linear-gradient(90deg,rgba(200,155,60,.08),transparent);
-    border-left:3px solid var(--gold-l);border-radius:0 4px 4px 0;margin:10px 0;
-    font-family:'Kaiti SC',serif;line-height:2}
-  .stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:24px}
-  .stat-card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:16px;text-align:center}
-  .stat-card .num{font-size:28px;font-weight:700;color:var(--cinnabar);font-family:'Songti SC',serif}
-  .stat-card .lbl{font-size:13px;color:var(--ink3);margin-top:4px;letter-spacing:.08em}
-  .footer{text-align:center;padding:30px 20px;color:var(--ink3);font-size:13px;border-top:1px solid var(--line)}
-  .chapter-nav{display:flex;gap:8px;justify-content:center;margin:20px 0 40px;flex-wrap:wrap}
-  .chapter-nav button{font-family:inherit;font-size:13px;padding:5px 10px;border:1px solid var(--line);
-    background:#fff;border-radius:4px;cursor:pointer;color:var(--ink2);min-width:38px}
-  .chapter-nav button.on{background:var(--cinnabar);color:#fff;border-color:var(--cinnabar)}
-  .chapter-nav button:hover:not(.on){background:#f5ecda}
-  .edit-note{margin:12px 0;padding:10px 14px;background:#fdf6e3;border-left:3px solid var(--gold);
-    font-size:13.5px;color:var(--ink2);border-radius:0 4px 4px 0}
-  .diff-del{background:#ffebee;text-decoration:line-through;color:#b71c1c;padding:0 2px}
-  .diff-add{background:#e8f5e9;color:#2e7d32;padding:0 2px}
 </style>
 </head>
 <body>
+<div class="topbar">
+  <a href="index.html">← 返回总览</a>
+  <a href="read.html">正文·评点</a>
+  <a href="compare.html">评点对照</a>
+  <a href="versions.html">版本谱</a>
+  <span style="flex:1"></span>
+  <span style="color:var(--ink3)">繁简白三语对照 · 校订版</span>
+</div>
 
-<div class="hero">
-  <h1>西 遊 記</h1>
-  <div class="sub serif">繁 · 簡 · 白　三版對照 · 校對定本</div>
+<header class="hero">
+  <h1>繁简白三语对照</h1>
+  <div class="sub">繁体原文 · 规范简体 · 白话译文</div>
   <div class="meta-row">
-    <span>底本：世德堂本 · 1592</span>
-    <span>简体：人民文学出版社 · 校注本</span>
-    <span>白话：全文精校改写本</span>
-    <span>共 100 回 · 约 85 万字</span>
+    <span id="mEd">— 个版本</span>
+    <span id="mLine">— 行</span>
+    <span>底本：维基文库 · 世德堂本系统</span>
   </div>
+</header>
+
+<div class="bar">
+  <label>版本
+    <select id="edSel" aria-label="选择版本"></select>
+  </label>
+  <label>回目
+    <select id="chSel" aria-label="选择回目"></select>
+  </label>
+  <div class="chips">
+    <span class="chip on" data-col="ft">繁体</span>
+    <span class="chip on" data-col="js">简体</span>
+    <span class="chip on" data-col="bh">白话</span>
+  </div>
+  <span class="spacer"></span>
+  <div class="scale">
+    <button id="fontMin" type="button">A−</button>
+    <span id="fontVal">100%</span>
+    <button id="fontPlus" type="button">A+</button>
+  </div>
+  <button id="prevBtn" type="button">← 上一回</button>
+  <button id="nextBtn" type="button">下一回 →</button>
 </div>
 
-<div class="container">
-  <!-- 统计概览 -->
-  <div class="stats-row">
-    <div class="stat-card"><div class="num">100</div><div class="lbl">回目</div></div>
-    <div class="stat-card"><div class="num">5022</div><div class="lbl">正文段落</div></div>
-    <div class="stat-card"><div class="num">270</div><div class="lbl">校勘修正</div></div>
-    <div class="stat-card"><div class="num">138</div><div class="lbl">典故注释</div></div>
-    <div class="stat-card"><div class="num">20</div><div class="lbl">存世版本</div></div>
-  </div>
-
-  <!-- 工具栏 -->
-  <div class="toolbar">
-    <label for="chapterSelect">回目选择</label>
-    <select id="chapterSelect" aria-label="回目选择">
-      <option value="1">第一回　靈根育孕源流出　心性修持大道生</option>
-      <option value="2">第二回　悟徹菩提真妙理　斷魔歸本合元神</option>
-      <option value="3">第三回　四海千山皆拱伏　九幽十類盡除名</option>
-      <option value="7">第七回　八卦爐中逃大聖　五行山下定心猿</option>
-      <option value="27">第二十七回　屍魔三戲唐三藏　聖僧恨逐美猴王</option>
-    </select>
-    <div class="chips">
-      <span class="chip on" data-toggle="ft">繁体</span>
-      <span class="chip on" data-toggle="js">简体</span>
-      <span class="chip on" data-toggle="bh">白话</span>
-      <span class="chip" data-toggle="corr">显示校勘</span>
-    </div>
-    <button class="primary" id="prevBtn">上一回</button>
-    <button class="primary" id="nextBtn">下一回</button>
-  </div>
-
-  <!-- 第一回正文 -->
-  <div id="chaptersContainer">
-
-    <!-- ============ 第一回 ============ -->
-    <div class="chapter-block" data-ch="1">
-      <div class="chap-head">
-        <h2>第一回　靈根育孕源流出　心性修持大道生</h2>
-        <div class="couple serif">灵根孕育源流出　心性修持大道生</div>
-      </div>
-
-      <div class="edit-note kai">
-        <b>校勘说明：</b>本回以世德堂本为底本，参校李卓吾评本、西游证道书。"育孕"通行本作"育藴"，依世德堂本原字；"圍圓"不误，指周长，非"方圓"；篇末邵康节诗"冬至子之半"原文如此。
-      </div>
-
-      <!-- 开篇诗 -->
-      <div class="tri-grid">
-        <div class="panel ft">
-          <span class="tag">繁體原文</span>
-          <div class="content">
-            <div class="poetry">
-              詩曰：<br>
-              混沌未分天地亂，茫茫渺渺無人見。<br>
-              自從盤古破鴻濛，開闢從茲清濁辨。<br>
-              覆載群生仰至仁，發明萬物皆成善。<br>
-              欲知造化會元功，須看《西遊釋厄傳》。
-            </div>
-          </div>
-        </div>
-        <div class="panel js">
-          <span class="tag">简体校注</span>
-          <div class="content">
-            <div class="poetry">
-              诗曰：<br>
-              混沌未分天地乱，茫茫渺渺无人见。<br>
-              自从盘古破鸿蒙，开辟从兹清浊辨。<br>
-              覆载群生仰至仁，发明万物皆成善。<br>
-              欲知造化会元功，须看《西游释厄传》。
-            </div>
-          </div>
-        </div>
-        <div class="panel bh">
-          <span class="tag">白话译文</span>
-          <div class="content">
-            <div class="poetry">
-              诗道：<br>
-              天地未开时一片混沌昏乱，茫茫渺渺无人能看见。<br>
-              自从盘古破开鸿蒙之气，清浊从此分辨，天地方才开辟。<br>
-              苍天覆盖、大地承载众生，全靠至仁之心，化育万物皆成善性。<br>
-              要知造化运转的玄妙功绩，请读这部《西游释厄传》。
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 天地历数段 -->
-      <div class="tri-grid">
-        <div class="panel ft">
-          <span class="tag">繁體原文</span>
-          <div class="content">
-            <p>蓋聞天地之數，有十二萬九千六百歲為一元。將一元分為十二會，乃子、丑、寅、卯、辰、巳、午、未、申、酉、戌、亥之十二支也。每會該一萬八百歲。</p>
-            <p>且就一日而論：子時得陽氣，而丑則雞鳴；寅不通光，而卯則日出；辰時食後，而巳則挨排；日午天中，而未則西蹉；申時晡而日落酉；戌黃昏而人定亥。譬於大數，若到戌會之終，則天地昏曚而萬物否矣。</p>
-          </div>
-        </div>
-        <div class="panel js">
-          <span class="tag">简体校注</span>
-          <div class="content">
-            <p>盖闻天地之数，有十二万九千六百岁为一元。将一元分为十二会，乃子、丑、寅、卯、辰、巳、午、未、申、酉、戌、亥之十二支也。每会该<span class="correction" data-tip="原作'合'，据世德堂本改">一万八百岁</span>。</p>
-            <p>且就一日而论：子时得阳气，而丑则鸡鸣；寅不通光，而卯则日出；辰时食后，而巳则挨排；日午天中，而未则西蹉；申时晡而日落酉；戌黄昏而人定亥。譬于大数，若到戌会之终，则天地昏蒙而万物否矣。</p>
-          </div>
-        </div>
-        <div class="panel bh">
-          <span class="tag">白话译文</span>
-          <div class="content">
-            <p>听说天地的历数，以十二万九千六百年为一"元"。一元又分成十二"会"，就是子、丑、寅、卯、辰、巳、午、未、申、酉、戌、亥十二地支，每会合一万零八百年。</p>
-            <p>就拿一天来说吧：子时阳气初生，丑时鸡鸣；寅时天还没亮，卯时太阳升起；辰时吃过早饭，巳时开始依次办事；正午太阳当顶，未时开始西斜；申时午后，酉时日落；戌时黄昏，亥时人们安歇入睡。比照这个大历数，若到了戌会末尾，天地就会昏蒙不明，万物也闭塞不通了。</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- 亥会子会段 -->
-      <div class="tri-grid">
-        <div class="panel ft">
-          <span class="tag">繁體原文</span>
-          <div class="content">
-            <p>再去五千四百歲，交亥會之初，則當黑暗，而兩間人物俱無矣，故曰混沌。又五千四百歲，亥會將終，貞下起元，近子之會，而復逐漸開明。邵康節曰：「冬至子之半，天心無改移。一陽初動處，萬物未生時。」到此，天始有根。</p>
-            <p>再五千四百歲，正當子會，輕清上騰，有日，有月，有星，有辰。日、月、星、辰，謂之四象。故曰，天開於子。</p>
-          </div>
-        </div>
-        <div class="panel js">
-          <span class="tag">简体校注</span>
-          <div class="content">
-            <p>再去五千四百岁，交亥会之初，则当黑暗，而两间人物俱无矣，故曰混沌。又五千四百岁，亥会将终，贞下起元，近子之会，而复逐渐开明。邵康节<span class="correction" data-tip="邵雍，字尧夫，谥康节，北宋理学家">曰</span>："冬至子之半，天心无改移。一阳初动处，万物未生时。"到此，天始有根。</p>
-            <p>再五千四百岁，正当子会，轻清上腾，有日，有月，有星，有辰。日、月、星、辰，谓之四象。故曰，天开于子。</p>
-          </div>
-        </div>
-        <div class="panel bh">
-          <span class="tag">白话译文</span>
-          <div class="content">
-            <p>再过五千四百年，到了亥会开始，天地一片黑暗，人间万物都不存在，所以叫做"混沌"。又过五千四百年，亥将结束，贞下起元，接近子会，天地又逐渐开明。邵康节先生说得好："冬至子半，天心不改；一阳初动，万物未生。"到这时，天才开始有了根。</p>
-            <p>再过五千四百年，正逢子会，轻清之气上浮，才有了日、月、星、辰——这就是所谓"四象"。所以说，天开于子。</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- 丑会寅会段 -->
-      <div class="tri-grid">
-        <div class="panel ft">
-          <span class="tag">繁體原文</span>
-          <div class="content">
-            <p>又經五千四百歲，子會將終，近丑之會，而地始凝結。再五千四百歲，正當丑會，重濁下凝，有水，有火，有山，有石，有土。水、火、山、石、土，謂之五形。故曰，地闢於丑。</p>
-            <p>又經五千四百歲，丑會終而寅會之初，發生萬物。曆曰：「天氣下降，地氣上升；天地交合，群物皆生。」至此，天清地爽，陰陽交合。再五千四百歲，正當寅會，生人，生獸，生禽，正謂天地人，三才定位。故曰，人生於寅。</p>
-          </div>
-        </div>
-        <div class="panel js">
-          <span class="tag">简体校注</span>
-          <div class="content">
-            <p>又经五千四百岁，子会将终，近丑之会，而地始凝结。再五千四百岁，正当丑会，重浊下凝，有水，有火，有山，有石，有土。水、火、山、石、土，谓之<span class="correction" data-tip="通行本多作'五行'，世德堂本作'五形'，指五种形质">五形</span>。故曰，地辟于丑。</p>
-            <p>又经五千四百岁，丑会终而寅会之初，发生万物。历曰："天气下降，地气上升；天地交合，群物皆生。"至此，天清地爽，阴阳交合。再五千四百岁，正当寅会，生人，生兽，生禽，正谓天地人，三才定位。故曰，人生于寅。</p>
-          </div>
-        </div>
-        <div class="panel bh">
-          <span class="tag">白话译文</span>
-          <div class="content">
-            <p>又经过五千四百年，子会将尽、近丑会时，大地开始凝结。再过五千四百年，正逢丑会，重浊之气下沉，形成了水、火、山、石、土——这五种基本形质。所以说，地辟于丑。</p>
-            <p>再过五千四百年，丑会结束、寅会开始，万物化生。历书上说："天气下降，地气上升，天地交合，万物滋生。"到这时，天清地爽，阴阳交合。再过五千四百年，正逢寅会，生出了人、兽、禽——天地人三才各就其位。所以说，人生于寅。</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- 花果山段 -->
-      <div class="tri-grid">
-        <div class="panel ft">
-          <span class="tag">繁體原文</span>
-          <div class="content">
-            <p>感盤古開闢，三皇治世，五帝定倫，世界之間，遂分為四大部洲：曰東勝神洲，曰西牛賀洲，曰南贍部洲，曰北俱蘆洲。這部書單表東勝神洲。海外有一國土，名曰傲來國。國近大海，海中有一座名山，喚為花果山。</p>
-            <p>此山乃十洲之祖脈，三島之來龍，自開清濁而立，鴻濛判後而成。真個好山！有詞賦為證。</p>
-          </div>
-        </div>
-        <div class="panel js">
-          <span class="tag">简体校注</span>
-          <div class="content">
-            <p>感盘古开辟，三皇治世，五帝定伦，世界之间，遂分为四大部洲：曰东胜神洲，曰西牛贺洲，曰南赡部洲，曰北俱芦洲。这部书单表东胜神洲。海外有一国土，名曰傲来国。国近大海，海中有一座名山，唤为<span class="correction" data-tip="'花果山'为原著固定地名，不误；'花菓山'为异体，不采用">花果山</span>。</p>
-            <p>此山乃十洲之祖脉，三岛之来龙，自开清浊而立，鸿蒙判后而成。真个好山！有词赋为证。</p>
-          </div>
-        </div>
-        <div class="panel bh">
-          <span class="tag">白话译文</span>
-          <div class="content">
-            <p>自从盘古开天辟地，三皇治理天下，五帝确定人伦，世界分成了四大部洲：东胜神洲、西牛贺洲、南赡部洲、北俱芦洲。这部书单说东胜神洲。海外有个国家叫傲来国，靠近大海。海中有一座名山，叫做花果山。</p>
-            <p>这座山是十洲三岛的龙脉祖山，自开天辟地、清浊分时就屹立，鸿蒙判分后形成。真是座好山！有词赋为证。</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- 仙石育猴段 -->
-      <div class="tri-grid">
-        <div class="panel ft">
-          <span class="tag">繁體原文</span>
-          <div class="content">
-            <p>那座山，正當頂上，有一塊仙石。其石有三丈六尺五寸高，有二丈四尺圍圓。三丈六尺五寸高，按周天三百六十五度；二丈四尺圍圓，按政歷二十四氣。上有九竅八孔，按九宮八卦。四面更無樹木遮陰，左右倒有芝蘭相襯。</p>
-            <p>蓋自開闢以來，每受天真地秀，日精月華，感之既久，遂有靈通之意。內育仙胞，一日迸裂，產一石卵，似圓球樣大。因見風，化作一個石猴，五官俱備，四肢皆全。</p>
-          </div>
-        </div>
-        <div class="panel js">
-          <span class="tag">简体校注</span>
-          <div class="content">
-            <p>那座山，正当顶上，有一块仙石。其石有三丈六尺五寸高，有二丈四尺围圆。三丈六尺五寸高，按周天三百六十五度；二丈四尺围圆，按政历二十四气。上有九窍八孔，按九宫八卦。四面更无树木遮阴，左右倒有<span class="correction" data-tip="芝兰：灵芝与兰草，古以为瑞草">芝兰</span>相衬。</p>
-            <p>盖自开辟以来，每受天真地秀，日精月华，感之既久，遂有灵通之意。内育仙胞，一日迸裂，产一石卵，似圆球样大。因见风，化作一个石猴，五官俱备，四肢皆全。</p>
-          </div>
-        </div>
-        <div class="panel bh">
-          <span class="tag">白话译文</span>
-          <div class="content">
-            <p>那山顶上，有一块仙石。石头高三丈六尺五寸，按周天三百六十五度；围圆二丈四尺，对应二十四节气。上面有九窍八孔，按九宫八卦排列。四面没有树木遮阴，左右却有灵芝、兰草相映。</p>
-            <p>自从开天辟地以来，这块仙石天天受天真地秀、日精月华，日子久了就有了灵气。里面育着仙胞，有一天轰然迸裂，产出一个石卵，圆球大小；见了风，化作一只石猴，五官俱全，四肢完整。</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ============ 第七回 预览 ============ -->
-    <div class="chapter-block" data-ch="7" style="display:none">
-      <div class="chap-head">
-        <h2>第七回　八卦爐中逃大聖　五行山下定心猿</h2>
-        <div class="couple serif">八卦炉中逃大圣　五行山下定心猿</div>
-      </div>
-      <div class="edit-note kai">
-        <b>校勘说明：</b>"心猿"为孙悟空别名，与"大圣"对仗，世德堂本原字如此；部分版本误作"心辕"，非是。"如來"繁体作"如來"，不作"如來"。
-      </div>
-      <div class="tri-grid">
-        <div class="panel ft"><span class="tag">繁體原文</span><div class="content">
-          <p>佛祖聽言，呵呵冷笑道：「你那廝乃是個猴子成精，焉敢欺心，要奪玉皇上帝尊位？他自幼修持，苦歷過一千七百五十劫。每劫該十二萬九千六百年，你算他該多少年數，方能享受此無極大道？」</p>
-          <p>大聖道：「他雖年幼修長，也不應久占在此。常言道：『皇帝輪流做，明年到我家。』只教他搬出去，將天宮讓與我，便罷了；若還不讓，定要攪亂，永不清平！」</p>
-        </div></div>
-        <div class="panel js"><span class="tag">简体校注</span><div class="content">
-          <p>佛祖听言，呵呵冷笑道："你那厮乃是个猴子成精，焉敢欺心，要夺玉皇上帝尊位？他自幼修持，苦历过一千七百五十劫。每劫该十二万九千六百年，你算他该多少年数，方能享受此无极大道？"</p>
-          <p>大圣道："他虽年幼修长，也不应久占在此。常言道：<span class="correction" data-tip="明刊本原文如此，最能体现悟空反抗精神，各校本多保留">'皇帝轮流做，明年到我家。'</span>只教他搬出去，将天宫让与我，便罢了；若还不让，定要搅乱，永不清平！"</p>
-        </div></div>
-        <div class="panel bh"><span class="tag">白话译文</span><div class="content">
-          <p>佛祖听了，呵呵冷笑："你这猴子成了精，怎敢欺心妄想，要夺玉皇上帝的位子？他自幼修行，苦熬了一千七百五十劫；每劫十二万九千六百年，你算算他修了多少年，才配享受这无极大道？"</p>
-          <p>大圣朗声说："他就算修得久，也不该一直占着这位子！常言道：'皇帝轮流做，明年到我家。'叫他搬出去，把天宫让给我便罢；若不肯让，我定要搅个天翻地覆，叫他永不安宁！"</p>
-        </div></div>
-      </div>
-    </div>
-
-    <!-- ============ 第二十七回预览 ============ -->
-    <div class="chapter-block" data-ch="27" style="display:none">
-      <div class="chap-head">
-        <h2>第二十七回　屍魔三戲唐三藏　聖僧恨逐美猴王</h2>
-        <div class="couple serif">尸魔三戏唐三藏　圣僧恨逐美猴王</div>
-      </div>
-      <div class="edit-note kai">
-        <b>校勘说明：</b>"屍魔"即白骨夫人，世德堂本回目原作"屍魔"；"三打白骨精"为后世俗称，原文并无此语。"聖僧"指唐僧，"美猴王"指悟空。
-      </div>
-      <div class="tri-grid">
-        <div class="panel ft"><span class="tag">繁體原文</span><div class="content">
-          <p>卻說三藏師徒，別了鎮元子，餐風宿水，一路行來，早到了白虎嶺。三藏在馬上道：「悟空，我這一日，肚中饑了，你去那裡化些齋吃？」行者陪笑道：「師父好不聰明。這等半山之中，前不巴村，後不著店，有錢也沒買處，教那裡去化齋？」</p>
-        </div></div>
-        <div class="panel js"><span class="tag">简体校注</span><div class="content">
-          <p>却说三藏师徒，别了镇元子，餐风宿水，一路行来，早到了<span class="correction" data-tip="世德堂本原作'白虎嶺'，李评本或作'白骨嶺'，为后世误改，据底本保留">白虎岭</span>。三藏在马上道："悟空，我这一日，肚中饥了，你去那里化些斋吃？"行者陪笑道："师父好不聪明。这等半山之中，前不巴村，后不着店，有钱也没买处，教那里去化斋？"</p>
-        </div></div>
-        <div class="panel bh"><span class="tag">白话译文</span><div class="content">
-          <p>话说三藏师徒辞别了镇元大仙，一路餐风宿露，走到了白虎岭。三藏在马上说："悟空啊，我肚子饿了，你到哪里去化点斋饭来吃？"行者赔笑道："师父您这就不机灵了，这半山中前不巴村、后不着店，有钱也没处买，叫我上哪儿化斋去？"</p>
-        </div></div>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- 底部章节导航 -->
-  <div class="chapter-nav" id="chapNav"></div>
-
-  <div class="footer serif">
-    <p>《西游记》三语对校本 · 以世德堂本（1592）为底本 · 参校李卓吾评本、西游证道书、人民文学出版社校注本</p>
-    <p>繁体原文保持明本原貌 · 简体校注规范现代用字 · 白话译文忠实原意、通俗可读</p>
-  </div>
+<div class="colhead">
+  <div class="ch ft">繁体原文</div>
+  <div class="ch js">规范简体</div>
+  <div class="ch bh">白话译文</div>
 </div>
+
+<main id="stage" class="stage"><div class="loading">正在加载……</div></main>
+
+<section id="diancangBox" class="diancang" hidden>
+  <div class="inner">
+    <h2 class="serif">朱鼎臣《西游釋厄傳》简体点校本 · 对照</h2>
+    <div class="note">来源：典藏·点校（与朱评本 66 回一一对应）。原文中含「（某原作「某」）」为点校者所标异文校记。</div>
+    <div id="diancangText" class="body"></div>
+  </div>
+</section>
+
+<footer>
+  <p><b>三栏说明</b>：<b>繁体原文</b>取自各版本在线阅读数据；<b>规范简体</b>据繁体原文规范转写（繁转简），保留原书用字系统；<b>白话译文</b>为各版本已有逐行译文，缺译者标注「待补」。</p>
+  <p><b>点校本对照</b>：朱鼎臣《西游釋厄傳》（即朱评本）另有《典藏》简体点校本，含异文校记，选中该版本时在页尾对照显示。</p>
+  <p><b>底本</b>：维基文库《西遊記》系统 · 世德堂本（明萬曆）为通行底本。<a href="read.html">正文·评点</a>　<a href="compare.html">评点对照</a></p>
+</footer>
 
 <script>
-// 章节导航生成
-const chapters = [
-  {id:1,title:'第一回 灵根育孕'},
-  {id:2,title:'第二回 悟彻菩提'},
-  {id:3,title:'第三回 四海拱伏'},
-  {id:7,title:'第七回 五行定心'},
-  {id:27,title:'第二十七回 三打白骨'},
-];
-const navEl = document.getElementById('chapNav');
-chapters.forEach(c=>{
-  const b = document.createElement('button');
-  b.textContent = c.id; b.title = c.title; b.dataset.ch = c.id;
-  if(c.id===1) b.classList.add('on');
-  b.onclick = ()=>switchChapter(c.id);
-  navEl.appendChild(b);
-});
+(function(){
+  'use strict';
+  var COLS = { ft:true, js:true, bh:true };
+  var IDX = null, DATA = null, DC = null;
+  var curEd = null, curCh = 0, curEdName = '';
+  // 根目录与 docs/ 副本共用同一份数据源
+  var DATA_BASE = /\/docs\//.test(location.pathname) ? '../data/read/' : 'data/read/';
 
-let currentCh = 1;
-function switchChapter(id){
-  document.querySelectorAll('.chapter-block').forEach(el=>{
-    el.style.display = el.dataset.ch == id ? '' : 'none';
-  });
-  document.querySelectorAll('#chapNav button').forEach(b=>{
-    b.classList.toggle('on', b.dataset.ch == id);
-  });
-  document.getElementById('chapterSelect').value = id;
-  currentCh = id;
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-document.getElementById('chapterSelect').onchange = e => switchChapter(+e.target.value);
-document.getElementById('prevBtn').onclick = ()=>{
-  const idx = chapters.findIndex(c=>c.id===currentCh);
-  if(idx>0) switchChapter(chapters[idx-1].id);
-};
-document.getElementById('nextBtn').onclick = ()=>{
-  const idx = chapters.findIndex(c=>c.id===currentCh);
-  if(idx<chapters.length-1) switchChapter(chapters[idx+1].id);
-};
+  function esc(s){
+    return String(s == null ? '' : s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+  // 原数据以 " : " 或换行表示分句/分行，渲染时转成软换行
+  function fmt(s){
+    return esc(s).split(' : ').join('<br>').replace(/\n/g,'<br>');
+  }
+  function applyCols(){
+    var n = 0;
+    for (var k in COLS) if (COLS[k]) n++;
+    document.documentElement.style.setProperty('--cols', n || 1);
+    document.body.classList.toggle('hide-ft', !COLS.ft);
+    document.body.classList.toggle('hide-js', !COLS.js);
+    document.body.classList.toggle('hide-bh', !COLS.bh);
+  }
+  function setStat(){
+    document.getElementById('mEd').textContent = (IDX.editions.length) + ' 个版本';
+    var tot = 0;
+    for (var k in IDX.versions) tot += IDX.versions[k].lines || 0;
+    document.getElementById('mLine').textContent = tot.toLocaleString() + ' 行';
+  }
+  async function getJSON(url){
+    var r = await fetch(url, { cache:'no-cache' });
+    if (!r.ok) throw new Error('HTTP ' + r.status + ' @ ' + url);
+    return r.json();
+  }
 
-// 三栏切换
-document.querySelectorAll('.chip[data-toggle]').forEach(chip=>{
-  chip.onclick = ()=>{
-    chip.classList.toggle('on');
-    const t = chip.dataset.toggle;
-    if(t==='ft') document.querySelectorAll('.panel.ft').forEach(p=>p.style.display = chip.classList.contains('on')?'':'none');
-    if(t==='js') document.querySelectorAll('.panel.js').forEach(p=>p.style.display = chip.classList.contains('on')?'':'none');
-    if(t==='bh') document.querySelectorAll('.panel.bh').forEach(p=>p.style.display = chip.classList.contains('on')?'':'none');
-    if(t==='corr') document.querySelectorAll('.correction').forEach(c=>c.style.borderBottom = chip.classList.contains('on')?'2px wavy var(--gold)':'none');
-    // 重排grid
-    const count = ['ft','js','bh'].filter(x=>document.querySelector(`.chip[data-toggle="${x}"]`).classList.contains('on')).length;
-    document.querySelectorAll('.tri-grid').forEach(g=>{
-      g.style.gridTemplateColumns = `repeat(${count}, minmax(0,1fr))`;
+  async function selectEdition(eid){
+    curEd = eid;
+    var meta = IDX.versions[eid];
+    curEdName = meta ? meta.name : eid;
+    var stage = document.getElementById('stage');
+    stage.innerHTML = '<div class="loading">正在加载《' + esc(curEdName) + '》……</div>';
+    try{
+      DATA = await getJSON(DATA_BASE + meta.file);
+    }catch(e){
+      stage.innerHTML = '<div class="loading">加载失败：' + esc(e.message) + '</div>';
+      return;
+    }
+    // 回目下拉按实际章数动态生成（不再出现空白回目）
+    var cs = document.getElementById('chSel');
+    cs.innerHTML = '';
+    for (var i = 0; i < DATA.length; i++){
+      var ch = DATA[i];
+      var o = document.createElement('option');
+      o.value = String(i);
+      var lab = ch.l || ('第' + (i + 1) + '回');
+      o.textContent = ch.t ? (lab + '　' + ch.t) : lab;
+      cs.appendChild(o);
+    }
+    curCh = 0;
+    // 点校本：仅朱鼎臣本
+    if (eid === 'zhu_ping'){
+      if (!DC){
+        try{ DC = await getJSON(DATA_BASE + 'diancang.json'); }catch(e){ DC = null; }
+      }
+      document.getElementById('diancangBox').hidden = !DC;
+    }else{
+      document.getElementById('diancangBox').hidden = true;
+    }
+    render();
+  }
+
+  function render(){
+    var ch = DATA && DATA[curCh];
+    var stage = document.getElementById('stage');
+    if (!ch){ stage.innerHTML = '<div class="loading">（无内容）</div>'; return; }
+    var out = [];
+    var lines = ch.lines || [];
+    for (var i = 0; i < lines.length; i++){
+      var ln = lines[i];
+      var ty = ln.t || 'main';
+      var zHtml = ln.z ? fmt(ln.z) : '<span class="miss">（白话译文待补）</span>';
+      out.push(
+        '<div class="row ' + esc(ty) + '">' +
+          '<div class="cell ft">' + fmt(ln.x) + '</div>' +
+          '<div class="cell js">' + fmt(ln.s) + '</div>' +
+          '<div class="cell bh">' + zHtml + '</div>' +
+        '</div>'
+      );
+    }
+    stage.innerHTML = out.join('') || '<div class="loading">（本回暂无正文）</div>';
+    document.getElementById('chSel').value = String(curCh);
+    if (curEd === 'zhu_ping' && DC){ showDiancang(); }
+    syncUrl();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function syncUrl(){
+    try{
+      history.replaceState(null, '', '?ed=' + encodeURIComponent(curEd) + '&ch=' + curCh);
+    }catch(e){ /* 本地 file:// 等场景忽略 */ }
+  }
+
+  function showDiancang(){
+    var box = document.getElementById('diancangBox');
+    var el = document.getElementById('diancangText');
+    if (!DC){ box.hidden = true; return; }
+    var item = DC[curCh];
+    if (!item){ el.textContent = '（本回暂无点校本对照）'; return; }
+    el.textContent = '【' + (item.volume || '') + '　' + item.title + '】\n\n' + item.text;
+  }
+
+  function step(d){
+    var n = DATA ? DATA.length : 0;
+    var t = curCh + d;
+    if (t < 0 || t >= n) return;
+    curCh = t;
+    render();
+  }
+
+  function bindChips(){
+    var chips = document.querySelectorAll('.chip[data-col]');
+    for (var i = 0; i < chips.length; i++){
+      (function(c){
+        c.addEventListener('click', function(){
+          var key = c.getAttribute('data-col');
+          COLS[key] = !COLS[key];
+          c.classList.toggle('on', COLS[key]);
+          applyCols();
+        });
+      })(chips[i]);
+    }
+  }
+
+  function bindScale(){
+    var scale = parseFloat(localStorage.getItem('jtw.sandui-scale')) || 1;
+    function apply(s){
+      s = Math.min(1.6, Math.max(0.8, Math.round(s * 100) / 100));
+      scale = s;
+      document.documentElement.style.setProperty('--scale', s);
+      document.getElementById('fontVal').textContent = Math.round(s * 100) + '%';
+      localStorage.setItem('jtw.sandui-scale', String(s));
+    }
+    document.getElementById('fontMin').addEventListener('click', function(){ apply(scale - 0.1); });
+    document.getElementById('fontPlus').addEventListener('click', function(){ apply(scale + 0.1); });
+    apply(scale);
+  }
+
+  async function init(){
+    var stage = document.getElementById('stage');
+    try{
+      IDX = await getJSON(DATA_BASE + 'index.json');
+    }catch(e){
+      stage.innerHTML = '<div class="loading">无法加载索引：' + esc(e.message) + '</div>';
+      return;
+    }
+    setStat();
+    applyCols();
+    var sel = document.getElementById('edSel');
+    sel.innerHTML = '';
+    for (var i = 0; i < IDX.editions.length; i++){
+      var e = IDX.editions[i];
+      var o = document.createElement('option');
+      o.value = e.id; o.textContent = e.name;
+      sel.appendChild(o);
+    }
+    bindChips();
+    bindScale();
+    sel.addEventListener('change', function(){ selectEdition(sel.value); });
+    document.getElementById('chSel').addEventListener('change', function(ev){
+      curCh = parseInt(ev.target.value, 10) || 0;
+      render();
     });
-  };
-});
-</script>
+    document.getElementById('prevBtn').addEventListener('click', function(){ step(-1); });
+    document.getElementById('nextBtn').addEventListener('click', function(){ step(1); });
+    document.addEventListener('keydown', function(ev){
+      if (ev.key === 'ArrowLeft') step(-1);
+      if (ev.key === 'ArrowRight') step(1);
+    });
+    // 默认打开底本「古本（維基西遊記）」；支持 ?ed=xxx&ch=N 深链
+    var params = new URLSearchParams(location.search);
+    var edParam = params.get('ed');
+    var chParam = parseInt(params.get('ch'), 10);
+    var def = (edParam && IDX.versions[edParam]) ? edParam
+              : (IDX.versions['gubao'] ? 'gubao' : IDX.editions[0].id);
+    sel.value = def;
+    await selectEdition(def);
+    if (Number.isFinite(chParam) && chParam > 0 && DATA && chParam < DATA.length){
+      curCh = chParam;
+      render();
+    }
+  }
 
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', init);
+  }else{
+    init();
+  }
+})();
+</script>
 </body>
 </html>

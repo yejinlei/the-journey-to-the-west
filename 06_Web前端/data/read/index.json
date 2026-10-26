@@ -1,1 +1,135 @@
-{"editions": [{"id": "baihui_xiangzhu", "name": "西遊記百回詳注", "pub": "清代 悟元子"}, {"id": "gubao", "name": "古本（維基西遊記）", "pub": "維基文庫"}, {"id": "hou_xiyouji", "name": "《後西游記》", "pub": "清 天花才子評點"}, {"id": "xinke_pingbi", "name": "新刻全像批评西游记", "pub": "清"}, {"id": "xiyou_bu", "name": "董說《西游補》", "pub": "明 董說"}, {"id": "xiyou_yuanzhi", "name": "劉一明《西游原旨》", "pub": "清 劉一明"}, {"id": "xiyouji_zhuan", "name": "楊致和《西游記傳》", "pub": "明 楊致和"}, {"id": "xu_xiyouji", "name": "《續西游記》", "pub": "清 佚名"}, {"id": "zhu_ping", "name": "朱评本（朱鼎臣）", "pub": "明朱鼎臣"}], "versions": {"baihui_xiangzhu": {"file": "baihui_xiangzhu.json", "name": "西遊記百回詳注", "pub": "清代 悟元子", "chapters": 100, "lines": 1379, "size_kb": 1772.0}, "gubao": {"file": "gubao.json", "name": "古本（維基西遊記）", "pub": "維基文庫", "chapters": 100, "lines": 2538, "size_kb": 4322.7}, "hou_xiyouji": {"file": "hou_xiyouji.json", "name": "《後西游記》", "pub": "清 天花才子評點", "chapters": 41, "lines": 1250, "size_kb": 1672.8}, "xinke_pingbi": {"file": "xinke_pingbi.json", "name": "新刻全像批评西游记", "pub": "清", "chapters": 4, "lines": 1105, "size_kb": 172.7}, "xiyou_bu": {"file": "xiyou_bu.json", "name": "董說《西游補》", "pub": "明 董說", "chapters": 17, "lines": 469, "size_kb": 272.7}, "xiyou_yuanzhi": {"file": "xiyou_yuanzhi.json", "name": "劉一明《西游原旨》", "pub": "清 劉一明", "chapters": 101, "lines": 256, "size_kb": 69.0}, "xiyouji_zhuan": {"file": "xiyouji_zhuan.json", "name": "楊致和《西游記傳》", "pub": "明 楊致和", "chapters": 41, "lines": 144, "size_kb": 370.1}, "xu_xiyouji": {"file": "xu_xiyouji.json", "name": "《續西游記》", "pub": "清 佚名", "chapters": 101, "lines": 3075, "size_kb": 2718.9}, "zhu_ping": {"file": "zhu_ping.json", "name": "朱评本（朱鼎臣）", "pub": "明朱鼎臣", "chapters": 66, "lines": 765, "size_kb": 690.0}}}
+{
+"editions": [
+{
+"id": "baihui_xiangzhu",
+"name": "西遊記百回詳注",
+"pub": "清代 悟元子"
+},
+{
+"id": "gubao",
+"name": "古本（維基西遊記）",
+"pub": "維基文庫"
+},
+{
+"id": "hou_xiyouji",
+"name": "《後西游記》",
+"pub": "清 天花才子評點"
+},
+{
+"id": "xinke_pingbi",
+"name": "新刻全像批评西游记",
+"pub": "清"
+},
+{
+"id": "xiyou_bu",
+"name": "董說《西游補》",
+"pub": "明 董說"
+},
+{
+"id": "xiyou_yuanzhi",
+"name": "劉一明《西游原旨》",
+"pub": "清 劉一明"
+},
+{
+"id": "xiyouji_zhuan",
+"name": "楊致和《西游記傳》",
+"pub": "明 楊致和"
+},
+{
+"id": "xu_xiyouji",
+"name": "《續西游記》",
+"pub": "清 佚名"
+},
+{
+"id": "zhu_ping",
+"name": "朱评本（朱鼎臣）",
+"pub": "明朱鼎臣"
+}
+],
+"versions": {
+"baihui_xiangzhu": {
+"file": "baihui_xiangzhu.json",
+"name": "西遊記百回詳注",
+"pub": "清代 悟元子",
+"chapters": 100,
+"lines": 1379,
+"size_kb": 2662.2
+},
+"gubao": {
+"file": "gubao.json",
+"name": "古本（維基西遊記）",
+"pub": "維基文庫",
+"chapters": 100,
+"lines": 2538,
+"size_kb": 6465.5
+},
+"hou_xiyouji": {
+"file": "hou_xiyouji.json",
+"name": "《後西游記》",
+"pub": "清 天花才子評點",
+"chapters": 41,
+"lines": 1250,
+"size_kb": 2516.9
+},
+"xinke_pingbi": {
+"file": "xinke_pingbi.json",
+"name": "新刻全像批评西游记",
+"pub": "清",
+"chapters": 4,
+"lines": 1105,
+"size_kb": 257.1
+},
+"xiyou_bu": {
+"file": "xiyou_bu.json",
+"name": "董說《西游補》",
+"pub": "明 董說",
+"chapters": 17,
+"lines": 469,
+"size_kb": 412.9
+},
+"xiyou_yuanzhi": {
+"file": "xiyou_yuanzhi.json",
+"name": "劉一明《西游原旨》",
+"pub": "清 劉一明",
+"chapters": 101,
+"lines": 256,
+"size_kb": 99.9
+},
+"xiyouji_zhuan": {
+"file": "xiyouji_zhuan.json",
+"name": "楊致和《西游記傳》",
+"pub": "明 楊致和",
+"chapters": 41,
+"lines": 144,
+"size_kb": 555.7
+},
+"xu_xiyouji": {
+"file": "xu_xiyouji.json",
+"name": "《續西游記》",
+"pub": "清 佚名",
+"chapters": 101,
+"lines": 3075,
+"size_kb": 4091.5
+},
+"zhu_ping": {
+"file": "zhu_ping.json",
+"name": "朱评本（朱鼎臣）",
+"pub": "明朱鼎臣",
+"chapters": 66,
+"lines": 765,
+"size_kb": 1036.7
+}
+},
+"schema": {
+"x": "繁体原文",
+"s": "规范简体（繁转简）",
+"z": "白话译文"
+},
+"diancang": {
+"file": "diancang.json",
+"name": "朱鼎臣《西游釋厄傳》简体点校本",
+"pub": "典藏·点校",
+"chapters": 66,
+"note": "与朱评本(zhu_ping)66回一一对应"
+}
+}
